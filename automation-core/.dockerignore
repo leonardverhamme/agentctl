@@ -1,0 +1,10 @@
+node_modules
+dist
+.data
+output
+.playwright-cli
+coverage
+*.log
+.env
+Dockerfile*
+compose*.yaml

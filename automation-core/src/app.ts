@@ -5,12 +5,25 @@ import { AppContext } from "./context";
 import { runJob } from "./jobs";
 import { renderDashboard } from "./web/render";
 
+const FAVICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#1f4f43"/>
+  <path d="M20 23h24v18H20z" fill="none" stroke="#f3f2ed" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M24 23v-4a8 8 0 0 1 16 0v4" fill="none" stroke="#f3f2ed" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="32" cy="32" r="3" fill="#f3f2ed"/>
+</svg>`;
+
 export function createApp(context: AppContext) {
   const app = Fastify({ logger: false });
 
   app.get("/", async (_request, reply) => {
     reply.header("content-type", "text/html; charset=utf-8");
     return renderDashboard(context.reconcile.queue());
+  });
+
+  app.get("/favicon.ico", async (_request, reply) => {
+    reply.header("cache-control", "public, max-age=604800, immutable");
+    reply.type("image/svg+xml; charset=utf-8");
+    return FAVICON_SVG;
   });
 
   app.get("/health", async () => ({
