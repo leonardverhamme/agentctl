@@ -47,6 +47,47 @@ jobs:
       - name: Run workflow-tools tests
         run: python -m unittest discover -s workflow-tools/tests -p "test_*.py"
 
+      - name: Smoke maintenance audit
+        run: python agentctl/agentctl.py maintenance audit --json
+
+      - name: Build package artifacts
+        run: |
+          python -m pip install build
+          python -m build --sdist --wheel --outdir dist
+
+  automation-core:
+    name: automation-core Postgres gate
+    runs-on: ubuntu-latest
+
+    env:
+      CODEX_HOME: ${{ github.workspace }}
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:54322/postgres
+      DATABASE_MIGRATIONS_DIR: ${{ github.workspace }}/automation-core/supabase/migrations
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+        ports:
+          - 54322:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 6
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: automation-core/package-lock.json
+
       - name: Install automation-core dependencies
         run: npm --prefix automation-core ci
 
@@ -57,20 +98,15 @@ jobs:
         run: npm --prefix automation-core run build
 
       - name: Run automation-core tests
-        run: npm --prefix automation-core test
+        run: npm --prefix automation-core test -- --pool forks --poolOptions.forks.singleFork
 
-      - name: Smoke maintenance audit
-        run: python agentctl/agentctl.py maintenance audit --json
-
-      - name: Build package artifacts
-        run: |
-          python -m pip install build
-          python -m build --sdist --wheel --outdir dist
+      - name: Smoke automation-core health check against Postgres
+        run: npm --prefix automation-core run cli -- health
 
   bundle-smoke:
     name: Bundle smoke test
     runs-on: ubuntu-latest
-    needs: verify
+    needs: [verify, automation-core]
 
     steps:
       - uses: actions/checkout@v4
@@ -103,7 +139,7 @@ jobs:
   package-smoke:
     name: Package smoke test
     runs-on: ubuntu-latest
-    needs: verify
+    needs: [verify, automation-core]
 
     steps:
       - uses: actions/checkout@v4

@@ -16,6 +16,8 @@ from typing import Any
 STATE_VERSION = 1
 DEFAULT_MAX_ITERATIONS = 30
 DEFAULT_MAX_STAGNANT_ITERATIONS = 3
+DEFAULT_TARGET_BATCH_SIZE = 4
+MAX_AUTO_ITERATIONS = 250
 BLOCKER_RE = re.compile(r"\bblocked?\b|\bblocker\b", re.IGNORECASE)
 CHECKBOX_RE = re.compile(r"^\s*[-*]\s+\[(?P<mark>[ xX])\]\s+(?P<text>.+?)\s*$")
 STATUS_RE = re.compile(r"^\s*[-*]\s*(?P<label>Unchecked|Checked|Blocked|Open|Done)\s*:\s*(?P<count>\d+)\s*$")
@@ -304,6 +306,15 @@ def meaningful_progress(before: dict[str, Any], after: dict[str, Any]) -> bool:
     )
 
 
+def suggested_max_iterations(open_items: int, configured_max: int, *, target_batch_size: int = DEFAULT_TARGET_BATCH_SIZE, hard_cap: int = MAX_AUTO_ITERATIONS) -> int:
+    normalized_open = max(open_items, 0)
+    if normalized_open == 0:
+        return max(configured_max, DEFAULT_MAX_ITERATIONS)
+    required_batches = (normalized_open + max(target_batch_size, 1) - 1) // max(target_batch_size, 1)
+    recommended = max(DEFAULT_MAX_ITERATIONS, required_batches + 8)
+    return min(max(configured_max, recommended), hard_cap)
+
+
 def derive_last_batch(before: dict[str, Any], after: dict[str, Any]) -> list[str]:
     before_open = {item["id"]: item for item in before["remaining_items"]}
     after_open = {item["id"]: item for item in after["remaining_items"]}
@@ -400,9 +411,18 @@ def load_or_initialize_state(
         payload = load_json(resolved_state_path)
         payload.setdefault("schema_version", payload.get("state_version", STATE_VERSION))
         payload["state_version"] = payload["schema_version"]
-        payload.setdefault("worker_command", worker_command or "")
-        payload["max_iterations"] = max_iterations
-        payload["max_stagnant_iterations"] = max_stagnant_iterations
+        if worker_command:
+            payload["worker_command"] = worker_command
+        else:
+            payload.setdefault("worker_command", "")
+        existing_max_iterations = payload.get("max_iterations", max_iterations)
+        if not isinstance(existing_max_iterations, int):
+            existing_max_iterations = max_iterations
+        payload["max_iterations"] = max(existing_max_iterations, max_iterations)
+        existing_max_stagnant = payload.get("max_stagnant_iterations", max_stagnant_iterations)
+        if not isinstance(existing_max_stagnant, int):
+            existing_max_stagnant = max_stagnant_iterations
+        payload["max_stagnant_iterations"] = max(existing_max_stagnant, max_stagnant_iterations)
         payload["checklist_path"] = str(resolve_path(checklist_path, repo_root))
         payload["progress_path"] = str(resolve_path(progress_path, repo_root))
         payload["repo_root"] = str(resolve_path(repo_root))

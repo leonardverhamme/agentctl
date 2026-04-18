@@ -12,7 +12,7 @@ from .paths import WORKFLOW_REGISTRY_PATH, WORKFLOW_TOOLS_DIR
 
 sys.path.insert(0, str(WORKFLOW_TOOLS_DIR))
 
-from workflow_common import validate_state_payload  # type: ignore  # noqa: E402
+from workflow_common import default_checklist_path, default_progress_path, validate_state_payload, workflow_state_path  # type: ignore  # noqa: E402
 
 
 WORKFLOW_RUNNER = WORKFLOW_TOOLS_DIR / "workflow_runner.py"
@@ -137,9 +137,18 @@ def run_workflow(
     max_stagnant: int,
 ) -> int:
     repo_root = _repo_root(repo)
+    resolved_checklist = Path(checklist).resolve() if checklist else default_checklist_path(repo_root, workflow)
+    resolved_progress = Path(progress).resolve() if progress else default_progress_path(repo_root, workflow)
+    state_path = workflow_state_path(repo_root, workflow)
     resolved_worker_command = worker_command
     if not resolved_worker_command and worker_mode in {"auto", "codex"}:
-        resolved_worker_command = resolve_codex_worker_command()
+        resolved_worker_command = resolve_codex_worker_command(
+            workflow=workflow,
+            repo_root=repo_root,
+            checklist_path=resolved_checklist,
+            progress_path=resolved_progress,
+            state_path=state_path,
+        )
     command = [
         sys.executable,
         str(WORKFLOW_RUNNER),

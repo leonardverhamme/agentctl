@@ -3,12 +3,12 @@ import { addDays, nowIso } from "../lib/time";
 import { EmailThreadSnapshot, JobName, JobResult } from "../types";
 
 export async function runJob(jobName: JobName, context: AppContext): Promise<JobResult> {
-  const runId = context.store.startJobRun(jobName);
+  const runId = await context.store.startJobRun(jobName);
   const startedAt = nowIso();
 
   try {
     const result = await execute(jobName, context, startedAt);
-    context.store.finishJobRun(runId, result);
+    await context.store.finishJobRun(runId, result);
     return result;
   } catch (error) {
     const failedAt = nowIso();
@@ -20,7 +20,7 @@ export async function runJob(jobName: JobName, context: AppContext): Promise<Job
       notes: [(error as Error).message],
       stats: {},
     };
-    context.store.finishJobRun(runId, result);
+    await context.store.finishJobRun(runId, result);
     throw error;
   }
 }
@@ -43,6 +43,18 @@ async function execute(jobName: JobName, context: AppContext, startedAt: string)
       return weeklyReviewJob(context, startedAt);
     case "hygiene-sweep":
       return hygieneSweepJob(context, startedAt);
+    case "github-discover":
+      return githubDiscoverJob(context, startedAt);
+    case "github-backfill":
+      return githubBackfillJob(context, startedAt);
+    case "github-sync":
+      return githubSyncJob(context, startedAt);
+    case "github-rollup":
+      return githubRollupJob(context, startedAt);
+    case "github-notion-sync":
+      return githubNotionSyncJob(context, startedAt);
+    case "github-weekly-brief":
+      return githubWeeklyBriefJob(context, startedAt);
     default: {
       const exhaustive: never = jobName;
       throw new Error(`Unsupported job ${exhaustive}`);
@@ -96,8 +108,9 @@ async function calendarSyncJob(context: AppContext, startedAt: string): Promise<
 }
 
 async function reconcileJob(context: AppContext, startedAt: string): Promise<JobResult> {
-  const threads = context.store.listSourceCache<EmailThreadSnapshot>("gmail", "thread");
+  const threads = await context.store.listSourceCache<EmailThreadSnapshot>("gmail", "thread");
   const proposals = await context.reconcile.refreshEmailProposals(threads);
+  const pendingDecisions = await context.store.listPendingDecisions();
   return {
     jobName: "reconcile",
     status: "success",
@@ -106,13 +119,13 @@ async function reconcileJob(context: AppContext, startedAt: string): Promise<Job
     notes: [],
     stats: {
       proposals: proposals.length,
-      pendingQueue: context.store.listPendingDecisions().length,
+      pendingQueue: pendingDecisions.length,
     },
   };
 }
 
 async function meetingWrapJob(context: AppContext, startedAt: string): Promise<JobResult> {
-  const events = context.store.listSourceCache<any>("calendar", "event");
+  const events = await context.store.listSourceCache<any>("calendar", "event");
   const proposals = await context.reconcile.refreshMeetingProposals(events);
   return {
     jobName: "meeting-wrap",
@@ -190,7 +203,7 @@ async function weeklyReviewJob(context: AppContext, startedAt: string): Promise<
   ensureNotionForBriefs(context);
   const pending = await context.notion.listPendingDecisions(20);
   const followUps = await context.notion.listOpenFollowUps(20);
-  const recentRuns = context.store.listRecentJobRuns(8);
+  const recentRuns = await context.store.listRecentJobRuns(8);
   const page = await context.notion.createBrief(
     `Weekly review — ${startedAt.slice(0, 10)}`,
     "Weekly Review",
@@ -257,4 +270,80 @@ function ensureNotionForBriefs(context: AppContext) {
   if (!context.notion.isConfigured()) {
     throw new Error("Notion must be configured for brief-generation jobs.");
   }
+}
+
+async function githubDiscoverJob(context: AppContext, startedAt: string): Promise<JobResult> {
+  const stats = await context.githubAnalytics.discoverRepositories();
+  return {
+    jobName: "github-discover",
+    status: "success",
+    startedAt,
+    finishedAt: nowIso(),
+    notes: [],
+    stats,
+  };
+}
+
+async function githubBackfillJob(context: AppContext, startedAt: string): Promise<JobResult> {
+  const stats = await context.githubAnalytics.backfillAnalytics();
+  return {
+    jobName: "github-backfill",
+    status: "success",
+    startedAt,
+    finishedAt: nowIso(),
+    notes: [],
+    stats,
+  };
+}
+
+async function githubSyncJob(context: AppContext, startedAt: string): Promise<JobResult> {
+  const stats = await context.githubAnalytics.syncAnalytics();
+  return {
+    jobName: "github-sync",
+    status: "success",
+    startedAt,
+    finishedAt: nowIso(),
+    notes: [],
+    stats,
+  };
+}
+
+async function githubRollupJob(context: AppContext, startedAt: string): Promise<JobResult> {
+  const stats = await context.githubAnalytics.rollupAnalytics();
+  return {
+    jobName: "github-rollup",
+    status: "success",
+    startedAt,
+    finishedAt: nowIso(),
+    notes: [],
+    stats,
+  };
+}
+
+async function githubNotionSyncJob(context: AppContext, startedAt: string): Promise<JobResult> {
+  const stats = await context.githubAnalytics.syncNotionReporting();
+  return {
+    jobName: "github-notion-sync",
+    status: stats.configured ? "success" : "warning",
+    startedAt,
+    finishedAt: nowIso(),
+    notes: stats.configured ? [] : ["Notion is not configured for GitHub reporting sync."],
+    stats,
+  };
+}
+
+async function githubWeeklyBriefJob(context: AppContext, startedAt: string): Promise<JobResult> {
+  const brief = await context.githubAnalytics.createWeeklyBrief();
+  return {
+    jobName: "github-weekly-brief",
+    status: brief ? "success" : "warning",
+    startedAt,
+    finishedAt: nowIso(),
+    notes: brief ? [brief.headline] : ["No GitHub weekly brief could be generated yet."],
+    stats: {
+      generated: Boolean(brief),
+      contributors: brief?.topContributors.length ?? 0,
+      repositories: brief?.topRepositories.length ?? 0,
+    },
+  };
 }

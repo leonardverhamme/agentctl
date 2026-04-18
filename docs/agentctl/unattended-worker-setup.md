@@ -53,11 +53,33 @@ What does **not** count:
 
 `agentctl run <workflow>` supports three ways to get a worker:
 
+- let `agentctl` use the built-in Codex worker wrapper when the Codex runtime is callable
 - pass `--worker-command "<real command>"`
 - set `CODEX_WORKFLOW_WORKER_COMMAND`
 - set `AGENTCTL_CODEX_WORKER_TEMPLATE`
 
+If the machine has a working Codex CLI at a non-default path, point `AGENTCTL_CODEX_PATH` at it so the built-in wrapper can use it.
+
 The first path is the most explicit and easiest to verify.
+
+### Windows note
+
+On Windows, do not rely on the Microsoft Store Codex app's internal `WindowsApps` binaries as the worker runtime. They are packaged app internals and may exist on disk while still failing with `Access is denied` when called from a shell.
+
+Use the standalone Codex CLI instead:
+
+```powershell
+npm install -g @openai/codex
+setx AGENTCTL_CODEX_PATH "C:\Users\<you>\AppData\Roaming\npm\codex.cmd"
+```
+
+After installing, verify:
+
+```powershell
+codex --version
+codex login status
+agentctl.cmd doctor
+```
 
 ## Recommended Order
 
@@ -68,7 +90,7 @@ agentctl.cmd doctor
 agentctl.cmd capabilities
 ```
 
-If `doctor` says the autonomous deep-run route is degraded, do not assume the loop can keep running unattended yet.
+If `doctor` says the autonomous deep-run route is degraded, do not assume the loop can keep running unattended yet. Fix the worker route first instead of treating manual chat batches as "still running."
 
 ### 2. Choose a workflow
 
@@ -99,11 +121,20 @@ agentctl.cmd run docs-deep-audit --repo C:\path\to\repo
 
 Use `AGENTCTL_CODEX_WORKER_TEMPLATE` only when you have a machine-specific Codex runtime shape that is already proven locally.
 
+Use `AGENTCTL_CODEX_PATH` when the default Codex detection is wrong but you do have a callable Codex CLI:
+
+```powershell
+$env:AGENTCTL_CODEX_PATH = "C:\path\to\codex.exe"
+agentctl.cmd run ui-deep-audit --repo C:\path\to\repo
+```
+
 ## What The Runner Guarantees
 
 Once a real worker command exists, the runner guarantees:
 
 - it re-reads the checklist and state every iteration
+- it repairs stale machine state from the checklist before trusting terminal status
+- it scales the iteration budget upward for very large checklists instead of blindly dying at the default cap
 - it updates progress after each batch
 - it stops as `complete` only when the guard passes
 - it stops as `blocked` or `stalled` when progress is no longer real

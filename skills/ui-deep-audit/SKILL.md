@@ -1,6 +1,6 @@
 ---
 name: ui-deep-audit
-description: Full-app UI audit and checklist-driven remediation workflow for React, Next.js, Tailwind, and shadcn/ui apps. Use when auditing an entire app page by page, mapping routes and UI zones, writing or refreshing a markdown checklist file such as docs/ui-deep-audit-checklist.md with `- [ ]` items, executing that checklist until all items are implemented and validated, and only replying `ready` when zero unchecked items remain. Also use when the user asks for deep design or UX criticism, queue-like completion tracking, or subagent-based parallel UI audits. If explicitly invoked with no further instructions, run the default full workflow automatically using docs/ui-deep-audit-checklist.md.
+description: Full-app UI audit and checklist-driven remediation workflow for React, Next.js, Tailwind, and shadcn/ui apps. Use when auditing an entire app page by page, mapping routes and UI zones, writing or refreshing a markdown checklist file such as docs/ui-deep-audit-checklist.md with `- [ ]` items, executing that checklist until all items are implemented and validated, and only replying `ready` when zero unchecked items remain. Also use when the user asks for deep design or UX criticism, dense operator-console cleanup, queue-like completion tracking, or subagent-based parallel UI audits. If explicitly invoked with no further instructions, run the default full workflow automatically using docs/ui-deep-audit-checklist.md.
 ---
 
 # UI Deep Audit
@@ -28,7 +28,9 @@ For UI implementation decisions while working the checklist, load `$ui-skill` an
 
 - If `agentctl` is available, start or resume this workflow through `agentctl run ui-deep-audit`, not by relying on chat memory alone.
 - Treat `docs/ui-deep-audit-checklist.md` as the human queue and `.codex-workflows/ui-deep-audit/state.json` as the machine queue.
-- If unattended execution is expected, the outer loop must use a real worker command such as an explicit worker command or a configured Codex worker template. A checklist file by itself is not a worker.
+- If unattended execution is expected, the outer loop must use a real worker command such as an explicit worker command, the built-in Codex worker wrapper when the Codex runtime is callable, or a configured Codex worker template. A checklist file by itself is not a worker.
+- If `agentctl doctor` reports the autonomous deep-run route as degraded, do not quietly treat manual chat batches as an unattended loop. Fix the worker route first with `--worker-command`, `AGENTCTL_CODEX_WORKER_TEMPLATE`, or `AGENTCTL_CODEX_PATH`.
+- A partial batch executed directly in chat is manual progress, not a running unattended deep audit.
 
 ## Core Modes
 
@@ -109,6 +111,7 @@ When the user does not clearly choose a mode, infer it from the checklist file s
 - Go page by page, then section by section when needed.
 - Include navigation, IA, overview, user friendliness, readability, scanability, color palette, contrast, corners, radius, spacing, typography, tables, forms, charts, AI surfaces, empty states, responsiveness, accessibility, and consistency.
 - Prefer actionable defects over abstract design commentary.
+- Treat low-value explainer copy, intro paragraphs, and section blurbs as first-class defects when the page should be communicating through structure instead.
 - Deduplicate overlapping findings so the checklist stays workable.
 
 ## Execution Rules
@@ -121,6 +124,8 @@ When the user does not clearly choose a mode, infer it from the checklist file s
 - Run the smallest correct validation.
 - For runnable UI issues, the minimum correct validation includes a real Playwright browser pass on the affected surface.
 - Do not let a locked browser MCP session end the batch; switch to the Playwright CLI path, a fresh session, or another free app port and complete the pass.
+- For dense product and operator surfaces, prefer removing or compressing explanatory copy rather than polishing it.
+- Use labels, counters, badges, column headers, inline helper text, and clearer grouping instead of keeping orientation paragraphs that the layout should replace.
 - Mark items `- [x]` only after implementation and validation.
 - If an item cannot be completed yet, leave it unchecked and append a short blocker note instead of pretending it is done.
 - Keep going until no unchecked items remain.
@@ -131,6 +136,7 @@ When the user does not clearly choose a mode, infer it from the checklist file s
 - Do not say `ready` if items were marked complete without evidence of implementation and validation.
 - Do not say `ready` if runnable UI items skipped real browser verification because Playwright MCP was busy or the original app port was blocked.
 - Do not say `ready` if the UI is visually inconsistent after the fixes.
+- Do not say `ready` if internal or operator pages still lean on long explainer paragraphs where the layout, labels, and state design should have carried the meaning.
 - If blocked items remain, say what is blocked and why.
 
 ## References

@@ -120,6 +120,7 @@ class MaintenanceTests(unittest.TestCase):
                 "test_browser_smoke.py",
                 "test_capabilities.py",
                 "test_cli_output.py",
+                "test_codex_worker.py",
                 "test_codex_runtime.py",
                 "test_install_bundle.py",
                 "test_research.py",

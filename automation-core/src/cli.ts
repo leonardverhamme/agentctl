@@ -12,22 +12,23 @@ async function main() {
     .command("health")
     .description("Print the local bridge health payload.")
     .action(async () => {
-      const context = createContext();
+      const context = await createContext();
       try {
+        const queue = await context.reconcile.queue();
         console.log(
           JSON.stringify(
             {
               status: "ok",
               notionConfigured: context.notion.isConfigured(),
               googleConfigured: context.googleAuth.isConfigured(),
-              queueSize: context.reconcile.queue().decisions.length,
+              queueSize: queue.decisions.length,
             },
             null,
             2,
           ),
         );
       } finally {
-        context.close();
+        await context.close();
       }
     });
 
@@ -35,12 +36,12 @@ async function main() {
     .command("schema-bootstrap")
     .description("Create the hidden Notion technical data sources and additive CRM fields.")
     .action(async () => {
-      const context = createContext();
+      const context = await createContext();
       try {
         const result = await context.notion.bootstrapSchema();
         console.log(JSON.stringify(result, null, 2));
       } finally {
-        context.close();
+        await context.close();
       }
     });
 
@@ -52,12 +53,12 @@ async function main() {
       if (!JOB_NAMES.includes(name as any)) {
         throw new Error(`Unknown job ${name}`);
       }
-      const context = createContext();
+      const context = await createContext();
       try {
         const result = await runJob(name as any, context);
         console.log(JSON.stringify(result, null, 2));
       } finally {
-        context.close();
+        await context.close();
       }
     });
 
@@ -65,11 +66,11 @@ async function main() {
     .command("queue")
     .description("Print the current approval queue.")
     .action(async () => {
-      const context = createContext();
+      const context = await createContext();
       try {
-        console.log(JSON.stringify(context.reconcile.queue(), null, 2));
+        console.log(JSON.stringify(await context.reconcile.queue(), null, 2));
       } finally {
-        context.close();
+        await context.close();
       }
     });
 
@@ -85,7 +86,7 @@ async function main() {
       if (!["approve", "reject", "snooze"].includes(action)) {
         throw new Error(`Unknown decision action ${action}`);
       }
-      const context = createContext();
+      const context = await createContext();
       try {
         const result = await context.reconcile.applyDecision(decisionId, action as any, {
           note: typeof options.note === "string" ? options.note : undefined,
@@ -94,7 +95,7 @@ async function main() {
         });
         console.log(JSON.stringify(result, null, 2));
       } finally {
-        context.close();
+        await context.close();
       }
     });
 

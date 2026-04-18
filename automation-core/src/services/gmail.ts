@@ -24,7 +24,7 @@ export class GmailService {
     const localEmail = (this.config.googleAccountEmail || profile.data.emailAddress || "").toLowerCase();
     const labelMap = await this.ensureManagedLabels(gmail);
 
-    const previousHistoryId = this.store.getSyncState("gmail", "historyId");
+    const previousHistoryId = await this.store.getSyncState("gmail", "historyId");
     const threadIds = new Set<string>();
     let fallbackUsed = false;
     let mode: "full" | "incremental" = previousHistoryId ? "incremental" : "full";
@@ -107,12 +107,12 @@ export class GmailService {
       }
       nextHistoryId = response.data.historyId ?? nextHistoryId;
       threads.push(snapshot);
-      this.store.upsertSourceCache("gmail", "thread", snapshot.threadId, stableHash(snapshot), snapshot);
+      await this.store.upsertSourceCache("gmail", "thread", snapshot.threadId, stableHash(snapshot), snapshot);
     }
 
     if (nextHistoryId !== "0") {
-      this.store.setSyncState("gmail", "historyId", nextHistoryId);
-      this.store.setSyncState("gmail", "lastSyncAt", nowIso());
+      await this.store.setSyncState("gmail", "historyId", nextHistoryId);
+      await this.store.setSyncState("gmail", "lastSyncAt", nowIso());
     }
 
     return { mode, threads, fallbackUsed };

@@ -1,28 +1,28 @@
 # automation-core
 
-`automation-core` is the local Gmail + Google Calendar + Notion bridge that backs the Codex automation stack.
+`automation-core` is the local Gmail + Google Calendar + Notion bridge and GitHub analytics workspace that runs inside this repo.
 
 It provides:
 
-- a local approval UI at `http://127.0.0.1:4313` when running through Docker
-- a CLI for sync, reconcile, brief, and hygiene jobs
+- a local approval console at `http://127.0.0.1:4313` when running through Docker
+- a CLI for sync, reconcile, brief, hygiene, and GitHub analytics jobs
 - a Docker runtime for workstation-local operation
-- a local SQLite state store for OAuth tokens, sync cursors, decision cache, and job history
+- a local Supabase/Postgres runtime at `127.0.0.1:58322`
+- a Notion reporting mirror for CRM and GitHub weekly snapshots
+- GitHub repo intelligence ingest backed by `gh api` plus local git mirrors
 
 ## Architecture
 
-- `src/app.ts` exposes the local HTTP API and approval UI shell.
+- `src/app.ts` exposes the local HTTP API and approval console shell.
 - `src/server.ts` starts the app and runs the startup catch-up pipeline.
 - `src/jobs/index.ts` owns the sequential job contract used by Codex automations and the CLI.
 - `src/services/gmail.ts` and `src/services/calendar.ts` perform incremental polling and mirror state into the local cache.
-- `src/services/notion.ts` owns technical data-source bootstrap plus business-record writes.
-- `src/services/reconcile.ts` converts synced evidence into approval proposals and approved business actions.
-- `src/store.ts` keeps operational state only:
-  - OAuth tokens
-  - sync cursors
-  - decision cache
-  - suppression hints
-  - job history
+- `src/services/github-analytics.ts` discovers repositories, maintains git mirrors, computes rollups, and syncs curated GitHub reporting into Notion when configured.
+- `src/services/notion.ts` owns technical data-source bootstrap plus business-record and reporting writes.
+- `src/store.ts` persists operational state and the GitHub analytics tables in the local Postgres database.
+- `supabase/migrations/` defines the local schema for bridge state, job history, and `github_*` analytics tables.
+
+The current web UI is still the operator console. GitHub analytics is exposed through jobs, the local Postgres tables, and optional Notion reporting until the dedicated dashboard views are wired in.
 
 ## HTTP API
 
@@ -38,32 +38,51 @@ It provides:
 
 ## Quick start
 
-1. Copy `.env.example` to `.env` and fill in:
-   - Google OAuth credentials
-   - Notion integration token
-   - your Notion data source IDs
+1. Start the local Supabase stack if it is not already running:
+
+```powershell
+supabase start
+```
+
 2. Install dependencies:
 
 ```powershell
 npm install
 ```
 
-3. Bootstrap the Notion-side technical databases and additive fields:
+3. Copy `.env.example` to `.env` and fill in:
+
+- Google OAuth credentials
+- Notion integration token and data source IDs
+- any GitHub mirror filters or optional Notion GitHub reporting IDs
+
+4. Bootstrap the Notion-side technical databases and additive CRM fields:
 
 ```powershell
 npm run cli -- schema-bootstrap
 ```
 
-4. Start the local UI directly:
+5. Start the local UI directly:
 
 ```powershell
 npm run dev
 ```
 
-5. Connect Gmail + Calendar by opening:
+6. Connect Gmail + Calendar by opening:
 
 ```text
 http://localhost:3010/auth/google/start
+```
+
+7. Run the first sync and GitHub analytics pass:
+
+```powershell
+npm run cli -- job gmail-sync
+npm run cli -- job calendar-sync
+npm run cli -- job reconcile
+npm run cli -- job github-discover
+npm run cli -- job github-backfill
+npm run cli -- job github-sync
 ```
 
 ## Core commands
@@ -78,24 +97,24 @@ npm run cli -- job morning-brief
 npm run cli -- job weekly-plan
 npm run cli -- job weekly-review
 npm run cli -- job hygiene-sweep
+npm run cli -- job github-discover
+npm run cli -- job github-backfill
+npm run cli -- job github-sync
+npm run cli -- job github-rollup
+npm run cli -- job github-notion-sync
+npm run cli -- job github-weekly-brief
 npm run cli -- queue
 npm run cli -- decision approve <decision-id> --override-read-gate
 npm run cli -- decision reject <decision-id> --note "reason"
 npm run cli -- decision snooze <decision-id> --snoozed-until 2026-04-19T09:00:00Z
 ```
 
-## Codex automation mapping
+## GitHub analytics flow
 
-These are the expected paused automations layered on top of the CLI:
-
-- `Inbox Pipeline`
-  - runs Gmail sync, Calendar sync, reconcile, and meeting-wrap sequentially
-- `Morning Brief`
-- `Weekly Plan`
-- `Weekly Review`
-- `Hygiene Sweep`
-
-The current implementation intentionally keeps them paused until `.env`, Notion IDs, and Google OAuth are configured.
+- Discover visible repositories with `gh api`.
+- Mirror repository history under `automation-core/.data/github-mirrors/<owner>/<repo>.git`.
+- Compute repo and contributor rollups in local Postgres from git history plus GitHub API facts.
+- Mirror curated repo/contributor snapshots and weekly reports into Notion only when the Notion GitHub data sources are configured.
 
 ## Docker
 
@@ -103,14 +122,7 @@ The current implementation intentionally keeps them paused until `.env`, Notion 
 docker compose -f compose.yaml up --build
 ```
 
-The app stores its SQLite database in `automation-core/.data/`.
-
-The container definition is now hardened for local operation:
-
-- `.dockerignore` trims the build context
-- the image exposes a real `/health` healthcheck
-- Compose runs with `restart: unless-stopped`
-- Compose uses `init: true` so signal handling and shutdown are cleaner
+The app stores its data in the local Postgres database that Supabase exposes on `127.0.0.1:58322`.
 
 The Docker route binds the container's internal `3010` port to host port `4313` by default.
 
@@ -168,7 +180,7 @@ http://127.0.0.1:4313/
 
 ## Notes
 
-- The current implementation uses Node 24's built-in `node:sqlite` runtime. On current Node releases that emits an experimental warning, but it avoids native-addon install failures on Windows and keeps local + Docker behavior aligned.
+- The current implementation uses the local Supabase/Postgres stack as the persistence layer.
 - Gmail labels are mirrored only after approval.
 - Nothing auto-sends and nothing auto-archives in v1.
 - The queue UI is intentionally approval-first and keeps unread inbound mail behind the soft read gate until a human reads or explicitly overrides it.

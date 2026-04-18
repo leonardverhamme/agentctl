@@ -8,7 +8,7 @@ It packages:
 - reusable skills for UI, testing, docs, refactor, CI/CD, research, and maintenance
 - the shared deep-workflow runner and guard
 - a local Codex plugin shell for routing and maintenance
-- `automation-core`, a local Gmail + Calendar + Notion bridge for CRM-style inbox automation
+- `automation-core`, a local Postgres-backed Gmail + Calendar + Notion bridge with GitHub analytics jobs and a compact operator console
 - zero-touch bootstrap plus explicit unattended-worker health checks
 
 The design goal is simple: give coding agents one stable front door for capability discovery, workflow launch, and state tracking without replacing the authoritative tools underneath.
@@ -142,6 +142,7 @@ Start here when you need the docs by job instead of by filename:
 - [docs/agentctl/skill-governance.md](docs/agentctl/skill-governance.md) for the rules that keep local skills thin, visible, and capability-first
 - [docs/agentctl/maintainer-guide.md](docs/agentctl/maintainer-guide.md) for operator and maintainer responsibilities
 - [docs/automation-core.md](docs/automation-core.md) for the workstation automation bridge
+- [docs/automation-core-architecture.md](docs/automation-core-architecture.md) for the automation-core system map and data flow
 
 ## Zero-Touch Agent Setup
 
@@ -180,12 +181,14 @@ This repo now also contains a workstation-local automation stack for Gmail, Goog
 - local approval UI for pending inbox and meeting decisions
 - incremental Gmail and Calendar polling
 - Notion technical tables plus business-record updates
-- Codex automation entrypoints for hourly sync, briefs, reviews, and hygiene sweeps
+- GitHub analytics ingest, rollups, and weekly reporting jobs backed by local Postgres
+- Codex automation entrypoints for hourly sync, briefs, reviews, hygiene sweeps, and GitHub repo intelligence
 
 Typical operator sequence:
 
 ```powershell
 cd automation-core
+supabase start
 copy .env.example .env
 npm install
 npm run cli -- schema-bootstrap
@@ -204,6 +207,9 @@ And run a first manual sync:
 npm run cli -- job gmail-sync
 npm run cli -- job calendar-sync
 npm run cli -- job reconcile
+npm run cli -- job github-discover
+npm run cli -- job github-backfill
+npm run cli -- job github-sync
 ```
 
 See [docs/automation-core.md](docs/automation-core.md) for the operator contract and [automation-core/README.md](automation-core/README.md) for the project-local command surface.

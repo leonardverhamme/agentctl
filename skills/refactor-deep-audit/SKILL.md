@@ -26,7 +26,9 @@ For implementation decisions while working the checklist, load `$refactor-skill`
 
 - If `agentctl` is available, start or resume this workflow through `agentctl run refactor-deep-audit`, not by relying on chat memory alone.
 - Treat `docs/refactor-deep-audit-checklist.md` as the human queue and `.codex-workflows/refactor-deep-audit/state.json` as the machine queue.
-- If unattended execution is expected, the outer loop must use a real worker command such as an explicit worker command or a configured Codex worker template. A checklist file by itself is not a worker.
+- If unattended execution is expected, the outer loop must use a real worker command such as an explicit worker command, the built-in Codex worker wrapper when the Codex runtime is callable, or a configured Codex worker template. A checklist file by itself is not a worker.
+- If `agentctl doctor` reports the autonomous deep-run route as degraded, do not quietly treat manual chat batches as an unattended loop. Fix the worker route first with `--worker-command`, `AGENTCTL_CODEX_WORKER_TEMPLATE`, or `AGENTCTL_CODEX_PATH`.
+- A partial batch executed directly in chat is manual progress, not a running unattended deep audit.
 
 ## Core Modes
 

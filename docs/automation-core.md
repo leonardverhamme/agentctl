@@ -1,57 +1,106 @@
 # automation-core Operator Guide
 
-This repo now contains a workstation-local automation stack under [`automation-core`](C:/Users/leona/Documents/Playground/agentctl/automation-core/README.md).
+`automation-core` is the local, Postgres-backed automation surface under [`automation-core/README.md`](../automation-core/README.md). It combines the CRM bridge, the GitHub analytics jobs, and the approval console that the Codex automations run against.
 
-## What it does
+For the system map, read [docs/automation-core-architecture.md](automation-core-architecture.md) first.
+
+## What It Does
 
 - polls Gmail with history-based incremental sync
 - polls Google Calendar with sync tokens
-- writes technical memory into Notion:
+- discovers GitHub repositories with `gh api`
+- mirrors Git history under `automation-core/.data/github-mirrors/`
+- writes CRM technical memory into Notion:
   - `Email Threads`
   - `Calendar Events`
   - `Automation Decisions`
   - `Meeting Notes`
-- keeps Notion as the business system of record
-- exposes a local approval UI and CLI for Codex automations
-- generates brief/review/audit pages into `AI Briefs`
+- writes GitHub reporting into Notion when the GitHub data sources are configured:
+  - `GitHub Repositories`
+  - `GitHub Contributors`
+  - weekly and monthly GitHub snapshots
+  - `GitHub Engineering Briefs`
+- keeps Postgres as the local system of record for bridge state and GitHub analytics tables
+- exposes a local approval console and CLI for Codex automations
 
-## System boundaries
+## System Boundaries
 
-- Notion is the business system of record.
+- Notion is the business system of record for CRM data and the reporting mirror for the curated GitHub summaries.
 - Gmail and Calendar remain the external evidence sources.
-- Local SQLite stores only operational bridge state and secrets.
-- Gmail labels are mirrors of approved Notion state, not the primary authority.
+- Local Supabase/Postgres stores operational bridge state, GitHub analytics facts, and rollups.
+- `gh api` plus local git mirrors are the source of truth for GitHub analytics facts.
+- Gmail labels are mirrors of approved state, not the primary authority.
+- No auto-send and no auto-archive in v1.
 
-## Required configuration
+## Required Configuration
 
 Fill `automation-core/.env` with:
 
-- `GOOGLE_CLIENT_ID`
-- `GOOGLE_CLIENT_SECRET`
-- `GOOGLE_REDIRECT_URI`
-- `NOTION_TOKEN`
-- all existing CRM data source IDs:
+- `DATABASE_URL` pointing at the local Supabase/Postgres stack, which defaults to `postgresql://postgres:postgres@127.0.0.1:58322/postgres`
+- Google OAuth credentials
+- the Notion integration token
+- the existing CRM data source IDs:
   - Accounts
   - Contacts
   - Opportunities
   - Interactions
   - Follow-ups
   - AI Briefs
-- a parent page ID for technical data sources if they do not exist yet
+- the hidden technical Notion data source IDs:
+  - Email Threads
+  - Calendar Events
+  - Automation Decisions
+  - Meeting Notes
+- the GitHub reporting Notion data source IDs if you want the weekly mirror:
+  - GitHub Repositories
+  - GitHub Contributors
+  - GitHub Weekly Repo Snapshots
+  - GitHub Weekly Contributor Snapshots
+  - GitHub Monthly Repo Snapshots
+  - GitHub Engineering Briefs
+- optional GitHub mirror filters:
+  - `GITHUB_OWNER_FILTERS`
+  - `GITHUB_REPO_EXCLUDE_PATTERNS`
+- optional mirror path overrides:
+  - `GITHUB_MIRROR_ROOT`
 
-## Bootstrap flow
+## Bootstrap Flow
 
-1. Run `npm install` in `automation-core`.
-2. Copy `.env.example` to `.env`.
-3. Run `npm run cli -- schema-bootstrap`.
-4. Start the server with `npm run dev` or `docker compose -f compose.yaml up --build`.
-5. Open `/auth/google/start` once to connect Gmail and Calendar.
-6. Run the first sync pass:
+1. Start the local Supabase/Postgres stack:
+
+```powershell
+supabase start
+```
+
+2. Install dependencies in `automation-core`.
+3. Copy `.env.example` to `.env`.
+4. Run the Notion schema bootstrap:
+
+```powershell
+npm run cli -- schema-bootstrap
+```
+
+5. Start the server with `npm run dev` or `docker compose -f compose.yaml up --build`.
+6. Open `/auth/google/start` once to connect Gmail and Calendar.
+7. Run the first sync pass:
    - `npm run cli -- job gmail-sync`
    - `npm run cli -- job calendar-sync`
    - `npm run cli -- job reconcile`
+8. Run the GitHub ingest jobs:
+   - `npm run cli -- job github-discover`
+   - `npm run cli -- job github-backfill`
+   - `npm run cli -- job github-sync`
+   - `npm run cli -- job github-rollup`
+   - `npm run cli -- job github-notion-sync`
+   - `npm run cli -- job github-weekly-brief`
 
-## Notion data sources
+## Local UI
+
+- The current web UI is the approval console at the root route.
+- It shows the inbox, waiting, meeting, and blocked queues plus recent job runs.
+- GitHub analytics currently runs through jobs and Postgres tables; the dedicated analytics dashboard views are still being wired in the app layer.
+
+## Notion Data Sources
 
 Existing business-facing sources remain in place:
 
@@ -69,25 +118,9 @@ The bridge adds or expects hidden technical sources:
 - Automation Decisions
 - Meeting Notes
 
-The schema bootstrap command also applies additive fields to the CRM-facing sources for deterministic external IDs and sync provenance.
+The GitHub reporting mirror uses separate Notion data sources and only receives curated repo/contributor snapshots and weekly/monthly summaries.
 
-## Approval model
-
-- The local UI is the primary approval surface.
-- Unread inbound mail stays behind a soft read gate.
-- Approving a decision updates Notion first and only then mirrors Gmail labels.
-- Rejecting a decision records the outcome and can add a local suppression hint.
-- Snoozing a decision keeps it in the queue with a future timestamp.
-
-## Local UI screens
-
-- Inbox approval queue
-- Waiting queue
-- Meeting follow-up queue
-- Stale / low-confidence queue
-- Daily overview based on recent job runs
-
-## Codex automation entrypoints
+## Codex Automation Entry Points
 
 The Codex automations should call these CLI entrypoints from this repo:
 
@@ -99,8 +132,14 @@ The Codex automations should call these CLI entrypoints from this repo:
 - `npm --prefix automation-core run cli -- job weekly-plan`
 - `npm --prefix automation-core run cli -- job weekly-review`
 - `npm --prefix automation-core run cli -- job hygiene-sweep`
+- `npm --prefix automation-core run cli -- job github-discover`
+- `npm --prefix automation-core run cli -- job github-backfill`
+- `npm --prefix automation-core run cli -- job github-sync`
+- `npm --prefix automation-core run cli -- job github-rollup`
+- `npm --prefix automation-core run cli -- job github-notion-sync`
+- `npm --prefix automation-core run cli -- job github-weekly-brief`
 
-## Current scope limits
+## Current Scope Limits
 
 - One Gmail account
 - One primary Google Calendar
@@ -108,9 +147,11 @@ The Codex automations should call these CLI entrypoints from this repo:
 - No auto-send
 - No auto-archive
 - No public webhooks
+- No separate analytics dashboard route yet in the web app
 
 ## Troubleshooting
 
 - If Google auth is not connected yet, `/health` reports `googleConfigured: false` and sync jobs will fail until `/auth/google/start` is completed.
 - If Notion is not configured, `/health` reports `notionConfigured: false`; schema bootstrap and brief-generation jobs will fail until the token and data source IDs are supplied.
+- If the local Postgres stack is not running, the app will fail to connect to the default `DATABASE_URL` on `127.0.0.1:58322`.
 - If Gmail history IDs or Calendar sync tokens expire, the bridge falls back to a bounded full sync and records that fallback in the job result.

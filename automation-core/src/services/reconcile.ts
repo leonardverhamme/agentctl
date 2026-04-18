@@ -17,7 +17,7 @@ export class ReconcileService {
     const proposals: DecisionProposal[] = [];
 
     for (const thread of threads) {
-      if (this.store.hasSuppressionHint(`thread:${thread.threadId}`)) {
+      if (await this.store.hasSuppressionHint(`thread:${thread.threadId}`)) {
         continue;
       }
 
@@ -33,7 +33,7 @@ export class ReconcileService {
         notionUrl = page.url ?? null;
       }
 
-      this.store.upsertDecision({
+      await this.store.upsertDecision({
         decisionId: proposal.decisionId,
         notionPageId,
         sourceType: proposal.sourceType,
@@ -90,7 +90,7 @@ export class ReconcileService {
         notionUrl = page.url ?? null;
       }
 
-      this.store.upsertDecision({
+      await this.store.upsertDecision({
         decisionId,
         notionPageId,
         sourceType: proposal.sourceType,
@@ -110,7 +110,7 @@ export class ReconcileService {
   }
 
   async applyDecision(decisionId: string, action: "approve" | "reject" | "snooze", input: DecisionActionInput = {}) {
-    const existing = this.store.getDecision(decisionId);
+    const existing = await this.store.getDecision(decisionId);
     if (!existing) {
       throw new Error(`Decision ${decisionId} was not found.`);
     }
@@ -123,7 +123,7 @@ export class ReconcileService {
 
       if (proposal.target.followUpId && (await this.notion.staleIfBusinessMoved(proposal.target.followUpId, proposal.createdAt))) {
         proposal.readGateBlocked = false;
-        this.store.updateDecisionStatus(decisionId, "stale", proposal, existing.notionUrl);
+        await this.store.updateDecisionStatus(decisionId, "stale", proposal, existing.notionUrl);
         if (this.notion.isConfigured()) {
           await this.notion.recordDecisionOutcome(
             decisionId,
@@ -140,7 +140,7 @@ export class ReconcileService {
         const interaction = await this.notion.ensureInteractionFromDecision(
           proposal,
           proposal.sourceType === "email"
-            ? this.store.getSourceCache<EmailThreadSnapshot>("gmail", "thread", proposal.sourceExternalId)
+            ? await this.store.getSourceCache<EmailThreadSnapshot>("gmail", "thread", proposal.sourceExternalId)
             : null,
         );
         const followUp = await this.notion.ensureFollowUpFromDecision(proposal, interaction.id);
@@ -159,13 +159,13 @@ export class ReconcileService {
         await this.gmail.applyApprovedState(proposal.sourceExternalId, proposal.proposedState);
       }
 
-      this.store.updateDecisionStatus(decisionId, "approved", proposal, existing.notionUrl);
+      await this.store.updateDecisionStatus(decisionId, "approved", proposal, existing.notionUrl);
       return this.store.getDecision(decisionId);
     }
 
     if (action === "reject") {
       if (input.note) {
-        this.store.addSuppressionHint(`thread:${proposal.sourceExternalId}`, input.note);
+        await this.store.addSuppressionHint(`thread:${proposal.sourceExternalId}`, input.note);
       }
       if (this.notion.isConfigured()) {
         await this.notion.recordDecisionOutcome(
@@ -176,7 +176,7 @@ export class ReconcileService {
           this.config.localApproverName,
         );
       }
-      this.store.updateDecisionStatus(decisionId, "rejected", proposal, existing.notionUrl);
+      await this.store.updateDecisionStatus(decisionId, "rejected", proposal, existing.notionUrl);
       return this.store.getDecision(decisionId);
     }
 
@@ -190,11 +190,11 @@ export class ReconcileService {
         this.config.localApproverName,
       );
     }
-    this.store.updateDecisionStatus(decisionId, "snoozed", proposal, existing.notionUrl);
+    await this.store.updateDecisionStatus(decisionId, "snoozed", proposal, existing.notionUrl);
     return this.store.getDecision(decisionId);
   }
 
-  queue(): QueueSnapshot {
+  async queue(): Promise<QueueSnapshot> {
     return this.store.queueSnapshot();
   }
 

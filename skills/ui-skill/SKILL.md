@@ -1,6 +1,6 @@
 ---
 name: ui-skill
-description: General cross-repo UI implementation and refactoring workflow for React, Next.js, Tailwind, and shadcn/ui apps. Use when adding pages, extending flows, tightening density, refactoring existing screens, preserving design-system consistency, or preventing UI drift across projects. Not for full-app checklist audits or execute-until-ready remediation; use ui-deep-audit for that.
+description: General cross-repo UI implementation and refactoring workflow for React, Next.js, Tailwind, and shadcn/ui apps. Use when adding pages, extending flows, tightening density, removing low-value explainer copy, refactoring existing screens, preserving design-system consistency, or preventing UI drift across projects. Not for full-app checklist audits or execute-until-ready remediation; use ui-deep-audit for that.
 ---
 
 # UI Skill
@@ -34,6 +34,14 @@ If you cannot load the supporting references for some reason, still follow the d
 - Browser-verified closeout for changed runnable UI surfaces
 - Final per-task UI review before stopping
 
+## Anti-Explainer Copy Rule
+
+- Default to zero intro paragraphs on internal tools, operator consoles, approval queues, CRUD pages, dashboards, and settings screens.
+- Assume the UI should orient the user through layout, section labels, table headers, badges, tabs, counters, and state chips before it uses prose.
+- Treat generic orientation copy such as "this page helps you...", "use this section to...", or "X feeds Y while Z remains authoritative..." as a likely defect unless the user explicitly asked for editorial guidance copy.
+- If explanatory copy is truly required, compress it to the smallest possible inline note, usually one short sentence, and only where the action would otherwise be ambiguous.
+- Prefer dense labels, empty states, inline helper text, or disclosure patterns over standalone explanatory paragraphs.
+
 ## Use the Companion Audit Skill When Needed
 
 If the request is any of the following, use `$ui-deep-audit` instead:
@@ -61,6 +69,7 @@ If the request is any of the following, use `$ui-deep-audit` instead:
 4. Critique the requested UI before generating:
    - density
    - copy volume
+   - whether the screen needs any intro copy at all
    - radius
    - hierarchy
    - whether the surface should really be a table, form, chart, chat, or simple detail page
@@ -80,6 +89,7 @@ If the request is any of the following, use `$ui-deep-audit` instead:
    - run the dense UI checklist
    - run the review reference
    - verify loading, empty, success, error, disabled, desktop, and narrow viewport states
+   - remove or compress low-signal explainer copy that the structure already makes obvious
    - report which browser route you used, what you verified, and any remaining unverifiable blockers
 
 ## Default Product Posture
@@ -90,6 +100,7 @@ If the request is any of the following, use `$ui-deep-audit` instead:
 - Prefer one main task per screen.
 - Use compact spacing and compact controls.
 - Use restrained titles, short labels, and almost no explanatory copy.
+- Default internal and operator surfaces to structure-first communication, not paragraph-first communication.
 - Keep charts secondary to the data model.
 - Keep AI conversation surfaces compact and product-like, not demo-like.
 
@@ -110,6 +121,9 @@ If the request is any of the following, use `$ui-deep-audit` instead:
 - Do not add giant hero sections to internal product pages.
 - Do not wrap tables and forms in unnecessary cards.
 - Do not add long explanatory copy above CRUD tables.
+- Do not place generic explainer paragraphs under page titles on operator, dashboard, queue, CRUD, or settings screens.
+- Do not add lane descriptions or section blurbs that simply restate the label the user already sees.
+- Do not use friendly onboarding copy, "how this works" prose, or policy narration as a substitute for clear structure and status design.
 - Do not add charts without analytical reason.
 - Do not ship AI chat that feels larger or louder than the rest of the app.
 - Do not default to oversized radii, pill buttons, gradient-heavy AI styling, or wrapper piles.

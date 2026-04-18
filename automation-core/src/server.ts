@@ -3,7 +3,7 @@ import { runJob } from "./jobs";
 import { createApp } from "./app";
 
 async function main() {
-  const context = createContext();
+  const context = await createContext();
   const app = createApp(context);
 
   await app.listen({
@@ -15,7 +15,7 @@ async function main() {
 
   const shutdown = async () => {
     await app.close();
-    context.close();
+    await context.close();
     process.exit(0);
   };
 
@@ -23,7 +23,7 @@ async function main() {
   process.on("SIGTERM", shutdown);
 }
 
-async function startupCatchUp(context: ReturnType<typeof createContext>) {
+async function startupCatchUp(context: Awaited<ReturnType<typeof createContext>>) {
   if (!context.googleAuth.isConfigured()) {
     return;
   }

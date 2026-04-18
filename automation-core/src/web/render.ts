@@ -1,4 +1,19 @@
-import { QueueSnapshot } from "../types";
+import {
+  AnalyticsFilters,
+  AnalyticsSummarySnapshot,
+  CommitFact,
+  ContributorRecord,
+  GitHubRepositoryRecord,
+  IssueFact,
+  PullRequestFact,
+  PullRequestReviewFact,
+  ReleaseFact,
+  RepoRollup,
+  TrendPoint,
+  WeeklyEngineeringBrief,
+  WorkflowRunFact,
+  QueueSnapshot,
+} from "../types";
 
 type Tone = "ok" | "pending" | "warn" | "danger";
 
@@ -163,6 +178,32 @@ export function renderDashboard(queue: QueueSnapshot): string {
         gap: 8px;
         justify-items: end;
         align-content: center;
+      }
+
+      .app-nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        align-items: center;
+      }
+
+      .app-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 7px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        font-size: 10px;
+        line-height: 1;
+        text-decoration: none;
+        background: var(--surface-subtle);
+      }
+
+      .app-link.active {
+        color: var(--accent);
+        background: #fff;
+        border-color: rgba(29, 78, 216, 0.24);
       }
 
       .status-rail,
@@ -618,6 +659,10 @@ export function renderDashboard(queue: QueueSnapshot): string {
           <div class="eyebrow">automation-core</div>
           <h1>Operator console</h1>
           <p class="headline">Notion authoritative. Manual review.</p>
+          <div class="app-nav" aria-label="Surfaces">
+            <a class="app-link active" href="/">Operator</a>
+            <a class="app-link" href="/analytics">GitHub analytics</a>
+          </div>
         </div>
         <div class="topbar-status">
           <div class="status-rail" aria-label="System posture">

@@ -24,3 +24,15 @@ node_modules/
 automation-core/dist/
 automation-core/.data/
 automation-core/.env
+
+.tmp/
+tmp/
+sessions/
+installation_id
+logs*.sqlite
+logs*.sqlite-shm
+logs*.sqlite-wal
+state*.sqlite
+state*.sqlite-shm
+state*.sqlite-wal
+skills/.system/

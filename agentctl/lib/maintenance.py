@@ -282,6 +282,7 @@ def _tests_status() -> list[dict[str, Any]]:
         AGENTCTL_HOME / "tests" / "test_browser_smoke.py",
         AGENTCTL_HOME / "tests" / "test_capabilities.py",
         AGENTCTL_HOME / "tests" / "test_cli_output.py",
+        AGENTCTL_HOME / "tests" / "test_codex_worker.py",
         AGENTCTL_HOME / "tests" / "test_codex_runtime.py",
         AGENTCTL_HOME / "tests" / "test_install_bundle.py",
         AGENTCTL_HOME / "tests" / "test_research.py",

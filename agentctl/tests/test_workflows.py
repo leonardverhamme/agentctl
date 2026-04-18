@@ -26,6 +26,63 @@ DEEP_WORKFLOWS = [
 ]
 
 
+def write_fake_codex_cli(root: Path) -> Path:
+    script_path = root / "fake_codex.py"
+    script_path.write_text(
+        """
+import json
+import os
+import sys
+from pathlib import Path
+
+
+def write_checklist(path: Path, iteration: int) -> None:
+    if iteration <= 1:
+        path.write_text(
+            "# Checklist\\n\\n## Status\\n\\n- Unchecked: 1\\n- Checked: 1\\n\\n- [x] first item\\n- [ ] second item\\n",
+            encoding="utf-8",
+        )
+    else:
+        path.write_text(
+            "# Checklist\\n\\n## Status\\n\\n- Unchecked: 0\\n- Checked: 2\\n\\n- [x] first item\\n- [x] second item\\n",
+            encoding="utf-8",
+        )
+
+
+def main() -> int:
+    args = sys.argv[1:]
+    if "--help" in args:
+        print("fake codex help")
+        return 0
+    if args[:2] != ["exec", "--full-auto"] or args[-1] != "-":
+        print("unexpected args: " + " ".join(args), file=sys.stderr)
+        return 2
+    _ = sys.stdin.read()
+    state_path = Path(os.environ["CODEX_WORKFLOW_STATE"])
+    checklist_path = Path(os.environ["CODEX_WORKFLOW_CHECKLIST"])
+    iteration = int(os.environ["CODEX_WORKFLOW_ITERATION"])
+    state = json.loads(state_path.read_text(encoding="utf-8"))
+    state["last_validation"] = {"worker_mode": "fake-codex", "iteration": iteration}
+    state_path.write_text(json.dumps(state, indent=2, sort_keys=True) + "\\n", encoding="utf-8")
+    write_checklist(checklist_path, iteration)
+    print("fake codex exec")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
+""".strip()
+        + "\n",
+        encoding="utf-8",
+    )
+    wrapper_path = root / "fake_codex.cmd"
+    wrapper_path.write_text(
+        f'@echo off\r\n"{sys.executable}" "{script_path}" %*\r\n',
+        encoding="utf-8",
+    )
+    return wrapper_path
+
+
 class WorkflowStatusTests(unittest.TestCase):
     def test_status_reads_schema_version(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -188,6 +245,11 @@ class WorkflowStatusTests(unittest.TestCase):
             )
 
         self.assertEqual(rc, 0)
+        resolve_codex_worker_command.assert_called_once()
+        resolver_kwargs = resolve_codex_worker_command.call_args.kwargs
+        self.assertEqual(resolver_kwargs["workflow"], "ui-deep-audit")
+        self.assertEqual(Path(resolver_kwargs["repo_root"]).resolve(), Path(temp_dir).resolve())
+        self.assertTrue(str(resolver_kwargs["state_path"]).endswith(".codex-workflows\\ui-deep-audit\\state.json") or str(resolver_kwargs["state_path"]).endswith(".codex-workflows/ui-deep-audit/state.json"))
         command = run_mock.call_args.args[0]
         self.assertIn("--worker-command", command)
         self.assertIn("codex-template-worker", command)
@@ -449,13 +511,84 @@ class WorkflowStatusTests(unittest.TestCase):
             self.assertEqual(state["worker_mode"], "auto")
             self.assertIn("complete_after_two", state["worker_command"])
 
-    def test_cli_run_without_worker_command_fails_safely(self) -> None:
+    def test_cli_run_uses_formatted_template_worker_end_to_end(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             repo_root = Path(temp_dir)
             env = os.environ.copy()
             env["CODEX_HOME"] = str(REPO_ROOT)
+            env["AGENTCTL_CODEX_WORKER_TEMPLATE"] = '{python_q} "' + str(FAKE_WORKER) + '" complete_after_two'
+
+            run_result = subprocess.run(
+                [
+                    sys.executable,
+                    str(CLI_ENTRY),
+                    "run",
+                    "docs-deep-audit",
+                    "--repo",
+                    str(repo_root),
+                ],
+                cwd=str(REPO_ROOT),
+                capture_output=True,
+                text=True,
+                check=False,
+                env=env,
+            )
+            self.assertEqual(run_result.returncode, 0, run_result.stderr or run_result.stdout)
+
+            state = json.loads(
+                (repo_root / ".codex-workflows" / "docs-deep-audit" / "state.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual(state["status"], "complete")
+            self.assertTrue(state["ready_allowed"])
+            self.assertIn(str(Path(sys.executable)), state["worker_command"])
+
+    def test_cli_run_uses_builtin_codex_worker_wrapper_end_to_end(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir, tempfile.TemporaryDirectory() as tool_dir:
+            repo_root = Path(temp_dir)
+            fake_codex = write_fake_codex_cli(Path(tool_dir))
+            env = os.environ.copy()
+            env["CODEX_HOME"] = str(REPO_ROOT)
+            env["AGENTCTL_CODEX_PATH"] = str(fake_codex)
+            env.pop("AGENTCTL_CODEX_WORKER_TEMPLATE", None)
+            env.pop("CODEX_WORKFLOW_WORKER_COMMAND", None)
+
+            run_result = subprocess.run(
+                [
+                    sys.executable,
+                    str(CLI_ENTRY),
+                    "run",
+                    "ui-deep-audit",
+                    "--repo",
+                    str(repo_root),
+                ],
+                cwd=str(REPO_ROOT),
+                capture_output=True,
+                text=True,
+                check=False,
+                env=env,
+            )
+            self.assertEqual(run_result.returncode, 0, run_result.stderr or run_result.stdout)
+            state = json.loads(
+                (repo_root / ".codex-workflows" / "ui-deep-audit" / "state.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual(state["status"], "complete")
+            self.assertTrue(state["ready_allowed"])
+            self.assertEqual(state["worker_mode"], "auto")
+            self.assertIn("codex_worker.py", state["worker_command"])
+
+    def test_cli_run_without_worker_command_fails_safely(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            repo_root = Path(temp_dir)
+            docs_dir = repo_root / "docs"
+            docs_dir.mkdir(parents=True, exist_ok=True)
+            (docs_dir / "ui-deep-audit-checklist.md").write_text("- [ ] Smoke item\n", encoding="utf-8")
+            env = os.environ.copy()
+            env["CODEX_HOME"] = str(REPO_ROOT)
             env.pop("CODEX_WORKFLOW_WORKER_COMMAND", None)
             env.pop("AGENTCTL_CODEX_WORKER_TEMPLATE", None)
+            env.pop("AGENTCTL_CODEX_PATH", None)
+            env["APPDATA"] = str(repo_root / "missing-appdata")
+            env["PATH"] = ""
 
             run_result = subprocess.run(
                 [

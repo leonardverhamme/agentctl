@@ -19,6 +19,7 @@
     "commander": "^14.0.0",
     "fastify": "^5.4.0",
     "googleapis": "^150.0.1",
+    "postgres": "^3.4.9",
     "zod": "^3.25.67"
   },
   "devDependencies": {

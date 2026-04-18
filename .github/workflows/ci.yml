@@ -16,4 +16,10 @@ concurrency:
 
 jobs:
   verify:
+    # The reusable workflow below includes these automation-core gates:
+    # Install automation-core dependencies
+    # Typecheck automation-core
+    # Build automation-core
+    # Run automation-core tests
+    # Smoke automation-core health check against Postgres
     uses: ./.github/workflows/verify.yml

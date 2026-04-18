@@ -49,7 +49,7 @@ export class GoogleAuthService {
     const gmail = google.gmail({ version: "v1", auth: client });
     const profile = await gmail.users.getProfile({ userId: "me" });
     const email = profile.data.emailAddress ?? null;
-    this.store.setOAuthToken("google", JSON.stringify(tokens), email);
+    await this.store.setOAuthToken("google", JSON.stringify(tokens), email);
     return email;
   }
 
@@ -58,7 +58,7 @@ export class GoogleAuthService {
       throw new Error("Google OAuth is not configured.");
     }
 
-    const tokenRecord = this.store.getOAuthToken("google");
+    const tokenRecord = await this.store.getOAuthToken("google");
     if (!tokenRecord) {
       throw new Error("Google OAuth token not found. Visit /auth/google/start to connect Gmail and Calendar.");
     }

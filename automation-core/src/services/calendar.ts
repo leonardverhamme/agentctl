@@ -18,7 +18,7 @@ export class CalendarService {
   async syncCalendar(): Promise<{ mode: "full" | "incremental"; events: CalendarEventSnapshot[]; fallbackUsed: boolean }> {
     const client = await this.auth.getAuthorizedClient();
     const calendar = google.calendar({ version: "v3", auth: client });
-    const previousSyncToken = this.store.getSyncState("calendar", "syncToken");
+    const previousSyncToken = await this.store.getSyncState("calendar", "syncToken");
     let fallbackUsed = false;
     let mode: "full" | "incremental" = previousSyncToken ? "incremental" : "full";
     const events: CalendarEventSnapshot[] = [];
@@ -52,7 +52,7 @@ export class CalendarService {
             continue;
           }
           events.push(snapshot);
-          this.store.upsertSourceCache("calendar", "event", snapshot.eventId, stableHash(snapshot), snapshot);
+          await this.store.upsertSourceCache("calendar", "event", snapshot.eventId, stableHash(snapshot), snapshot);
         }
         nextSyncToken = response.data.nextSyncToken ?? nextSyncToken;
         pageToken = response.data.nextPageToken ?? undefined;
@@ -71,8 +71,8 @@ export class CalendarService {
     } while (pageToken);
 
     if (nextSyncToken) {
-      this.store.setSyncState("calendar", "syncToken", nextSyncToken);
-      this.store.setSyncState("calendar", "lastSyncAt", nowIso());
+      await this.store.setSyncState("calendar", "syncToken", nextSyncToken);
+      await this.store.setSyncState("calendar", "lastSyncAt", nowIso());
     }
 
     return { mode, events, fallbackUsed };

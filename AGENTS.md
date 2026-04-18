@@ -5,14 +5,22 @@
 - Prefer thin capability skills such as `$github-capability`, `$github-security-capability`, `$vercel-capability`, `$supabase-capability`, `$browser-capability`, `$stripe-capability`, `$sentry-capability`, `$figma-capability`, and `$nextjs-runtime-capability` when that makes the route explicit and easier to follow in chat.
 - Add or update local skills only when they represent a meaningful capability or workflow front door; do not create raw one-command wrapper skills that duplicate the runtime.
 - Keep local capability skills thin and navigation-first. Put detail behind `agentctl capability <key>` and repo docs instead of bloating `SKILL.md`.
+- Treat meaningful top-level capabilities as skill-backed front doors so agents surface visible skill usage in chat, but do not create one skill per raw CLI subcommand, MCP method, or tiny variant.
+- Keep capability menus and docs capability-first, not transport-first. Hide low-level CLI/MCP/plugin detail behind `agentctl capability <key>`, help output, and generated docs instead of front-loading it into prompts.
 - Prefer `agentctl run <workflow>` over repeating the same deep-skill prompt to force progress.
+- Treat deep workflows as disk-backed loops: checklist plus `.codex-workflows/<workflow>/state.json` is the source of truth, and `agentctl run <workflow>` is the real resume path.
 - Prefer `agentctl research web|github|scout` when external evidence is needed before implementation.
 - Keep vendor CLIs authoritative for their own systems; use `agentctl` to route to them, not to replace them.
 - Choose interfaces by capability first, then use the healthiest authoritative path that `agentctl` reports instead of reasoning from transport type alone.
 - Keep Playwright authoritative for browser automation; use the browser route that `agentctl` reports as healthiest.
+- For runnable UI or browser-relevant work, require a real Playwright verification pass. A locked session is not a valid stop reason; fall back to a fresh CLI/browser route and move the app to another free port if needed.
+- For UI/operator-console work, default to dense information design and remove filler explainer paragraphs. Structure, labels, counters, tables, and grouping should carry meaning before intro copy does.
+- When asked to add tests, use `$test-skill` and choose the materially needed layers yourself: unit, integration, API or contract, e2e, Playwright/browser, accessibility, visual, regression, edge-case, data or migration, and performance-smoke where relevant.
 - When a task needs a new helper script, create it in the target repo being worked on, not in `$CODEX_HOME`, not in the `agentctl` bundle repo unless that repo itself is the target, and never inside a skill directory.
 - Treat `.codex-workflows/<workflow>/state.json` as the source of truth for deep workflow progress and completion.
 - After changing `agentctl`, its plugin, or its contracts, run `agentctl maintenance audit` or use `$agentctl-maintenance-engineer`.
+- After changing the skill surface or capability registry, also update `agents/openai.yaml`, `agentctl/lib/capabilities.py`, `AGENTS.md`, generated docs, and the relevant tests.
+- When skill work is approved, use `$skill-creator` for structure and validation help, keep the change set narrow, run `quick_validate.py` on changed skills, run repo tests, and sync the installed bundle when this repo mirrors the live `CODEX_HOME`.
 - Treat `skills/` and `plugins/*/skills/` as stable infrastructure during normal work.
 - Never create, edit, rename, move, or delete a skill unless the user explicitly asks to change the skill system itself and explicitly confirms that `skill-edit-mode` should open.
 - Use `$skill-edit-mode` for intentional skill creation or skill maintenance only after that confirmation is present.

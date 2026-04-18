@@ -3,6 +3,7 @@ import Fastify from "fastify";
 import { JOB_NAMES, JobName } from "./types";
 import { AppContext } from "./context";
 import { runJob } from "./jobs";
+import { renderGitHubAnalytics } from "./web/github-dashboard";
 import { renderDashboard } from "./web/render";
 
 const FAVICON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
@@ -17,7 +18,7 @@ export function createApp(context: AppContext) {
 
   app.get("/", async (_request, reply) => {
     reply.header("content-type", "text/html; charset=utf-8");
-    return renderDashboard(context.reconcile.queue());
+    return renderDashboard(await context.reconcile.queue());
   });
 
   app.get("/favicon.ico", async (_request, reply) => {
@@ -30,10 +31,40 @@ export function createApp(context: AppContext) {
     status: "ok",
     notionConfigured: context.notion.isConfigured(),
     googleConfigured: context.googleAuth.isConfigured(),
-    queueSize: context.reconcile.queue().decisions.length,
+    queueSize: (await context.reconcile.queue()).decisions.length,
   }));
 
   app.get("/queue", async () => context.reconcile.queue());
+
+  app.get("/analytics", async (request, reply) => {
+    reply.header("content-type", "text/html; charset=utf-8");
+    const data = await context.githubAnalytics.queryAnalytics(context.githubAnalytics.parseFilters(request.query as Record<string, unknown>));
+    return renderGitHubAnalytics(data);
+  });
+
+  app.get("/analytics/summary", async (request) =>
+    (await context.githubAnalytics.queryAnalytics(context.githubAnalytics.parseFilters(request.query as Record<string, unknown>))).summary,
+  );
+
+  app.get("/analytics/repos", async (request) =>
+    (await context.githubAnalytics.queryAnalytics(context.githubAnalytics.parseFilters(request.query as Record<string, unknown>))).repositories,
+  );
+
+  app.get("/analytics/contributors", async (request) =>
+    (await context.githubAnalytics.queryAnalytics(context.githubAnalytics.parseFilters(request.query as Record<string, unknown>))).contributors,
+  );
+
+  app.get("/analytics/commits", async (request) =>
+    (await context.githubAnalytics.queryAnalytics(context.githubAnalytics.parseFilters(request.query as Record<string, unknown>))).commits,
+  );
+
+  app.get("/analytics/trends", async (request) =>
+    (await context.githubAnalytics.queryAnalytics(context.githubAnalytics.parseFilters(request.query as Record<string, unknown>))).trends,
+  );
+
+  app.get("/analytics/weekly", async (request) =>
+    (await context.githubAnalytics.queryAnalytics(context.githubAnalytics.parseFilters(request.query as Record<string, unknown>))).weeklyBrief,
+  );
 
   app.get("/auth/google/start", async (_request, reply) => {
     const url = context.googleAuth.getAuthorizationUrl();

@@ -19,6 +19,7 @@ from workflow_common import (
     parse_checklist,
     render_progress_markdown,
     save_json,
+    suggested_max_iterations,
     sync_state_from_checklist,
     update_registry,
     utc_now,
@@ -37,6 +38,7 @@ def build_retry_hint(state: dict, checklist: dict, *, worker_rc: int | None = No
     hint_lines = [
         f"Workflow: {state['workflow_name']}",
         f"Iteration: {state['iteration']}",
+        f"Iteration budget: {state['max_iterations']}",
         f"Remaining unchecked items: {checklist['open']}",
         f"Blocked items: {checklist['blocked']}",
     ]
@@ -53,7 +55,8 @@ def build_retry_hint(state: dict, checklist: dict, *, worker_rc: int | None = No
         hint_lines.append(f"Last worker exit code: {worker_rc}")
     if guard_message:
         hint_lines.append(f"Last guard result: {guard_message}")
-    hint_lines.append("Try another way. Do not repeat the same failed approach. Update checklist and workflow state after the next batch.")
+    hint_lines.append("Try another way. Do not repeat the same failed approach.")
+    hint_lines.append("Do one real validated batch, update checklist and workflow state, then let the outer runner continue.")
     return "\n".join(hint_lines)
 
 
@@ -64,6 +67,28 @@ def persist_state(state_path: Path, state: dict, registry_path: Path, render: bo
         checklist = parse_checklist(state["checklist_path"])
         progress = render_progress_markdown(state, checklist)
         ensure_parent(state["progress_path"]).write_text(progress, encoding="utf-8")
+
+
+def reconcile_state_with_checklist(state: dict, checklist: dict) -> tuple[dict, bool]:
+    if not checklist.get("exists"):
+        return state, False
+    previous = {
+        "status": state.get("status"),
+        "tasks_total": state.get("tasks_total"),
+        "tasks_done": state.get("tasks_done"),
+        "tasks_open": state.get("tasks_open"),
+        "tasks_blocked": state.get("tasks_blocked"),
+        "remaining_items": state.get("remaining_items"),
+        "blocked_items": state.get("blocked_items"),
+        "ready_allowed": state.get("ready_allowed"),
+    }
+    next_status = state.get("status")
+    if checklist["open"] > 0 and state.get("status") in {"complete", "blocked", "stalled", "error"}:
+        next_status = "running"
+    updated = sync_state_from_checklist(state, checklist, status=next_status)
+    updated["max_iterations"] = suggested_max_iterations(checklist["open"], updated["max_iterations"])
+    repaired = any(updated.get(key) != value for key, value in previous.items()) or updated["max_iterations"] != state.get("max_iterations")
+    return updated, repaired
 
 
 def determine_worker_command(cli_value: str | None) -> str | None:
@@ -103,6 +128,22 @@ def main() -> int:
         max_stagnant_iterations=args.max_stagnant,
         worker_command=worker_command,
     )
+    startup_checklist = parse_checklist(checklist_path)
+    state, repaired = reconcile_state_with_checklist(state, startup_checklist)
+    if repaired:
+        state = append_evidence(
+            state,
+            {
+                "timestamp": utc_now(),
+                "iteration": state["iteration"],
+                "worker_exit_code": None,
+                "progress_made": False,
+                "tasks_done": state["tasks_done"],
+                "tasks_open": state["tasks_open"],
+                "tasks_blocked": state["tasks_blocked"],
+                "event": "state_reconciled_from_checklist",
+            },
+        )
     validation_errors = validate_state_payload(state)
     if validation_errors:
         state["status"] = "error"
@@ -143,6 +184,21 @@ def main() -> int:
         )
 
         before = parse_checklist(state["checklist_path"])
+        state, repaired = reconcile_state_with_checklist(state, before)
+        if repaired:
+            state = append_evidence(
+                state,
+                {
+                    "timestamp": utc_now(),
+                    "iteration": state["iteration"],
+                    "worker_exit_code": None,
+                    "progress_made": False,
+                    "tasks_done": state["tasks_done"],
+                    "tasks_open": state["tasks_open"],
+                    "tasks_blocked": state["tasks_blocked"],
+                    "event": "state_reconciled_from_checklist",
+                },
+            )
         if state["iteration"] >= state["max_iterations"]:
             state["status"] = "stalled"
             state["last_error"] = {
@@ -191,6 +247,21 @@ def main() -> int:
             worker_command=worker_command,
         )
         after = parse_checklist(state["checklist_path"])
+        state, repaired_after = reconcile_state_with_checklist(state, after)
+        if repaired_after:
+            state = append_evidence(
+                state,
+                {
+                    "timestamp": utc_now(),
+                    "iteration": state["iteration"],
+                    "worker_exit_code": result.returncode,
+                    "progress_made": False,
+                    "tasks_done": state["tasks_done"],
+                    "tasks_open": state["tasks_open"],
+                    "tasks_blocked": state["tasks_blocked"],
+                    "event": "state_reconciled_from_checklist",
+                },
+            )
         progress_made = meaningful_progress(before, after)
         state["stagnant_iterations"] = 0 if progress_made else state.get("stagnant_iterations", 0) + 1
         state = sync_state_from_checklist(

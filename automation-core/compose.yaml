@@ -4,13 +4,15 @@ services:
       context: .
     init: true
     restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "${HOST_PORT:-4313}:3010"
     env_file:
       - path: ./.env
         required: false
     environment:
-      SQLITE_PATH: /data/automation-core.sqlite
+      DATABASE_URL: "${CONTAINER_DATABASE_URL:-postgresql://postgres:postgres@host.docker.internal:58322/postgres}"
       APP_HOST: 0.0.0.0
       APP_PORT: 3010
     volumes:
