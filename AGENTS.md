@@ -3,6 +3,8 @@
 - Use `agentctl` first for capability discovery, maintenance checks, research routing, and deep workflow launch.
 - Use `agentctl capability <key>` when a task clearly belongs to one capability or vendor surface and the agent needs the drill-down page before picking concrete tools.
 - Prefer thin capability skills such as `$github-capability`, `$github-security-capability`, `$vercel-capability`, `$supabase-capability`, `$browser-capability`, `$stripe-capability`, `$sentry-capability`, `$figma-capability`, and `$nextjs-runtime-capability` when that makes the route explicit and easier to follow in chat.
+- Add or update local skills only when they represent a meaningful capability or workflow front door; do not create raw one-command wrapper skills that duplicate the runtime.
+- Keep local capability skills thin and navigation-first. Put detail behind `agentctl capability <key>` and repo docs instead of bloating `SKILL.md`.
 - Prefer `agentctl run <workflow>` over repeating the same deep-skill prompt to force progress.
 - Prefer `agentctl research web|github|scout` when external evidence is needed before implementation.
 - Keep vendor CLIs authoritative for their own systems; use `agentctl` to route to them, not to replace them.

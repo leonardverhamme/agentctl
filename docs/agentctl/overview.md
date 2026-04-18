@@ -15,7 +15,7 @@
 ## Current Status
 
 - Maintenance status: `ok`
-- Checks passed: 45 / 45
+- Checks passed: 51 / 51
 - Open findings: 0
 - Blocked findings: 0
 
@@ -40,6 +40,7 @@
 - [Install on another computer](install-on-another-computer.md) for moving the bundle to a new machine.
 - [Unattended worker setup](unattended-worker-setup.md) for getting deep workflow loops to keep running with a real worker.
 - [Maintainer guide](maintainer-guide.md) for generated-vs-manual docs, release hygiene, and validation expectations.
+- [Skill governance](skill-governance.md) for the rules that keep capability skills thin, documented, and low-context.
 
 ## Common Agent Flows
 

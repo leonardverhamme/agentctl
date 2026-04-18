@@ -17,6 +17,7 @@ BUNDLE_ITEMS = [
     "skills",
     "plugins",
     "docs/agentctl",
+    "README.md",
     "AGENTS.md",
     "agentctl.cmd",
     "agentctl.sh",

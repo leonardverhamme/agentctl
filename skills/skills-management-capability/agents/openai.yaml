@@ -1,0 +1,4 @@
+interface:
+  display_name: "Skills Management"
+  short_description: "Route skill installs and provenance checks through agentctl."
+  default_prompt: "Use this skill to navigate skill list, add, check, and update workflows through agentctl."

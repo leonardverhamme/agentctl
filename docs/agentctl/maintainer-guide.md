@@ -39,6 +39,7 @@ These should be reviewed directly when behavior changes:
 - `docs/agentctl/zero-touch-setup.md`
 - `docs/agentctl/install-on-another-computer.md`
 - `docs/agentctl/unattended-worker-setup.md`
+- `docs/agentctl/skill-governance.md`
 - this file
 - `docs/automation-core.md`
 
@@ -86,6 +87,7 @@ Update:
 
 - `skills/` or `plugins/agentctl/`
 - `AGENTS.md` if the front-door guidance changed
+- `docs/agentctl/skill-governance.md` if the skill-governance rules or capability-wrapper policy changed
 - generated docs via `agentctl maintenance audit`
 
 ## Minimum Validation Before You Trust A Change

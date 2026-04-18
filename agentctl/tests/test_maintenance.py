@@ -132,6 +132,17 @@ class MaintenanceTests(unittest.TestCase):
             router_skill.parent.mkdir(parents=True, exist_ok=True)
             router_skill.write_text("---\nname: agentctl-router\ndescription: test\n---\n", encoding="utf-8")
             (root / "config.toml").write_text('[plugins."agentctl"]\nenabled = true\n', encoding="utf-8")
+            docs_dir = root / "docs" / "agentctl"
+            docs_dir.mkdir(parents=True, exist_ok=True)
+            (root / "README.md").write_text("# agentctl\n", encoding="utf-8")
+            for name in (
+                "zero-touch-setup.md",
+                "install-on-another-computer.md",
+                "unattended-worker-setup.md",
+                "maintainer-guide.md",
+                "skill-governance.md",
+            ):
+                (docs_dir / name).write_text(f"# {name}\n", encoding="utf-8")
 
             patches = self._patch_paths(root)
             with ExitStack() as stack:

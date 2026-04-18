@@ -4,17 +4,28 @@
 - Key: `autonomous-deep-runs`
 - Group: `control-plane`
 - Status: `ok`
-- Front door: `agentctl run`
+- Front door: `$autonomous-deep-runs-capability`
 
 ## Summary
 
-Autonomous deep runs
+Use for launching, resuming, and diagnosing unattended deep workflows through the shared runner.
+
+## Navigation Skills
+
+- `autonomous-deep-runs-capability`
 
 ## Entry Points
 
+- `$autonomous-deep-runs-capability`
+- `agentctl capability autonomous-deep-runs`
 - `agentctl run <workflow>`
 - `CODEX_WORKFLOW_WORKER_COMMAND`
 - `AGENTCTL_CODEX_WORKER_TEMPLATE`
+
+## Routing Notes
+
+- Start with the capability skill, then route into `agentctl run <workflow>`.
+- A real worker command or `AGENTCTL_CODEX_WORKER_TEMPLATE` is still required for unattended execution.
 
 ## Advisory
 
@@ -22,6 +33,7 @@ Autonomous deep runs
 
 ## Backing Interfaces
 
+- `skill` `autonomous-deep-runs-capability` [ok]
 - `tool` `codex` [degraded]
 
 ## Overlap Policy

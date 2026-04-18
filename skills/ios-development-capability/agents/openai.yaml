@@ -1,0 +1,4 @@
+interface:
+  display_name: "iOS Development"
+  short_description: "Route iOS build, simulator, and SwiftUI work through agentctl."
+  default_prompt: "Use this skill to navigate iOS work through agentctl, then switch to the right Build iOS Apps plugin skill."

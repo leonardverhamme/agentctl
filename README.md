@@ -139,6 +139,7 @@ Start here when you need the docs by job instead of by filename:
 - [docs/agentctl/zero-touch-setup.md](docs/agentctl/zero-touch-setup.md) for one-command bootstrap
 - [docs/agentctl/install-on-another-computer.md](docs/agentctl/install-on-another-computer.md) for moving the bundle to a new machine
 - [docs/agentctl/unattended-worker-setup.md](docs/agentctl/unattended-worker-setup.md) for making deep workflow loops actually run unattended
+- [docs/agentctl/skill-governance.md](docs/agentctl/skill-governance.md) for the rules that keep local skills thin, visible, and capability-first
 - [docs/agentctl/maintainer-guide.md](docs/agentctl/maintainer-guide.md) for operator and maintainer responsibilities
 - [docs/automation-core.md](docs/automation-core.md) for the workstation automation bridge
 

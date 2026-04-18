@@ -15,6 +15,9 @@ SPEC.loader.exec_module(install_bundle)
 
 
 class InstallBundleTests(unittest.TestCase):
+    def test_bundle_items_include_readme(self) -> None:
+        self.assertIn("README.md", install_bundle.BUNDLE_ITEMS)
+
     def test_ensure_plugin_enabled_appends_once(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             config_path = Path(temp_dir) / "config.toml"

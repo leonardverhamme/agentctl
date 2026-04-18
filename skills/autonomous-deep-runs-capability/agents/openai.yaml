@@ -1,0 +1,4 @@
+interface:
+  display_name: "Autonomous Deep Runs"
+  short_description: "Route unattended deep workflows through agentctl and the shared runner."
+  default_prompt: "Use this skill to navigate unattended deep workflows through agentctl, then choose the right workflow and worker-command path."

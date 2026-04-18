@@ -14,11 +14,11 @@ The machine-readable registry lives at `agentctl/state/capabilities.json`.
 
 ### Control Plane
 
-- `autonomous-deep-runs` uses `agentctl run` and is currently `ok`.
+- `autonomous-deep-runs` uses `$autonomous-deep-runs-capability` and is currently `ok`.
   - Overlap policy: The outer execute-until-done loop must use a real worker command, not chat memory. Prefer Codex runtime when it is callable or explicitly templated.
   - Advisory: Default Codex runtime is not callable in this environment. Use `--worker-command` or configure `AGENTCTL_CODEX_WORKER_TEMPLATE` for unattended deep runs.
   - Page: `docs/agentctl/capabilities/autonomous-deep-runs.md`
-- `skills-management` uses `agentctl skills` and is currently `ok`.
+- `skills-management` uses `$skills-management-capability` and is currently `ok`.
   - Overlap policy: Wrap official skills tooling rather than reimplementing it.
   - Page: `docs/agentctl/capabilities/skills-management.md`
 - `agentctl-maintenance` uses `$agentctl-maintenance-engineer` and is currently `ok`.
@@ -48,7 +48,7 @@ The machine-readable registry lives at `agentctl/state/capabilities.json`.
 
 ### Research And Verification
 
-- `research` uses `agentctl research` and is currently `ok`.
+- `research` uses `$research-capability` and is currently `ok`.
   - Overlap policy: Hide web, GitHub, and browser transport choices behind one research surface and one evidence contract.
   - Page: `docs/agentctl/capabilities/research.md`
 - `browser-automation` uses `$browser-capability` and is currently `ok`.
@@ -75,13 +75,13 @@ The machine-readable registry lives at `agentctl/state/capabilities.json`.
 - `sentry-observability` uses `$sentry-capability` and is currently `missing`.
   - Overlap policy: Expose Sentry as one observability capability instead of a transport-specific tool entry.
   - Page: `docs/agentctl/capabilities/sentry-observability.md`
-- `ios-development` uses `Build iOS Apps plugin` and is currently `missing`.
+- `ios-development` uses `$ios-development-capability` and is currently `missing`.
   - Overlap policy: Expose iOS build, UI, and debugging workflows as one capability backed by the iOS plugin.
   - Page: `docs/agentctl/capabilities/ios-development.md`
-- `macos-development` uses `Build macOS Apps plugin` and is currently `missing`.
+- `macos-development` uses `$macos-development-capability` and is currently `missing`.
   - Overlap policy: Expose macOS build, packaging, and desktop debugging as one capability backed by the macOS plugin.
   - Page: `docs/agentctl/capabilities/macos-development.md`
-- `android-testing` uses `Test Android Apps plugin` and is currently `missing`.
+- `android-testing` uses `$android-testing-capability` and is currently `missing`.
   - Overlap policy: Expose Android emulator QA as one capability backed by the Android testing plugin.
   - Page: `docs/agentctl/capabilities/android-testing.md`
 - `figma-design` uses `$figma-capability` and is currently `missing`.
@@ -111,8 +111,8 @@ The machine-readable registry lives at `agentctl/state/capabilities.json`.
 {
   "configured_mcp_count": 0,
   "enabled_plugin_count": 1,
-  "installed_skill_count": 27,
-  "local_skill_count": 27,
+  "installed_skill_count": 33,
+  "local_skill_count": 33,
   "optional_attention_count": 7,
   "optional_capability_count": 12,
   "required_capability_count": 10,
@@ -122,6 +122,7 @@ The machine-readable registry lives at `agentctl/state/capabilities.json`.
 
 ## Overlap Decisions
 
+- `autonomous-deep-runs`: The outer execute-until-done loop must use a real worker command, not chat memory. Prefer Codex runtime when it is callable or explicitly templated.
 - `skills-management`: Wrap official skills tooling rather than reimplementing it.
 - `agentctl-maintenance`: Keep maintenance as one capability surface for docs, packaging, registry health, and platform drift.
 - `ui-workflows`: Surface the UI skills first; plugin support stays a backing capability, not a separate menu.
@@ -137,5 +138,8 @@ The machine-readable registry lives at `agentctl/state/capabilities.json`.
 - `supabase-data`: Prefer the Supabase CLI for local stack, schema, migrations, and CI/CD. Use MCP when structured project access adds value beyond the CLI.
 - `stripe-payments`: Prefer the Stripe plugin capability surface; keep MCP as backing metadata, not a separate menu.
 - `sentry-observability`: Expose Sentry as one observability capability instead of a transport-specific tool entry.
+- `ios-development`: Expose iOS build, UI, and debugging workflows as one capability backed by the iOS plugin.
+- `macos-development`: Expose macOS build, packaging, and desktop debugging as one capability backed by the macOS plugin.
+- `android-testing`: Expose Android emulator QA as one capability backed by the Android testing plugin.
 - `figma-design`: No plugin overlap here, so MCP remains the single capability entry.
 - `nextjs-runtime`: Keep Next.js runtime tooling as one capability entry backed by Next DevTools MCP.

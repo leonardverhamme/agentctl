@@ -65,6 +65,7 @@ If this is a brand-new workstation, also read:
 
 - [install-on-another-computer.md](install-on-another-computer.md)
 - [unattended-worker-setup.md](unattended-worker-setup.md)
+- [skill-governance.md](skill-governance.md) if you are maintaining or extending the local skill surface
 
 ## Unattended Deep Workflows
 

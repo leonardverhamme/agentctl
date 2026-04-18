@@ -1,0 +1,4 @@
+interface:
+  display_name: "macOS Development"
+  short_description: "Route macOS build, packaging, and desktop debugging through agentctl."
+  default_prompt: "Use this skill to navigate macOS work through agentctl, then switch to the right Build macOS Apps plugin skill."

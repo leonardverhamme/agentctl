@@ -3,9 +3,9 @@
 
 ## Last Run
 
-- Generated: `2026-04-18T16:18:47.569499+00:00`
+- Generated: `2026-04-18T16:45:03.888352+00:00`
 - Status: `ok`
-- Checks passed: 45 / 45
+- Checks passed: 51 / 51
 - Open findings: 0
 - Blocked findings: 0
 
@@ -27,11 +27,12 @@
 ## What Must Be Updated After Changes
 
 - Refresh `docs/agentctl/*.md` from machine state.
-- Review hand-maintained guides such as `README.md`, `zero-touch-setup.md`, `install-on-another-computer.md`, `unattended-worker-setup.md`, and `maintainer-guide.md` when behavior or setup expectations change.
+- Review hand-maintained guides such as `README.md`, `zero-touch-setup.md`, `install-on-another-computer.md`, `unattended-worker-setup.md`, `maintainer-guide.md`, and `skill-governance.md` when behavior or setup expectations change.
 - Keep `state-schema.md`, `capability-registry.md`, and `maintenance-contract.md` aligned with code.
 - Re-run tests for `agentctl` and the shared workflow tools.
 - Re-run at least one CLI-level deep-workflow smoke after changing runner/state/guard behavior.
 - Keep `AGENTS.md` aligned with the intended front door.
+- If the skill surface changes, keep capability wrappers thin and update `skill-governance.md` in the same change.
 
 ## Verification Expectations
 

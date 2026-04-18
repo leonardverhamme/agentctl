@@ -200,6 +200,32 @@ def _record_reference(name: str, path: Path) -> dict[str, Any]:
     }
 
 
+def _manual_guides_map() -> dict[str, Path]:
+    repo_root = AGENTCTL_HOME.parent
+    return {
+        "readme": repo_root / "README.md",
+        "zero-touch-setup": AGENTCTL_DOCS_DIR / "zero-touch-setup.md",
+        "install-on-another-computer": AGENTCTL_DOCS_DIR / "install-on-another-computer.md",
+        "unattended-worker-setup": AGENTCTL_DOCS_DIR / "unattended-worker-setup.md",
+        "maintainer-guide": AGENTCTL_DOCS_DIR / "maintainer-guide.md",
+        "skill-governance": AGENTCTL_DOCS_DIR / "skill-governance.md",
+    }
+
+
+def _record_manual_guide(name: str, path: Path) -> dict[str, Any]:
+    content = _read_text(path)
+    return {
+        "name": name,
+        "path": str(path),
+        "exists": path.exists(),
+        "size": len(content),
+    }
+
+
+def _manual_guides_status() -> list[dict[str, Any]]:
+    return [_record_manual_guide(name, path) for name, path in _manual_guides_map().items()]
+
+
 def _capability_docs(report: dict[str, Any]) -> list[dict[str, Any]]:
     items: list[dict[str, Any]] = []
     for key in capability_keys(report["capabilities_snapshot"]):
@@ -309,6 +335,7 @@ def _build_findings(
     *,
     docs: list[dict[str, Any]],
     references: list[dict[str, Any]],
+    manual_guides: list[dict[str, Any]],
     plugin: dict[str, Any],
     skills: list[dict[str, Any]],
     tests: list[dict[str, Any]],
@@ -343,6 +370,17 @@ def _build_findings(
                 title=f"Missing reference: {record['name']}",
                 severity="warn",
                 detail="A required agentctl reference file is missing.",
+                path=record["path"],
+            )
+
+    for record in manual_guides:
+        if not record["exists"]:
+            _add_finding(
+                findings,
+                finding_id=f"manual-guide-missing-{record['name']}",
+                title=f"Missing guide: {record['name']}",
+                severity="warn",
+                detail="A required hand-maintained agentctl guide is missing.",
                 path=record["path"],
             )
 
@@ -433,19 +471,21 @@ def build_maintenance_report() -> dict[str, Any]:
     docs = [_record_file(name, path) for name, path in MAINTENANCE_DOCS.items()]
     docs.extend(_capability_docs({"capabilities_snapshot": capabilities}))
     references = [_record_reference(name, path) for name, path in REFERENCE_DOCS.items()]
+    manual_guides = _manual_guides_status()
     plugin = _plugin_status()
     skills = _skills_status()
     tests = _tests_status()
     findings = _build_findings(
         docs=docs,
         references=references,
+        manual_guides=manual_guides,
         plugin=plugin,
         skills=skills,
         tests=tests,
         capabilities=capabilities,
     )
 
-    total_checks = len(docs) + len(references) + len(skills) + len(tests) + 3
+    total_checks = len(docs) + len(references) + len(manual_guides) + len(skills) + len(tests) + 3
     blocked_findings = [item for item in findings if item["severity"] == "error"]
     open_findings = len(findings)
     passed_checks = max(total_checks - open_findings, 0)
@@ -471,6 +511,7 @@ def build_maintenance_report() -> dict[str, Any]:
         },
         "docs": docs,
         "references": references,
+        "manual_guides": manual_guides,
         "skills": skills,
         "plugin": plugin,
         "tests": tests,
@@ -600,6 +641,7 @@ def _render_overview(report: dict[str, Any]) -> str:
         "- [Install on another computer](install-on-another-computer.md) for moving the bundle to a new machine.",
         "- [Unattended worker setup](unattended-worker-setup.md) for getting deep workflow loops to keep running with a real worker.",
         "- [Maintainer guide](maintainer-guide.md) for generated-vs-manual docs, release hygiene, and validation expectations.",
+        "- [Skill governance](skill-governance.md) for the rules that keep capability skills thin, documented, and low-context.",
         "",
         "## Common Agent Flows",
         "",
@@ -1024,11 +1066,12 @@ def _render_maintenance(report: dict[str, Any]) -> str:
         "## What Must Be Updated After Changes",
         "",
         "- Refresh `docs/agentctl/*.md` from machine state.",
-        "- Review hand-maintained guides such as `README.md`, `zero-touch-setup.md`, `install-on-another-computer.md`, `unattended-worker-setup.md`, and `maintainer-guide.md` when behavior or setup expectations change.",
+        "- Review hand-maintained guides such as `README.md`, `zero-touch-setup.md`, `install-on-another-computer.md`, `unattended-worker-setup.md`, `maintainer-guide.md`, and `skill-governance.md` when behavior or setup expectations change.",
         "- Keep `state-schema.md`, `capability-registry.md`, and `maintenance-contract.md` aligned with code.",
         "- Re-run tests for `agentctl` and the shared workflow tools.",
         "- Re-run at least one CLI-level deep-workflow smoke after changing runner/state/guard behavior.",
         "- Keep `AGENTS.md` aligned with the intended front door.",
+        "- If the skill surface changes, keep capability wrappers thin and update `skill-governance.md` in the same change.",
         "",
         "## Verification Expectations",
         "",

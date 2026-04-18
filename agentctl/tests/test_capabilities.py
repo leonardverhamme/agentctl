@@ -9,6 +9,7 @@ from unittest import mock
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from lib.capabilities import (
+    CAPABILITY_SPECS,
     _detect_ghas_cli,
     _playwright_browser_binaries,
     _python_user_script_candidates,
@@ -82,7 +83,13 @@ class CapabilitiesTests(unittest.TestCase):
             "internet-researcher",
             "github-researcher",
             "web-github-scout",
+            "research-capability",
+            "skills-management-capability",
+            "autonomous-deep-runs-capability",
             "agentctl-maintenance-engineer",
+            "ios-development-capability",
+            "macos-development-capability",
+            "android-testing-capability",
         }
 
         report = build_capabilities_report()
@@ -149,7 +156,13 @@ class CapabilitiesTests(unittest.TestCase):
             "internet-researcher",
             "github-researcher",
             "web-github-scout",
+            "research-capability",
+            "skills-management-capability",
+            "autonomous-deep-runs-capability",
             "agentctl-maintenance-engineer",
+            "ios-development-capability",
+            "macos-development-capability",
+            "android-testing-capability",
         }
 
         report = build_capabilities_report()
@@ -215,7 +228,13 @@ class CapabilitiesTests(unittest.TestCase):
             "internet-researcher",
             "github-researcher",
             "web-github-scout",
+            "research-capability",
+            "skills-management-capability",
+            "autonomous-deep-runs-capability",
             "agentctl-maintenance-engineer",
+            "ios-development-capability",
+            "macos-development-capability",
+            "android-testing-capability",
         }
 
         report = build_capabilities_report()
@@ -393,6 +412,11 @@ class CapabilitiesTests(unittest.TestCase):
         self.assertEqual(record["status"], "ok")
         self.assertTrue(record["callable"])
         self.assertEqual(record["version"], "Usage: cli.py [OPTIONS] COMMAND [ARGS]...")
+
+    def test_every_capability_has_a_local_skill_front_door(self) -> None:
+        for spec in CAPABILITY_SPECS:
+            self.assertTrue(spec.get("skills"), f"{spec['key']} should expose at least one local skill")
+            self.assertIn("$", spec["front_door"], f"{spec['key']} should route through a skill front door")
 
 
 if __name__ == "__main__":
