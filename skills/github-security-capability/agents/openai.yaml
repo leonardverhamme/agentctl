@@ -1,0 +1,4 @@
+interface:
+  display_name: "GitHub Security Capability"
+  short_description: "Route GitHub Advanced Security work through agentctl."
+  default_prompt: "Use this skill to inspect the GitHub Advanced Security capability in agentctl, then prefer gh api, gh codeql, and ghas-cli according to the capability page."

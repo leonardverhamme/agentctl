@@ -99,6 +99,8 @@ playwright-cli --help
 3. Interact using refs from the latest snapshot.
 4. Re-snapshot after navigation or significant DOM changes.
 5. Capture artifacts (screenshot, pdf, traces) when useful.
+6. If the browser route is locked, stale, or attached to another session, start a fresh CLI session instead of stopping.
+7. If the current app port is unavailable or already occupied, rerun the app on another free port and continue the browser pass there.
 
 Minimal loop:
 
@@ -183,3 +185,5 @@ Open only what you need:
 - Use `--headed` when a visual check will help.
 - When capturing artifacts in this repo, use `output/playwright/` and avoid introducing new top-level artifact folders.
 - Default to CLI commands and workflows, not Playwright test specs.
+- Do not stop because another Playwright session has the MCP/browser route locked; open a fresh CLI-driven browser session and continue.
+- Do not treat the first chosen localhost port as fixed; if the app is runnable and the port is blocked, switch to another free port and finish the verification.

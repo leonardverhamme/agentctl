@@ -21,9 +21,11 @@ Use this as the thin navigation layer for browser automation. The real browser r
 2. Read the generated page at `docs/agentctl/capabilities/browser-automation.md`.
 3. Prefer `$playwright` and the Playwright CLI when terminal-driven browser work is enough.
 4. Use Playwright MCP when the structured MCP interface is the better fit for the task.
+5. If the MCP route is locked, stale, or attached to another session, switch to the Playwright CLI wrapper and start a fresh browser session instead of stopping.
+6. If the current app port is unavailable or already occupied, rerun the app on another free port and continue the browser pass there.
 
 ## Do Not Do
 
 - Do not create a custom browser runtime here.
 - Do not choose between CLI and MCP blindly without checking the capability page first.
-
+- Do not accept a locked Playwright session or a busy localhost port as a reason to skip a required browser verification.

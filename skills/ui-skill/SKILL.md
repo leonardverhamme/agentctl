@@ -31,6 +31,7 @@ If you cannot load the supporting references for some reason, still follow the d
 - Dense shadcn or Tailwind product UI
 - Overview and analytics surfaces with justified charts
 - Product-embedded AI conversation UI
+- Browser-verified closeout for changed runnable UI surfaces
 - Final per-task UI review before stopping
 
 ## Use the Companion Audit Skill When Needed
@@ -68,11 +69,18 @@ If the request is any of the following, use `$ui-deep-audit` instead:
    - preserve existing server or client boundaries
    - keep route files thin
    - extend variants before creating wrappers
-6. Review before stopping:
+6. Run real-browser verification with Playwright whenever the affected UI can run locally:
+   - use `$browser-capability` and `$playwright` for the changed or directly affected flows
+   - verify the real rendered surface, not just code structure or static screenshots
+   - if the Playwright MCP path is locked, stale, or attached to another session, do not stop there
+   - fall back to the Playwright CLI wrapper and start a fresh browser session instead
+   - if the current app port is busy, unstable, or already occupied, restart the app on another free port and continue the visual pass there
+   - use practical repo-native artifacts when helpful, such as screenshots, snapshots, or console output under a repo-local artifact path
+7. Review before stopping:
    - run the dense UI checklist
    - run the review reference
    - verify loading, empty, success, error, disabled, desktop, and narrow viewport states
-   - report what you verified and what you did not verify
+   - report which browser route you used, what you verified, and any remaining unverifiable blockers
 
 ## Default Product Posture
 
@@ -105,6 +113,9 @@ If the request is any of the following, use `$ui-deep-audit` instead:
 - Do not add charts without analytical reason.
 - Do not ship AI chat that feels larger or louder than the rest of the app.
 - Do not default to oversized radii, pill buttons, gradient-heavy AI styling, or wrapper piles.
+- Do not call runnable UI work done without a real browser pass on the affected surface.
+- Do not accept "Playwright was busy" or "the browser MCP was locked" as a stopping point; use the CLI wrapper, a fresh browser session, or another free app port and finish the verification.
+- Do not rely on MCP-only browser access when Playwright CLI can complete the same visual pass more reliably.
 - Do not stop before checking core states and responsive behavior.
 
 ## Preserve and Improve

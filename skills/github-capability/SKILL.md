@@ -19,11 +19,11 @@ Use this as the thin navigation layer for GitHub work. This skill should route i
 
 1. Run `agentctl capability github-workflows`.
 2. Read the generated page at `docs/agentctl/capabilities/github-workflows.md` under the active `CODEX_HOME`.
-3. If the GitHub plugin skills clearly cover the task, use them.
-4. Otherwise use `gh` for direct repository, issue, PR, or Actions operations.
+3. If the task is about GitHub Advanced Security, CodeQL, code scanning, secret scanning, Dependabot alerts, dependency review, or security campaigns, switch to `$github-security-capability`.
+4. If the GitHub plugin skills clearly cover the task, use them.
+5. Otherwise use `gh` for direct repository, issue, PR, or Actions operations.
 
 ## Do Not Do
 
 - Do not duplicate GitHub operational logic in this skill.
 - Do not bypass `agentctl` when health, auth, or overlap is unclear.
-

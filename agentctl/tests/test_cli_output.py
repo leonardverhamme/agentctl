@@ -162,6 +162,23 @@ class CliOutputTests(unittest.TestCase):
         self.assertEqual(payload["key"], "supabase-data")
         self.assertEqual(payload["front_door"], "$supabase-capability")
 
+    def test_capability_command_emits_json_for_github_advanced_security(self) -> None:
+        env = os.environ.copy()
+        env["CODEX_HOME"] = str(REPO_ROOT)
+        result = subprocess.run(
+            [sys.executable, str(CLI_ENTRY), "capability", "github-advanced-security", "--json"],
+            cwd=str(REPO_ROOT),
+            capture_output=True,
+            text=True,
+            check=False,
+            env=env,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr or result.stdout)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["key"], "github-advanced-security")
+        self.assertEqual(payload["front_door"], "$github-security-capability")
+        self.assertIn("gh codeql", payload["entrypoints"])
+
 
 if __name__ == "__main__":
     unittest.main()

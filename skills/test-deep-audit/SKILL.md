@@ -79,6 +79,9 @@ If the user explicitly invokes `$test-deep-audit` with no meaningful extra instr
 7. Keep findings concrete, fixable, and implementation-ready.
 8. Start executing the checklist in the same run after the audit refresh.
 9. Before marking anything done, implement it, validate it, and update the checklist file.
+   - For browser, e2e, smoke, accessibility, or visually verifiable UI items, include a real Playwright pass before checking them off.
+   - If the Playwright MCP path is locked, stale, or attached to another session, fall back to the Playwright CLI wrapper and start a fresh browser session.
+   - If the current app port is unavailable, unstable, or already occupied, restart the app on another free port and continue the browser validation there.
 10. Continue until zero unchecked items remain or a real blocker remains.
 11. Only reply `ready` when the closeout rules pass.
 
@@ -120,6 +123,8 @@ If the user explicitly invokes `$test-deep-audit` with no meaningful extra instr
 - Prefer small coherent batches, usually 2 to 6 related items.
 - Implement the fixes or missing tests.
 - Run the smallest correct validation.
+- For browser-related checklist items, the minimum correct validation includes a real Playwright pass on the affected flow or surface.
+- Do not stop at a locked MCP session; use the Playwright CLI route, a fresh session, or another free app port and complete the validation.
 - Mark items `- [x]` only after implementation and validation.
 - If a correct test reveals broken product code, fix the code instead of weakening the test.
 - If an item cannot be completed yet, leave it unchecked and append a short blocker note instead of pretending it is done.
@@ -136,6 +141,7 @@ If the user explicitly invokes `$test-deep-audit` with no meaningful extra instr
 
 - Do not say `ready` if any `- [ ]` items remain.
 - Do not say `ready` if items were marked complete without evidence of implementation and validation.
+- Do not say `ready` if browser-related checklist items skipped real Playwright verification because a browser session or port conflict was inconvenient.
 - Do not say `ready` if the suite is still broken, flaky, or clearly unbalanced in a way the checklist claimed to fix.
 - If blocked items remain, say what is blocked and why.
 

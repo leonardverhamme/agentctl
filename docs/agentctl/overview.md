@@ -15,7 +15,7 @@
 ## Current Status
 
 - Maintenance status: `ok`
-- Checks passed: 40 / 40
+- Checks passed: 41 / 41
 - Open findings: 0
 - Blocked findings: 0
 
@@ -77,6 +77,7 @@ The capability registry exists to collapse those overlaps into one stable route.
 ## Known Limitations
 
 - `gh skill` is not available locally, so publish/preview wrappers remain disabled.
+- `ghas-cli` is installed but not callable in this environment; prefer `gh api` and `gh codeql` until the GHAS CLI route is repaired or wrapped.
 - The default local Codex runtime is not callable here. Use `agentctl run --worker-command ...` or configure `AGENTCTL_CODEX_WORKER_TEMPLATE` for unattended deep runs.
 - `firebase` is detected but intentionally remains detect-only in v1.
 - `gcloud` is detected but intentionally remains detect-only in v1.

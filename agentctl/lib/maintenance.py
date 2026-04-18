@@ -136,6 +136,18 @@ CLOUD_READINESS = [
         "notes": "Authoritative interface for GitHub-first workflows.",
     },
     {
+        "name": "gh-codeql",
+        "classification": "cloud-ready-with-setup",
+        "requirements": ["GitHub CLI", "github/gh-codeql extension", "GitHub auth"],
+        "notes": "Official GitHub CLI extension for managing and invoking the CodeQL CLI.",
+    },
+    {
+        "name": "ghas-cli",
+        "classification": "cloud-ready-with-setup",
+        "requirements": ["Python 3.9+", "callable ghas-cli build", "GitHub token or auth context"],
+        "notes": "Useful for GHAS enablement and rollout at scale, but local Windows packaging should be verified before you rely on it as the primary path.",
+    },
+    {
         "name": "vercel",
         "classification": "cloud-ready-with-setup",
         "requirements": ["Vercel CLI", "Vercel auth"],
@@ -267,6 +279,9 @@ def _known_limitations(capabilities: dict[str, Any]) -> list[str]:
     gh = capabilities.get("tools", {}).get("gh", {})
     if gh.get("installed") and not gh.get("skill_supported"):
         limitations.append("`gh skill` is not available locally, so publish/preview wrappers remain disabled.")
+    ghas_cli = capabilities.get("tools", {}).get("ghas-cli", {})
+    if ghas_cli.get("installed") and ghas_cli.get("status") != "ok":
+        limitations.append("`ghas-cli` is installed but not callable in this environment; prefer `gh api` and `gh codeql` until the GHAS CLI route is repaired or wrapped.")
     codex = capabilities.get("tools", {}).get("codex", {})
     if codex.get("installed") and not codex.get("worker_runtime_ready"):
         limitations.append(

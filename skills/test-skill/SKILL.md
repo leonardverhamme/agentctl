@@ -69,6 +69,9 @@ Do not run a full checklist audit in this mode.
 4. Choose the smallest test layer that covers the risk.
 5. Implement the tests in repo patterns.
 6. Run the smallest correct validation before stopping.
+   - If the task affects runnable UI, browser flows, or frontend behavior that should be seen in a browser, include a real Playwright pass.
+   - If the Playwright MCP route is locked, stale, or held by another session, fall back to the Playwright CLI wrapper and start a fresh browser session.
+   - If the current app port is unavailable or unstable, restart the app on another free port and continue the browser validation there.
 7. If a newly added or updated test fails, determine whether:
    - the test is correct and the product code is wrong
    - the test is wrong, brittle, or asserting the wrong contract
@@ -111,6 +114,8 @@ Do not run a full checklist audit in this mode.
 - Do not mark a bug fix complete without adding or considering permanent regression coverage.
 - Do not weaken assertions or delete meaningful coverage just to make the suite pass.
 - Do not keep patching tests when the tests correctly expose broken product behavior.
+- Do not treat "Playwright was busy" or "the browser MCP was locked" as an acceptable reason to skip a needed browser validation.
+- Do not stop browser validation because the first app port was occupied; use another free port and continue.
 - Do not stop before checking failure paths, not just happy paths.
 
 ## References

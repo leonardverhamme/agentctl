@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import site
 import sys
 import tomllib
 from pathlib import Path
@@ -148,6 +149,32 @@ CAPABILITY_SPECS: list[dict[str, Any]] = [
         "routing_notes": [
             "Prefer the GitHub capability skill when you need a quick route decision before acting.",
             "Use the GitHub plugin skills when they cover the task directly; use `gh` for direct CLI workflows and gaps in plugin coverage.",
+        ],
+    },
+    {
+        "key": "github-advanced-security",
+        "label": "GitHub Advanced Security",
+        "group": "integrations",
+        "required": False,
+        "front_door": "$github-security-capability",
+        "entrypoints": [
+            "$github-security-capability",
+            "agentctl capability github-advanced-security",
+            "ghas-cli",
+            "gh codeql",
+            "gh api",
+        ],
+        "skills": ["github-security-capability"],
+        "interfaces": ["tool:gh", "tool:gh-codeql", "tool:ghas-cli", "plugin:github@openai-curated"],
+        "availability_mode": "any",
+        "overlap_policy": "Use `gh api` and `gh codeql` as the authoritative GitHub security routes, with `ghas-cli` as the rollout-at-scale helper when it is healthy. Do not assume generic GitHub plugin skills cover GHAS-specific work.",
+        "summary": "Use for GHAS rollout, CodeQL, code scanning alerts, secret scanning alerts, Dependabot alerts, dependency review, security overview, and organization-scale security automation.",
+        "routing_notes": [
+            "Prefer `ghas-cli` for GHAS enablement and rollout work across many repositories when it is callable.",
+            "Prefer `gh codeql` for local CodeQL CLI management, version pinning, and query workflows.",
+            "Prefer `gh api` for alert inspection and targeted automation against code scanning, secret scanning, Dependabot, and dependency review endpoints.",
+            "No installed GitHub plugin skill currently provides GHAS-specific workflow coverage, so route security work through this capability instead of generic GitHub skills.",
+            "Useful community extensions exist, such as `advanced-security/gh-codeql-scan`, `GitHubSecurityLab/gh-mrva`, `CallMeGreg/gh-secret-scanning`, and `securesauce/gh-alerts`, but they are optional extras rather than agentctl defaults.",
         ],
     },
     {
@@ -320,6 +347,7 @@ CAPABILITY_CLOUD_READINESS = {
     "research": ["research web", "research github", "research scout"],
     "browser-automation": ["Playwright CLI", "Playwright MCP"],
     "github-workflows": ["gh"],
+    "github-advanced-security": ["gh", "gh-codeql", "ghas-cli"],
     "vercel-platform": ["vercel"],
     "supabase-data": ["supabase"],
     "stripe-payments": [],
@@ -365,6 +393,33 @@ def _tool_record(name: str, *, command: str, version_args: list[str], auth_args:
     return record
 
 
+def _python_user_script_candidates(name: str) -> list[Path]:
+    userbase = Path(site.getuserbase())
+    script_dirs: list[Path]
+    if os.name == "nt":
+        script_dirs = [userbase / "Scripts"]
+        usersite = site.getusersitepackages()
+        if usersite:
+            script_dirs.append(Path(usersite).resolve().parent / "Scripts")
+        script_dirs.extend(candidate / "Scripts" for candidate in userbase.glob("Python*") if candidate.is_dir())
+        candidates: list[Path] = []
+        seen: set[Path] = set()
+        for scripts_dir in script_dirs:
+            for candidate in (
+                scripts_dir / f"{name}.exe",
+                scripts_dir / f"{name}.cmd",
+                scripts_dir / f"{name}.bat",
+                scripts_dir / name,
+            ):
+                if candidate not in seen:
+                    seen.add(candidate)
+                    candidates.append(candidate)
+        return candidates
+
+    scripts_dir = userbase / "bin"
+    return [scripts_dir / name]
+
+
 def _detect_skills_cli() -> dict[str, Any]:
     record = _tool_record("skills", command="npx", version_args=["skills", "--version"])
     if record["installed"] and record["status"] == "ok":
@@ -382,6 +437,89 @@ def _detect_gh() -> dict[str, Any]:
     record["skill_supported"] = skill_help["ok"] and "unknown help topic" not in combined and 'unknown command "skill"' not in combined
     if not record["skill_supported"]:
         record["skill_detail"] = skill_help["stderr"] or skill_help["stdout"] or "gh skill unavailable"
+    return record
+
+
+def _gh_extensions() -> dict[str, dict[str, Any]]:
+    gh_path = command_path("gh")
+    if not gh_path:
+        return {}
+    result = run_command(["gh", "extension", "list"], timeout=20)
+    if not result["ok"]:
+        return {}
+
+    extensions: dict[str, dict[str, Any]] = {}
+    for raw_line in result["stdout"].splitlines():
+        line = raw_line.strip()
+        if not line:
+            continue
+        parts = [part.strip() for part in line.split("\t") if part.strip()]
+        if not parts:
+            continue
+        command_name = parts[0]
+        repo = parts[1] if len(parts) > 1 else command_name
+        revision = parts[2] if len(parts) > 2 else None
+        item = {"command": command_name, "repo": repo, "revision": revision}
+        extensions[repo.lower()] = item
+        extensions[repo.split("/")[-1].lower()] = item
+        extensions[command_name.replace("gh ", "", 1).lower()] = item
+    return extensions
+
+
+def _detect_gh_codeql(extensions: dict[str, dict[str, Any]], gh_record: dict[str, Any]) -> dict[str, Any]:
+    record: dict[str, Any] = {
+        "name": "gh-codeql",
+        "command": "gh codeql",
+        "path": gh_record.get("path"),
+        "installed": False,
+        "status": "missing",
+    }
+    if not gh_record.get("installed"):
+        return record
+
+    item = extensions.get("github/gh-codeql") or extensions.get("gh-codeql") or extensions.get("codeql")
+    if item:
+        record["installed"] = True
+        record["status"] = "ok"
+        record["repo"] = item.get("repo")
+        if item.get("revision"):
+            record["revision"] = item["revision"]
+    return record
+
+
+def _detect_ghas_cli() -> dict[str, Any]:
+    path = command_path("ghas-cli")
+    if not path:
+        for candidate in _python_user_script_candidates("ghas-cli"):
+            if candidate.exists():
+                path = str(candidate)
+                break
+
+    record: dict[str, Any] = {
+        "name": "ghas-cli",
+        "command": "ghas-cli",
+        "path": path,
+        "installed": bool(path),
+        "status": "missing",
+        "auth": "unknown",
+    }
+    if not path:
+        return record
+
+    help_result = run_command([path, "-h"], timeout=20)
+    if help_result["ok"]:
+        record["status"] = "ok"
+        record["callable"] = True
+        first_line = (help_result["stdout"] or help_result["stderr"]).splitlines()
+        if first_line:
+            record["version"] = first_line[0]
+        return record
+
+    record["status"] = "degraded"
+    record["callable"] = False
+    combined = (help_result["stderr"] or help_result["stdout"] or "").strip().splitlines()
+    if combined:
+        record["runtime_error"] = combined[0]
     return record
 
 
@@ -696,6 +834,8 @@ def _mcp_servers_map(config: dict[str, Any]) -> dict[str, Any]:
 
 
 def build_capabilities_report() -> dict[str, Any]:
+    gh = _detect_gh()
+    gh_extensions = _gh_extensions() if gh.get("installed") else {}
     tools = {
         "python": {
             "name": "python",
@@ -708,7 +848,9 @@ def build_capabilities_report() -> dict[str, Any]:
         "npx": _tool_record("npx", command="npx", version_args=["--version"]),
         "skills": _detect_skills_cli(),
         "codex": detect_codex_runtime(),
-        "gh": _detect_gh(),
+        "gh": gh,
+        "gh-codeql": _detect_gh_codeql(gh_extensions, gh),
+        "ghas-cli": _detect_ghas_cli(),
         "vercel": _tool_record("vercel", command="vercel", version_args=["--version"]),
         "supabase": _tool_record("supabase", command="supabase", version_args=["--version"]),
         "firebase": _tool_record("firebase", command="firebase", version_args=["--version"], detect_only=True),
@@ -826,7 +968,7 @@ def capability_detail(payload: dict[str, Any], key: str) -> dict[str, Any] | Non
         "cloud_readiness": cloud_items,
         "tool_snapshot": {
             name: tool_map.get(name)
-            for name in ("codex", "gh", "playwright", "supabase", "vercel")
+            for name in ("codex", "gh", "gh-codeql", "ghas-cli", "playwright", "supabase", "vercel")
             if name in tool_map
         },
     }
@@ -859,6 +1001,9 @@ def _doctor_notes(payload: dict[str, Any]) -> list[str]:
     gh = payload.get("tools", {}).get("gh", {})
     if gh.get("installed") and not gh.get("skill_supported"):
         notes.append("`gh skill` is unavailable locally, so publish/preview wrappers stay disabled.")
+    ghas_cli = payload.get("tools", {}).get("ghas-cli", {})
+    if ghas_cli.get("installed") and ghas_cli.get("status") != "ok":
+        notes.append("`ghas-cli` is installed but not callable cleanly here, so GitHub security work should prefer `gh api` and `gh codeql` unless the GHAS CLI route is repaired.")
     detect_only = payload.get("detect_only_tools", [])
     if detect_only:
         notes.append("Detect-only capabilities remain intentionally lightweight: " + ", ".join(f"`{name}`" for name in detect_only) + ".")

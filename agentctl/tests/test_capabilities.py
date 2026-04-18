@@ -8,10 +8,22 @@ from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from lib.capabilities import _playwright_browser_binaries, build_capabilities_report, capability_detail
+from lib.capabilities import _playwright_browser_binaries, _python_user_script_candidates, build_capabilities_report, capability_detail
 
 
 class CapabilitiesTests(unittest.TestCase):
+    @staticmethod
+    def _default_tool_record(*args, **kwargs) -> dict:
+        name = kwargs.get("name")
+        if name is None and args:
+            name = args[0]
+        base = {"installed": True, "status": "ok", "version": "1.0.0"}
+        if name == "gh-codeql":
+            return {**base, "name": "gh-codeql", "extension": "github/gh-codeql"}
+        if name == "ghas-cli":
+            return {**base, "name": "ghas-cli", "callable": True, "path": r"C:\tools\ghas-cli.exe"}
+        return base
+
     @mock.patch("lib.capabilities._local_skill_names")
     @mock.patch("lib.capabilities._mcp_servers_map")
     @mock.patch("lib.capabilities._enabled_plugins_map")
@@ -19,6 +31,8 @@ class CapabilitiesTests(unittest.TestCase):
     @mock.patch("lib.capabilities._installed_skills")
     @mock.patch("lib.capabilities.detect_codex_runtime")
     @mock.patch("lib.capabilities._detect_playwright")
+    @mock.patch("lib.capabilities._detect_ghas_cli")
+    @mock.patch("lib.capabilities._detect_gh_codeql")
     @mock.patch("lib.capabilities._detect_gh")
     @mock.patch("lib.capabilities._detect_skills_cli")
     @mock.patch("lib.capabilities._tool_record")
@@ -27,6 +41,8 @@ class CapabilitiesTests(unittest.TestCase):
         tool_record: mock.Mock,
         detect_skills: mock.Mock,
         detect_gh: mock.Mock,
+        detect_gh_codeql: mock.Mock,
+        detect_ghas_cli: mock.Mock,
         detect_playwright: mock.Mock,
         detect_codex: mock.Mock,
         installed_skills: mock.Mock,
@@ -35,9 +51,11 @@ class CapabilitiesTests(unittest.TestCase):
         mcp_servers: mock.Mock,
         local_skill_names: mock.Mock,
     ) -> None:
-        tool_record.return_value = {"installed": True, "status": "ok", "version": "1.0.0"}
+        tool_record.side_effect = self._default_tool_record
         detect_skills.return_value = {"installed": True, "status": "ok", "version": "1.5.1"}
         detect_gh.return_value = {"installed": True, "status": "ok", "version": "gh 1.0", "skill_supported": False}
+        detect_gh_codeql.return_value = self._default_tool_record("gh-codeql")
+        detect_ghas_cli.return_value = self._default_tool_record("ghas-cli")
         detect_playwright.return_value = {"installed": True, "status": "degraded", "wrapper_ready": False}
         detect_codex.return_value = {"installed": True, "status": "ok", "callable": True, "worker_runtime_ready": True}
         installed_skills.return_value = {"status": "ok", "items": [{"name": "ui-skill"}]}
@@ -67,6 +85,7 @@ class CapabilitiesTests(unittest.TestCase):
         self.assertIn("research", capability_keys)
         self.assertIn("browser-automation", capability_keys)
         self.assertIn("supabase-data", capability_keys)
+        self.assertIn("github-advanced-security", capability_keys)
         self.assertIn("autonomous-deep-runs", capability_keys)
         self.assertEqual(report["summary"]["installed_skill_count"], 1)
 
@@ -77,6 +96,8 @@ class CapabilitiesTests(unittest.TestCase):
     @mock.patch("lib.capabilities._installed_skills")
     @mock.patch("lib.capabilities.detect_codex_runtime")
     @mock.patch("lib.capabilities._detect_playwright")
+    @mock.patch("lib.capabilities._detect_ghas_cli")
+    @mock.patch("lib.capabilities._detect_gh_codeql")
     @mock.patch("lib.capabilities._detect_gh")
     @mock.patch("lib.capabilities._detect_skills_cli")
     @mock.patch("lib.capabilities._tool_record")
@@ -85,6 +106,8 @@ class CapabilitiesTests(unittest.TestCase):
         tool_record: mock.Mock,
         detect_skills: mock.Mock,
         detect_gh: mock.Mock,
+        detect_gh_codeql: mock.Mock,
+        detect_ghas_cli: mock.Mock,
         detect_playwright: mock.Mock,
         detect_codex: mock.Mock,
         installed_skills: mock.Mock,
@@ -93,9 +116,11 @@ class CapabilitiesTests(unittest.TestCase):
         mcp_servers: mock.Mock,
         local_skill_names: mock.Mock,
     ) -> None:
-        tool_record.return_value = {"installed": True, "status": "ok", "version": "1.0.0"}
+        tool_record.side_effect = self._default_tool_record
         detect_skills.return_value = {"installed": True, "status": "ok", "version": "1.5.1"}
         detect_gh.return_value = {"installed": False, "status": "missing", "skill_supported": False}
+        detect_gh_codeql.return_value = {"installed": False, "status": "missing", "name": "gh-codeql"}
+        detect_ghas_cli.return_value = {"installed": False, "status": "missing", "name": "ghas-cli"}
         detect_playwright.return_value = {"installed": False, "status": "missing", "wrapper_ready": False}
         detect_codex.return_value = {"installed": True, "status": "ok", "callable": True, "worker_runtime_ready": True}
         installed_skills.return_value = {"status": "ok", "items": []}
@@ -132,6 +157,8 @@ class CapabilitiesTests(unittest.TestCase):
     @mock.patch("lib.capabilities._installed_skills")
     @mock.patch("lib.capabilities.detect_codex_runtime")
     @mock.patch("lib.capabilities._detect_playwright")
+    @mock.patch("lib.capabilities._detect_ghas_cli")
+    @mock.patch("lib.capabilities._detect_gh_codeql")
     @mock.patch("lib.capabilities._detect_gh")
     @mock.patch("lib.capabilities._detect_skills_cli")
     @mock.patch("lib.capabilities._tool_record")
@@ -140,6 +167,8 @@ class CapabilitiesTests(unittest.TestCase):
         tool_record: mock.Mock,
         detect_skills: mock.Mock,
         detect_gh: mock.Mock,
+        detect_gh_codeql: mock.Mock,
+        detect_ghas_cli: mock.Mock,
         detect_playwright: mock.Mock,
         detect_codex: mock.Mock,
         installed_skills: mock.Mock,
@@ -148,9 +177,11 @@ class CapabilitiesTests(unittest.TestCase):
         mcp_servers: mock.Mock,
         local_skill_names: mock.Mock,
     ) -> None:
-        tool_record.return_value = {"installed": True, "status": "ok", "version": "1.0.0"}
+        tool_record.side_effect = self._default_tool_record
         detect_skills.return_value = {"installed": True, "status": "ok", "version": "1.5.1"}
         detect_gh.return_value = {"installed": True, "status": "ok", "version": "gh 1.0", "skill_supported": False}
+        detect_gh_codeql.return_value = self._default_tool_record("gh-codeql")
+        detect_ghas_cli.return_value = self._default_tool_record("ghas-cli")
         detect_playwright.return_value = {"installed": True, "status": "ok", "wrapper_ready": True}
         detect_codex.return_value = {
             "installed": True,
@@ -195,6 +226,8 @@ class CapabilitiesTests(unittest.TestCase):
     @mock.patch("lib.capabilities._installed_skills")
     @mock.patch("lib.capabilities.detect_codex_runtime")
     @mock.patch("lib.capabilities._detect_playwright")
+    @mock.patch("lib.capabilities._detect_ghas_cli")
+    @mock.patch("lib.capabilities._detect_gh_codeql")
     @mock.patch("lib.capabilities._detect_gh")
     @mock.patch("lib.capabilities._detect_skills_cli")
     @mock.patch("lib.capabilities._tool_record")
@@ -203,6 +236,8 @@ class CapabilitiesTests(unittest.TestCase):
         tool_record: mock.Mock,
         detect_skills: mock.Mock,
         detect_gh: mock.Mock,
+        detect_gh_codeql: mock.Mock,
+        detect_ghas_cli: mock.Mock,
         detect_playwright: mock.Mock,
         detect_codex: mock.Mock,
         installed_skills: mock.Mock,
@@ -211,9 +246,11 @@ class CapabilitiesTests(unittest.TestCase):
         mcp_servers: mock.Mock,
         local_skill_names: mock.Mock,
     ) -> None:
-        tool_record.return_value = {"installed": True, "status": "ok", "version": "1.0.0"}
+        tool_record.side_effect = self._default_tool_record
         detect_skills.return_value = {"installed": True, "status": "ok", "version": "1.5.1"}
         detect_gh.return_value = {"installed": True, "status": "ok", "version": "gh 1.0", "skill_supported": False}
+        detect_gh_codeql.return_value = self._default_tool_record("gh-codeql")
+        detect_ghas_cli.return_value = self._default_tool_record("ghas-cli")
         detect_playwright.return_value = {"installed": True, "status": "ok", "wrapper_ready": True}
         detect_codex.return_value = {"installed": True, "status": "ok", "callable": True, "worker_runtime_ready": True}
         installed_skills.return_value = {"status": "ok", "items": []}
@@ -232,6 +269,65 @@ class CapabilitiesTests(unittest.TestCase):
         self.assertEqual(detail["front_door"], "$supabase-capability")
         self.assertEqual(detail["status"], "ok")
         self.assertTrue(any("CLI-first" in note for note in detail["routing_notes"]))
+
+    @mock.patch("lib.capabilities._local_skill_names")
+    @mock.patch("lib.capabilities._mcp_servers_map")
+    @mock.patch("lib.capabilities._enabled_plugins_map")
+    @mock.patch("lib.capabilities._config_payload")
+    @mock.patch("lib.capabilities._installed_skills")
+    @mock.patch("lib.capabilities.detect_codex_runtime")
+    @mock.patch("lib.capabilities._detect_playwright")
+    @mock.patch("lib.capabilities._detect_ghas_cli")
+    @mock.patch("lib.capabilities._detect_gh_codeql")
+    @mock.patch("lib.capabilities._detect_gh")
+    @mock.patch("lib.capabilities._detect_skills_cli")
+    @mock.patch("lib.capabilities._tool_record")
+    def test_capability_detail_exposes_github_advanced_security_routes(
+        self,
+        tool_record: mock.Mock,
+        detect_skills: mock.Mock,
+        detect_gh: mock.Mock,
+        detect_gh_codeql: mock.Mock,
+        detect_ghas_cli: mock.Mock,
+        detect_playwright: mock.Mock,
+        detect_codex: mock.Mock,
+        installed_skills: mock.Mock,
+        config_payload: mock.Mock,
+        enabled_plugins: mock.Mock,
+        mcp_servers: mock.Mock,
+        local_skill_names: mock.Mock,
+    ) -> None:
+        tool_record.side_effect = self._default_tool_record
+        detect_skills.return_value = {"installed": True, "status": "ok", "version": "1.5.1"}
+        detect_gh.return_value = {"installed": True, "status": "ok", "version": "gh 1.0", "skill_supported": False}
+        detect_gh_codeql.return_value = self._default_tool_record("gh-codeql")
+        detect_ghas_cli.return_value = {
+            "installed": True,
+            "status": "degraded",
+            "name": "ghas-cli",
+            "callable": False,
+            "runtime_error": "ModuleNotFoundError: No module named 'cli'",
+        }
+        detect_playwright.return_value = {"installed": True, "status": "ok", "wrapper_ready": True}
+        detect_codex.return_value = {"installed": True, "status": "ok", "callable": True, "worker_runtime_ready": True}
+        installed_skills.return_value = {"status": "ok", "items": []}
+        config_payload.return_value = {}
+        enabled_plugins.return_value = {
+            "github@openai-curated": {"name": "github@openai-curated", "enabled": True, "status": "ok"},
+            "agentctl": {"name": "agentctl", "enabled": True, "status": "ok"},
+        }
+        mcp_servers.return_value = {}
+        local_skill_names.return_value = {"github-capability", "github-security-capability"}
+
+        report = build_capabilities_report()
+        detail = capability_detail(report, "github-advanced-security")
+
+        self.assertIsNotNone(detail)
+        assert detail is not None
+        self.assertEqual(detail["front_door"], "$github-security-capability")
+        self.assertIn("gh codeql", detail["entrypoints"])
+        self.assertIn("gh api", detail["entrypoints"])
+        self.assertTrue(any("GHAS-specific" in note for note in detail["routing_notes"]))
 
     def test_playwright_browser_binaries_detects_standard_and_cached_windows_paths(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -258,6 +354,21 @@ class CapabilitiesTests(unittest.TestCase):
 
         self.assertEqual(browsers["chrome"], str(chrome_path))
         self.assertEqual(browsers["chromium"], str(chromium_path))
+
+    def test_python_user_script_candidates_includes_windows_store_python_scripts(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            userbase = root / "local-packages"
+            usersite = userbase / "Python312" / "site-packages"
+
+            with mock.patch("os.name", "nt"), mock.patch("site.getuserbase", return_value=str(userbase)), mock.patch(
+                "site.getusersitepackages", return_value=str(usersite)
+            ):
+                candidates = _python_user_script_candidates("ghas-cli")
+
+        candidate_paths = {str(path) for path in candidates}
+        self.assertIn(str(userbase / "Scripts" / "ghas-cli.exe"), candidate_paths)
+        self.assertIn(str(userbase / "Python312" / "Scripts" / "ghas-cli.exe"), candidate_paths)
 
 
 if __name__ == "__main__":

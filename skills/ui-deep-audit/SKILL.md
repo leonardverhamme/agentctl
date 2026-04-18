@@ -72,6 +72,9 @@ If the user explicitly invokes `$ui-deep-audit` with no meaningful extra instruc
    - `- [x]` implemented and validated
 7. Keep findings concrete, fixable, and implementation-ready.
 8. Before marking anything done, implement it, validate it, and update the checklist file.
+   - For any runnable UI item, include a real browser pass with Playwright before checking it off.
+   - If the Playwright MCP route is locked, stale, or attached to another session, fall back to the Playwright CLI wrapper and start a fresh browser session.
+   - If the current app port is unavailable, unstable, or already occupied, restart the app on another free port and continue the browser validation there.
 9. Continue until zero unchecked items remain.
 10. Only reply `ready` when the closeout rules pass.
 
@@ -116,6 +119,8 @@ When the user does not clearly choose a mode, infer it from the checklist file s
 - Prefer small coherent batches, usually 2 to 6 related items.
 - Implement the fixes.
 - Run the smallest correct validation.
+- For runnable UI issues, the minimum correct validation includes a real Playwright browser pass on the affected surface.
+- Do not let a locked browser MCP session end the batch; switch to the Playwright CLI path, a fresh session, or another free app port and complete the pass.
 - Mark items `- [x]` only after implementation and validation.
 - If an item cannot be completed yet, leave it unchecked and append a short blocker note instead of pretending it is done.
 - Keep going until no unchecked items remain.
@@ -124,6 +129,7 @@ When the user does not clearly choose a mode, infer it from the checklist file s
 
 - Do not say `ready` if any `- [ ]` items remain.
 - Do not say `ready` if items were marked complete without evidence of implementation and validation.
+- Do not say `ready` if runnable UI items skipped real browser verification because Playwright MCP was busy or the original app port was blocked.
 - Do not say `ready` if the UI is visually inconsistent after the fixes.
 - If blocked items remain, say what is blocked and why.
 

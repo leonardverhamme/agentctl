@@ -21,7 +21,7 @@ Use `agentctl` as the first door for control-plane questions and long-running wo
 
 - Use `agentctl doctor` or `agentctl capabilities` to inspect what is installed and healthy.
 - Use `agentctl capability <key>` when the agent needs the drill-down page for one capability or vendor surface.
-- Prefer the thin capability skills such as `$github-capability`, `$vercel-capability`, `$supabase-capability`, `$browser-capability`, `$stripe-capability`, `$sentry-capability`, `$figma-capability`, and `$nextjs-runtime-capability` when the task clearly belongs to one of those surfaces and visible skill usage is helpful.
+- Prefer the thin capability skills such as `$github-capability`, `$github-security-capability`, `$vercel-capability`, `$supabase-capability`, `$browser-capability`, `$stripe-capability`, `$sentry-capability`, `$figma-capability`, and `$nextjs-runtime-capability` when the task clearly belongs to one of those surfaces and visible skill usage is helpful.
 - Use `agentctl research web|github|scout` for evidence-driven research before implementation.
 - Use `agentctl run <workflow>` for deep workflows such as `ui-deep-audit` or `test-deep-audit`.
 - Use `agentctl maintenance ...` when the control plane itself may have drifted.

@@ -37,6 +37,12 @@ Cloud support is explicit, not assumed. A plugin install is not enough without a
 - `gh`: `cloud-ready-with-setup`
   - Requirements: GitHub CLI, GitHub auth
   - Notes: Authoritative interface for GitHub-first workflows.
+- `gh-codeql`: `cloud-ready-with-setup`
+  - Requirements: GitHub CLI, github/gh-codeql extension, GitHub auth
+  - Notes: Official GitHub CLI extension for managing and invoking the CodeQL CLI.
+- `ghas-cli`: `cloud-ready-with-setup`
+  - Requirements: Python 3.9+, callable ghas-cli build, GitHub token or auth context
+  - Notes: Useful for GHAS enablement and rollout at scale, but local Windows packaging should be verified before you rely on it as the primary path.
 - `vercel`: `cloud-ready-with-setup`
   - Requirements: Vercel CLI, Vercel auth
   - Notes: Detected now and suitable for later richer adapters once usage patterns are stable.

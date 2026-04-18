@@ -60,6 +60,9 @@ The machine-readable registry lives at `agentctl/state/capabilities.json`.
 - `github-workflows` uses `$github-capability` and is currently `ok`.
   - Overlap policy: Collapse GitHub plugin skills and gh into one capability entry instead of separate transport menus.
   - Page: `docs/agentctl/capabilities/github-workflows.md`
+- `github-advanced-security` uses `$github-security-capability` and is currently `ok`.
+  - Overlap policy: Use `gh api` and `gh codeql` as the authoritative GitHub security routes, with `ghas-cli` as the rollout-at-scale helper when it is healthy. Do not assume generic GitHub plugin skills cover GHAS-specific work.
+  - Page: `docs/agentctl/capabilities/github-advanced-security.md`
 - `vercel-platform` uses `$vercel-capability` and is currently `ok`.
   - Overlap policy: Keep one Vercel capability entry; plugin and CLI are primary, MCP stays background metadata.
   - Page: `docs/agentctl/capabilities/vercel-platform.md`
@@ -108,10 +111,10 @@ The machine-readable registry lives at `agentctl/state/capabilities.json`.
 {
   "configured_mcp_count": 0,
   "enabled_plugin_count": 1,
-  "installed_skill_count": 26,
-  "local_skill_count": 26,
+  "installed_skill_count": 27,
+  "local_skill_count": 27,
   "optional_attention_count": 7,
-  "optional_capability_count": 11,
+  "optional_capability_count": 12,
   "required_capability_count": 10,
   "status": "ok"
 }
@@ -128,6 +131,7 @@ The machine-readable registry lives at `agentctl/state/capabilities.json`.
 - `cicd-workflows`: Surface CI/CD by workflow, not by whether GitHub or Vercel provides the underlying route.
 - `research`: Hide web, GitHub, and browser transport choices behind one research surface and one evidence contract.
 - `github-workflows`: Collapse GitHub plugin skills and gh into one capability entry instead of separate transport menus.
+- `github-advanced-security`: Use `gh api` and `gh codeql` as the authoritative GitHub security routes, with `ghas-cli` as the rollout-at-scale helper when it is healthy. Do not assume generic GitHub plugin skills cover GHAS-specific work.
 - `browser-automation`: Treat Playwright CLI and MCP as peer browser backends behind one browser capability.
 - `vercel-platform`: Keep one Vercel capability entry; plugin and CLI are primary, MCP stays background metadata.
 - `supabase-data`: Prefer the Supabase CLI for local stack, schema, migrations, and CI/CD. Use MCP when structured project access adds value beyond the CLI.
