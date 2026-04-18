@@ -9,14 +9,14 @@ Primary commands:
 
 Primary outputs:
 
-- `../../../docs/agentctl/overview.md`
-- `../../../docs/agentctl/command-map.md`
-- `../../../docs/agentctl/state-schema.md`
-- `../../../docs/agentctl/capability-registry.md`
-- `../../../docs/agentctl/cloud-readiness.md`
-- `../../../docs/agentctl/maintenance.md`
-- `../../../docs/agentctl/maintenance-report.json`
-- `../../../.codex-workflows/agentctl-maintenance/state.json`
+- `C:\Users\leona\.codex\docs\agentctl\overview.md`
+- `C:\Users\leona\.codex\docs\agentctl\command-map.md`
+- `C:\Users\leona\.codex\docs\agentctl\state-schema.md`
+- `C:\Users\leona\.codex\docs\agentctl\capability-registry.md`
+- `C:\Users\leona\.codex\docs\agentctl\cloud-readiness.md`
+- `C:\Users\leona\.codex\docs\agentctl\maintenance.md`
+- `C:\Users\leona\.codex\docs\agentctl\maintenance-report.json`
+- `C:\Users\leona\.codex\.codex-workflows\agentctl-maintenance\state.json`
 
 Use `audit` when:
 

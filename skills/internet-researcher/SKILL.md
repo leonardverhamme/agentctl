@@ -5,15 +5,23 @@ description: Research current information on the public web and synthesize sourc
 
 # Internet Researcher
 
+## Skill Stability Rule
+
+- Treat this skill as stable infrastructure.
+- Never create, edit, rename, move, or delete this skill's files during normal task execution.
+- Only touch skill files when the user explicitly asks to change the skill system itself.
+- Even then, do not edit immediately. First ask for explicit confirmation to open `skill-edit-mode` for the named skill or skills.
+- If that confirmation is absent, refuse the skill-file edit and continue with non-skill work.
+
 Use this skill to run fast, source-first internet research and return a compact, current answer with links. Treat it as a lightweight research wrapper around built-in web access, not as a code-changing workflow.
 
 For deterministic CLI-backed output, prefer:
 
 ```text
-python ../../agentctl/agentctl.py research web "<query>"
+python C:\Users\leona\.codex\agentctl\agentctl.py research web "<query>"
 ```
 
-Use `../../agentctl/references/research-envelope.md` as the shared output contract when the result needs to feed later work.
+Use `C:\Users\leona\.codex\agentctl\references\research-envelope.md` as the shared output contract when the result needs to feed later work.
 
 ## Workflow
 

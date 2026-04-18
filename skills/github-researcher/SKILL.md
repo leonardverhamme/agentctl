@@ -5,15 +5,23 @@ description: Research GitHub repositories, code, issues, pull requests, discussi
 
 # GitHub Researcher
 
+## Skill Stability Rule
+
+- Treat this skill as stable infrastructure.
+- Never create, edit, rename, move, or delete this skill's files during normal task execution.
+- Only touch skill files when the user explicitly asks to change the skill system itself.
+- Even then, do not edit immediately. First ask for explicit confirmation to open `skill-edit-mode` for the named skill or skills.
+- If that confirmation is absent, refuse the skill-file edit and continue with non-skill work.
+
 Use this skill to search GitHub deliberately and summarize the strongest external implementation evidence. Prefer the GitHub connector when available, then `gh` CLI if authenticated, then GitHub web search as a fallback.
 
 For deterministic CLI-backed output, prefer:
 
 ```text
-python ../../agentctl/agentctl.py research github "<query>"
+python C:\Users\leona\.codex\agentctl\agentctl.py research github "<query>"
 ```
 
-Use `../../agentctl/references/research-envelope.md` as the shared output contract when you need a machine-readable artifact plus a short brief.
+Use `C:\Users\leona\.codex\agentctl\references\research-envelope.md` as the shared output contract when you need a machine-readable artifact plus a short brief.
 
 ## Workflow
 

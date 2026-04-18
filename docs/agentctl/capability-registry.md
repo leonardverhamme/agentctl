@@ -84,8 +84,8 @@ The machine-readable registry lives at `agentctl/state/capabilities.json`.
 {
   "configured_mcp_count": 0,
   "enabled_plugin_count": 1,
-  "installed_skill_count": 17,
-  "local_skill_count": 17,
+  "installed_skill_count": 18,
+  "local_skill_count": 18,
   "optional_attention_count": 8,
   "optional_capability_count": 11,
   "required_capability_count": 9,

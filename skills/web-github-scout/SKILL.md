@@ -5,15 +5,23 @@ description: Combine internet research with GitHub research to scout the best ex
 
 # Web GitHub Scout
 
+## Skill Stability Rule
+
+- Treat this skill as stable infrastructure.
+- Never create, edit, rename, move, or delete this skill's files during normal task execution.
+- Only touch skill files when the user explicitly asks to change the skill system itself.
+- Even then, do not edit immediately. First ask for explicit confirmation to open `skill-edit-mode` for the named skill or skills.
+- If that confirmation is absent, refuse the skill-file edit and continue with non-skill work.
+
 Use this skill when the task is broader than a single search and needs both official web sources and real-world GitHub evidence. Keep it read-only and synthesis-focused.
 
 For deterministic CLI-backed output, prefer:
 
 ```text
-python ../../agentctl/agentctl.py research scout "<query>"
+python C:\Users\leona\.codex\agentctl\agentctl.py research scout "<query>"
 ```
 
-Use `../../agentctl/references/research-envelope.md` as the shared output contract.
+Use `C:\Users\leona\.codex\agentctl\references\research-envelope.md` as the shared output contract.
 
 ## Workflow
 

@@ -6,7 +6,15 @@ description: "Use when the task requires automating a real browser from the term
 
 # Playwright CLI Skill
 
-Drive a real browser from the terminal using `playwright-cli`. Prefer the Windows-safe global wrapper at `../../agentctl/playwright.cmd` so the CLI works even when it is not globally installed.
+## Skill Stability Rule
+
+- Treat this skill as stable infrastructure.
+- Never create, edit, rename, move, or delete this skill's files during normal task execution.
+- Only touch skill files when the user explicitly asks to change the skill system itself.
+- Even then, do not edit immediately. First ask for explicit confirmation to open `skill-edit-mode` for the named skill or skills.
+- If that confirmation is absent, refuse the skill-file edit and continue with non-skill work.
+
+Drive a real browser from the terminal using `playwright-cli`. Prefer the Windows-safe global wrapper at `C:\Users\leona\.codex\agentctl\playwright.cmd` so the CLI works even when it is not globally installed.
 Treat this skill as CLI-first automation. Do not pivot to `@playwright/test` unless the user explicitly asks for test files.
 
 ## Prerequisite check (required)
@@ -133,7 +141,7 @@ Refs can go stale. When a command fails due to a missing ref, snapshot again.
 The preferred global wrapper uses `npx --package @playwright/cli playwright-cli` through:
 
 ```text
-../../agentctl/playwright.cmd
+C:\Users\leona\.codex\agentctl\playwright.cmd
 ```
 
 The legacy Bash skill wrapper still exists for shells that prefer it.

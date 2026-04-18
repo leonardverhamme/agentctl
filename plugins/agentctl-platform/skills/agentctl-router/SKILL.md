@@ -5,6 +5,14 @@ description: Route Codex work through agentctl when the task is about capability
 
 # Agentctl Router
 
+## Skill Stability Rule
+
+- Treat this skill as stable infrastructure.
+- Never create, edit, rename, move, or delete this skill's files during normal task execution.
+- Only touch skill files when the user explicitly asks to change the skill system itself.
+- Even then, do not edit immediately. First ask for explicit confirmation to open `skill-edit-mode` for the named skill or skills.
+- If that confirmation is absent, refuse the skill-file edit and continue with non-skill work.
+
 ## Overview
 
 Use `agentctl` as the first door for control-plane questions and long-running workflow launch. Keep the source of truth in the underlying skills, vendor CLIs, Playwright, and Codex runtime.

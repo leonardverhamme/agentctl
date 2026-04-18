@@ -5,6 +5,14 @@ description: Focused code refactor workflow for one feature area, module, or bou
 
 # Refactor Skill
 
+## Skill Stability Rule
+
+- Treat this skill as stable infrastructure.
+- Never create, edit, rename, move, or delete this skill's files during normal task execution.
+- Only touch skill files when the user explicitly asks to change the skill system itself.
+- Even then, do not edit immediately. First ask for explicit confirmation to open `skill-edit-mode` for the named skill or skills.
+- If that confirmation is absent, refuse the skill-file edit and continue with non-skill work.
+
 Use this skill for small to medium refactors that should stay behavior-preserving, test-backed, and tightly scoped.
 
 If you cannot load the supporting references for some reason, still follow the defaults in this file.

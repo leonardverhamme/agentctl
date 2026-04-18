@@ -5,6 +5,14 @@ description: General cross-repo UI implementation and refactoring workflow for R
 
 # UI Skill
 
+## Skill Stability Rule
+
+- Treat this skill as stable infrastructure.
+- Never create, edit, rename, move, or delete this skill's files during normal task execution.
+- Only touch skill files when the user explicitly asks to change the skill system itself.
+- Even then, do not edit immediately. First ask for explicit confirmation to open `skill-edit-mode` for the named skill or skills.
+- If that confirmation is absent, refuse the skill-file edit and continue with non-skill work.
+
 Use this skill for normal UI work across repos when you want dense, calm, production-grade product UI instead of generic AI-generated dashboard layouts. This skill is repo-aware first and opinionated about density, hierarchy, and product surfaces second.
 
 If you cannot load the supporting references for some reason, still follow the defaults in this file.
@@ -22,7 +30,7 @@ If you cannot load the supporting references for some reason, still follow the d
 
 ## Use the Companion Audit Skill When Needed
 
-If the request is any of the following, use `../../skills/ui-deep-audit/SKILL.md` instead:
+If the request is any of the following, use `C:\Users\leona\.codex\skills\ui-deep-audit\SKILL.md` instead:
 
 - Full-app UI audit
 - Page-by-page UX, design, or readability review

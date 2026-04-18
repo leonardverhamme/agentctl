@@ -1,0 +1,4 @@
+interface:
+  display_name: "Skill Edit Mode"
+  short_description: "Create or edit managed skills only after explicit confirmation"
+  default_prompt: "Use $skill-edit-mode only after the user explicitly confirms that skill files should change."
