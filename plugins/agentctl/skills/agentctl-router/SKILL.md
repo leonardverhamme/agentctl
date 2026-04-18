@@ -20,12 +20,15 @@ Use `agentctl` as the first door for control-plane questions and long-running wo
 ## Routing Rules
 
 - Use `agentctl doctor` or `agentctl capabilities` to inspect what is installed and healthy.
+- Use `agentctl capability <key>` when the agent needs the drill-down page for one capability or vendor surface.
+- Prefer the thin capability skills such as `$github-capability`, `$vercel-capability`, `$supabase-capability`, `$browser-capability`, `$stripe-capability`, `$sentry-capability`, `$figma-capability`, and `$nextjs-runtime-capability` when the task clearly belongs to one of those surfaces and visible skill usage is helpful.
 - Use `agentctl research web|github|scout` for evidence-driven research before implementation.
 - Use `agentctl run <workflow>` for deep workflows such as `ui-deep-audit` or `test-deep-audit`.
 - Use `agentctl maintenance ...` when the control plane itself may have drifted.
 
 ## Do Not Do
 
+- Do not force the agent to think in terms of CLI vs MCP vs plugin first; route by capability, then pick the healthiest authoritative interface.
 - Do not reinvent vendor CLI logic inside the skill.
 - Do not bypass the shared workflow state contract for deep workflows.
 - Do not assume cloud support from local success. Use the explicit cloud-readiness docs.

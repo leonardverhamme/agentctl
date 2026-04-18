@@ -6,7 +6,9 @@ import sys
 
 from lib.capabilities import (
     build_capabilities_report,
+    capability_detail,
     print_capabilities_human,
+    print_capability_human,
     print_doctor_human,
     print_research_human,
     print_skills_human,
@@ -71,6 +73,10 @@ def build_parser() -> argparse.ArgumentParser:
     capabilities_parser = subparsers.add_parser("capabilities", help="Emit the machine-readable capability inventory")
     capabilities_parser.add_argument("--json", action="store_true", help="Emit JSON")
 
+    capability_parser = subparsers.add_parser("capability", help="Show the drill-down page for a single capability")
+    capability_parser.add_argument("key", help="Capability key, e.g. github-workflows")
+    capability_parser.add_argument("--json", action="store_true", help="Emit JSON")
+
     status_parser = subparsers.add_parser("status", help="Inspect deep-workflow state")
     status_parser.add_argument("--repo", help="Repo root to inspect. Defaults to the current working directory.")
     status_parser.add_argument("--all", action="store_true", help="Read the global workflow registry instead of a single repo")
@@ -109,12 +115,17 @@ def main() -> int:
     parser = build_parser()
     args = parser.parse_args()
 
-    if args.command in {"doctor", "capabilities"}:
+    if args.command in {"doctor", "capabilities", "capability"}:
         report = build_capabilities_report()
         save_json(CAPABILITIES_PATH, report)
         save_json(DOCTOR_REPORT_PATH, report)
         if args.command == "doctor":
             print_doctor_human(report, as_json=args.json)
+        elif args.command == "capability":
+            detail = capability_detail(report, args.key)
+            if detail is None:
+                parser.error(f"unknown capability: {args.key}")
+            print_capability_human(detail, as_json=args.json)
         else:
             print_capabilities_human(report, as_json=args.json)
         return 0 if report["summary"]["status"] != "error" else 1

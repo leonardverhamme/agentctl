@@ -7,6 +7,7 @@ This is the frozen v1 command surface that maintenance checks expect.
 
 - `doctor` is the shortest health-oriented entrypoint.
 - `capabilities` is the full menu for capability discovery.
+- `capability <key>` is the drill-down page for a single capability and should be preferred before choosing lower-level vendor tools.
 - `status` is for workflow progress, not general health.
 - `run` is only for deep workflows that use the shared runner/state contract.
 - `run` should prefer a real worker runtime such as Codex CLI or an explicit worker command, not chat-only repetition.
@@ -26,6 +27,8 @@ This is the frozen v1 command surface that maintenance checks expect.
   - Check installed tools, wrappers, auth health, and browser readiness.
 - `agentctl capabilities [--json]`
   - Emit the machine-readable capability inventory and preferred interfaces.
+- `agentctl capability <key> [--json]`
+  - Show the drill-down page for a single capability.
 - `agentctl status [--repo <path>] [--all] [--json]`
   - Inspect repo-local or registry-backed deep workflow state.
 - `agentctl run <workflow> [--repo <path>] [--worker-command <cmd>]`

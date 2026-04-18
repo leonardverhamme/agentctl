@@ -1,0 +1,5 @@
+interface:
+  display_name: "Browser Capability"
+  short_description: "Route browser automation through agentctl and Playwright."
+  default_prompt: "Use this skill to inspect the browser capability in agentctl, then choose the right Playwright CLI or MCP path."
+

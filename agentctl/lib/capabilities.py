@@ -9,7 +9,7 @@ from typing import Any
 
 from .codex_runtime import detect_codex_runtime
 from .common import command_path, print_json, run_command, utc_now
-from .paths import CONFIG_PATH, PLAYWRIGHT_WRAPPER, PLAYWRIGHT_WRAPPER_CMD, SKILLS_DIR
+from .paths import AGENTCTL_CAPABILITIES_DOCS_DIR, CONFIG_PATH, PLAYWRIGHT_WRAPPER, PLAYWRIGHT_WRAPPER_CMD, SKILLS_DIR
 
 
 CAPABILITY_SPECS: list[dict[str, Any]] = [
@@ -138,73 +138,103 @@ CAPABILITY_SPECS: list[dict[str, Any]] = [
         "label": "GitHub workflows",
         "group": "integrations",
         "required": False,
-        "front_door": "GitHub plugin / gh",
-        "entrypoints": ["$github:github", "$github:gh-fix-ci", "$github:gh-address-comments", "gh"],
-        "skills": [],
+        "front_door": "$github-capability",
+        "entrypoints": ["$github-capability", "agentctl capability github-workflows", "$github:github", "$github:gh-fix-ci", "$github:gh-address-comments", "gh"],
+        "skills": ["github-capability"],
         "interfaces": ["plugin:github@openai-curated", "tool:gh"],
         "availability_mode": "any",
         "overlap_policy": "Collapse GitHub plugin skills and gh into one capability entry instead of separate transport menus.",
+        "summary": "Use for repositories, pull requests, issues, release history, and Actions triage.",
+        "routing_notes": [
+            "Prefer the GitHub capability skill when you need a quick route decision before acting.",
+            "Use the GitHub plugin skills when they cover the task directly; use `gh` for direct CLI workflows and gaps in plugin coverage.",
+        ],
     },
     {
         "key": "browser-automation",
         "label": "Browser automation",
         "group": "research-and-verification",
         "required": False,
-        "front_door": "$playwright",
-        "entrypoints": ["$playwright", "playwright.cmd", "Playwright MCP"],
-        "skills": ["playwright"],
+        "front_door": "$browser-capability",
+        "entrypoints": ["$browser-capability", "agentctl capability browser-automation", "$playwright", "playwright.cmd", "Playwright MCP"],
+        "skills": ["browser-capability", "playwright"],
         "interfaces": ["tool:playwright", "mcp:playwright", "plugin:vercel@openai-curated"],
         "availability_mode": "any",
         "overlap_policy": "Treat Playwright CLI and MCP as peer browser backends behind one browser capability.",
+        "summary": "Use for real browser automation, screenshots, runtime UI verification, and dynamic-site inspection.",
+        "routing_notes": [
+            "Prefer Playwright CLI when a terminal-driven browser route is enough.",
+            "Use Playwright MCP when the structured MCP browser path gives a better interface for the task.",
+        ],
     },
     {
         "key": "vercel-platform",
         "label": "Vercel platform",
         "group": "integrations",
         "required": False,
-        "front_door": "Vercel plugin / vercel",
-        "entrypoints": ["$vercel:vercel-cli", "$vercel:deployments-cicd", "vercel"],
-        "skills": [],
+        "front_door": "$vercel-capability",
+        "entrypoints": ["$vercel-capability", "agentctl capability vercel-platform", "$vercel:vercel-cli", "$vercel:deployments-cicd", "vercel"],
+        "skills": ["vercel-capability"],
         "interfaces": ["plugin:vercel@openai-curated", "tool:vercel", "mcp:com-vercel-vercel-mcp", "mcp:vercel-remote"],
         "availability_mode": "any",
         "overlap_policy": "Keep one Vercel capability entry; plugin and CLI are primary, MCP stays background metadata.",
+        "summary": "Use for deployments, project linking, env vars, logs, domains, and Vercel platform operations.",
+        "routing_notes": [
+            "Prefer Vercel plugin skills for guided workflows already packaged in Codex.",
+            "Use the Vercel CLI for direct project operations and deployment commands.",
+        ],
     },
     {
         "key": "supabase-data",
         "label": "Supabase data",
         "group": "integrations",
         "required": False,
-        "front_door": "supabase + Supabase MCP",
-        "entrypoints": ["supabase", "Supabase MCP"],
-        "skills": [],
+        "front_door": "$supabase-capability",
+        "entrypoints": ["$supabase-capability", "agentctl capability supabase-data", "supabase", "Supabase MCP"],
+        "skills": ["supabase-capability"],
         "interfaces": ["tool:supabase", "mcp:supabase", "mcp:supabase-remote"],
-        "availability_mode": "paired",
-        "paired_primary": ["tool:supabase", "mcp:supabase"],
-        "overlap_policy": "Keep Supabase as a real dual-route capability because CLI and MCP complement each other.",
+        "availability_mode": "any",
+        "overlap_policy": "Prefer the Supabase CLI for local stack, schema, migrations, and CI/CD. Use MCP when structured project access adds value beyond the CLI.",
+        "summary": "Use for local Supabase stacks, migrations, database workflows, platform deploy steps, and Supabase project operations.",
+        "routing_notes": [
+            "CLI-first: `supabase init` and `supabase start` are the default local-development path.",
+            "Do not rely on `npm install -g supabase`; prefer Scoop, Homebrew, standalone binaries, or `npx supabase`.",
+            "If running via `npx`, require Node.js 20 or later.",
+            "Local Supabase development expects a Docker-compatible container runtime.",
+        ],
     },
     {
         "key": "stripe-payments",
         "label": "Stripe payments",
         "group": "integrations",
         "required": False,
-        "front_door": "Stripe plugin",
-        "entrypoints": ["$stripe:stripe-best-practices", "$stripe:upgrade-stripe"],
-        "skills": [],
+        "front_door": "$stripe-capability",
+        "entrypoints": ["$stripe-capability", "agentctl capability stripe-payments", "$stripe:stripe-best-practices", "$stripe:upgrade-stripe"],
+        "skills": ["stripe-capability"],
         "interfaces": ["plugin:stripe@openai-curated", "mcp:stripe"],
         "availability_mode": "any",
         "overlap_policy": "Prefer the Stripe plugin capability surface; keep MCP as backing metadata, not a separate menu.",
+        "summary": "Use for payment flows, subscriptions, Connect/platform work, and Stripe integration reviews.",
+        "routing_notes": [
+            "Prefer the Stripe plugin skills for guided Stripe decisions and upgrade work.",
+            "Use the capability page to see whether plugin coverage is enough before dropping into lower-level tooling.",
+        ],
     },
     {
         "key": "sentry-observability",
         "label": "Sentry observability",
         "group": "integrations",
         "required": False,
-        "front_door": "Sentry plugin",
-        "entrypoints": ["$sentry:sentry"],
-        "skills": [],
+        "front_door": "$sentry-capability",
+        "entrypoints": ["$sentry-capability", "agentctl capability sentry-observability", "$sentry:sentry"],
+        "skills": ["sentry-capability"],
         "interfaces": ["plugin:sentry@openai-curated"],
         "availability_mode": "all",
         "overlap_policy": "Expose Sentry as one observability capability instead of a transport-specific tool entry.",
+        "summary": "Use for production error inspection, event review, and Sentry-backed observability checks.",
+        "routing_notes": [
+            "Use the Sentry capability when the task starts from a production issue or error event.",
+        ],
     },
     {
         "key": "ios-development",
@@ -247,24 +277,32 @@ CAPABILITY_SPECS: list[dict[str, Any]] = [
         "label": "Figma design",
         "group": "integrations",
         "required": False,
-        "front_door": "Figma MCP",
-        "entrypoints": ["Figma MCP"],
-        "skills": [],
+        "front_door": "$figma-capability",
+        "entrypoints": ["$figma-capability", "agentctl capability figma-design", "Figma MCP"],
+        "skills": ["figma-capability"],
         "interfaces": ["mcp:figma"],
         "availability_mode": "all",
         "overlap_policy": "No plugin overlap here, so MCP remains the single capability entry.",
+        "summary": "Use for Figma design context, code-connect, design system search, and direct Figma edits via MCP.",
+        "routing_notes": [
+            "Figma is MCP-backed here; use the capability page to see the supported operations before editing design files.",
+        ],
     },
     {
         "key": "nextjs-runtime",
         "label": "Next.js runtime",
         "group": "integrations",
         "required": False,
-        "front_door": "Next DevTools MCP",
-        "entrypoints": ["Next DevTools MCP"],
-        "skills": [],
+        "front_door": "$nextjs-runtime-capability",
+        "entrypoints": ["$nextjs-runtime-capability", "agentctl capability nextjs-runtime", "Next DevTools MCP"],
+        "skills": ["nextjs-runtime-capability"],
         "interfaces": ["mcp:next-devtools"],
         "availability_mode": "all",
         "overlap_policy": "Keep Next.js runtime tooling as one capability entry backed by Next DevTools MCP.",
+        "summary": "Use for live Next.js dev-server diagnostics, route introspection, and runtime/build error inspection.",
+        "routing_notes": [
+            "Prefer Next DevTools MCP over generic browser logs when the task is specifically about a running Next.js app.",
+        ],
     },
 ]
 
@@ -273,6 +311,21 @@ GROUP_LABELS = {
     "workflow-skills": "Workflow skills",
     "research-and-verification": "Research and verification",
     "integrations": "Integrations",
+}
+
+CAPABILITY_CLOUD_READINESS = {
+    "autonomous-deep-runs": [],
+    "skills-management": ["skills wrapper layer"],
+    "agentctl-maintenance": ["agentctl core"],
+    "research": ["research web", "research github", "research scout"],
+    "browser-automation": ["Playwright CLI", "Playwright MCP"],
+    "github-workflows": ["gh"],
+    "vercel-platform": ["vercel"],
+    "supabase-data": ["supabase"],
+    "stripe-payments": [],
+    "sentry-observability": [],
+    "figma-design": [],
+    "nextjs-runtime": [],
 }
 
 REQUIRED_TOOL_NAMES = {"python", "npx", "skills"}
@@ -624,6 +677,8 @@ def _capability_record(
         "skills": [record["name"] for record in skill_records],
         "backing_interfaces": backing_sorted,
         "overlap_policy": spec["overlap_policy"],
+        "summary": spec.get("summary", spec["label"]),
+        "routing_notes": spec.get("routing_notes", []),
     }
     if advisory:
         record["advisory"] = advisory
@@ -732,6 +787,51 @@ def build_capabilities_report() -> dict[str, Any]:
     }
 
 
+def capability_doc_path(key: str) -> Path:
+    return AGENTCTL_CAPABILITIES_DOCS_DIR / f"{key}.md"
+
+
+def capability_keys(payload: dict[str, Any]) -> list[str]:
+    return [item["key"] for item in payload.get("capabilities", [])]
+
+
+def capability_detail(payload: dict[str, Any], key: str) -> dict[str, Any] | None:
+    capability = next((item for item in payload.get("capabilities", []) if item.get("key") == key), None)
+    if capability is None:
+        return None
+
+    tool_map = payload.get("tools", {})
+    fallback_label = key.replace("-", " ").title()
+    cloud_items = [
+        item
+        for item in payload.get("cloud_readiness", [])
+        if item.get("name") in CAPABILITY_CLOUD_READINESS.get(key, [])
+    ]
+
+    return {
+        "key": capability["key"],
+        "label": capability.get("label", fallback_label),
+        "group": capability.get("group", "unknown"),
+        "required": capability.get("required", True),
+        "status": capability["status"],
+        "front_door": capability["front_door"],
+        "entrypoints": capability.get("entrypoints", []),
+        "skills": capability.get("skills", []),
+        "backing_interfaces": capability.get("backing_interfaces", []),
+        "overlap_policy": capability.get("overlap_policy"),
+        "summary": capability.get("summary", capability.get("label", fallback_label)),
+        "routing_notes": capability.get("routing_notes", []),
+        "advisory": capability.get("advisory"),
+        "doc_path": str(capability_doc_path(capability["key"])),
+        "cloud_readiness": cloud_items,
+        "tool_snapshot": {
+            name: tool_map.get(name)
+            for name in ("codex", "gh", "playwright", "supabase", "vercel")
+            if name in tool_map
+        },
+    }
+
+
 def _grouped_capabilities(payload: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
     grouped: dict[str, list[dict[str, Any]]] = {}
     for item in payload.get("capabilities", []):
@@ -837,13 +937,73 @@ def print_capabilities_human(payload: dict[str, Any], *, as_json: bool = False) 
         print(f"- {GROUP_LABELS[group_key]}:")
         for item in items:
             optional_tag = " optional" if not item.get("required", True) else ""
-            print(f"  - {item['label']}: `{item['front_door']}` [{item['status']}{optional_tag}]")
+            print(f"  - {item['key']}: `{item['front_door']}` [{item['status']}{optional_tag}]")
+    print("")
+    print("Use `agentctl capability <key>` for the drill-down page for any capability.")
     notes = _doctor_notes(payload)
     if notes:
         print("")
         print("Notes")
         for note in notes:
             print(f"- {note}")
+
+
+def print_capability_human(payload: dict[str, Any], *, as_json: bool = False) -> None:
+    if as_json:
+        print_json(payload)
+        return
+
+    print(f"Capability: {payload['label']} (`{payload['key']}`)")
+    print(f"Status: {payload['status']}")
+    print(f"Front door: `{payload['front_door']}`")
+    print(f"Doc page: `{payload['doc_path']}`")
+    print("")
+    print(payload["summary"])
+
+    if payload.get("skills"):
+        print("")
+        print("Navigation skills")
+        for name in payload["skills"]:
+            print(f"- `{name}`")
+
+    if payload.get("entrypoints"):
+        print("")
+        print("Entry points")
+        for entry in payload["entrypoints"]:
+            print(f"- `{entry}`")
+
+    if payload.get("routing_notes"):
+        print("")
+        print("Routing notes")
+        for note in payload["routing_notes"]:
+            print(f"- {note}")
+
+    if payload.get("advisory"):
+        print("")
+        print("Advisory")
+        print(f"- {payload['advisory']}")
+
+    if payload.get("backing_interfaces"):
+        print("")
+        print("Backing interfaces")
+        for item in payload["backing_interfaces"]:
+            extras: list[str] = []
+            if "enabled" in item:
+                extras.append(f"enabled={str(item['enabled']).lower()}")
+            if "configured" in item:
+                extras.append(f"configured={str(item['configured']).lower()}")
+            suffix = f" ({', '.join(extras)})" if extras else ""
+            print(f"- {item['kind']} `{item['name']}` [{item['status']}]"+suffix)
+
+    if payload.get("cloud_readiness"):
+        print("")
+        print("Cloud readiness")
+        for item in payload["cloud_readiness"]:
+            print(f"- `{item['name']}`: `{item['classification']}`")
+
+    print("")
+    print("Overlap policy")
+    print(f"- {payload['overlap_policy']}")
 
 
 def print_status_human(payload: dict[str, Any], *, as_json: bool = False) -> None:

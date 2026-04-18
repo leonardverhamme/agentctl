@@ -1,0 +1,5 @@
+interface:
+  display_name: "GitHub Capability"
+  short_description: "Route GitHub work through agentctl, the GitHub plugin, and gh."
+  default_prompt: "Use this skill to navigate GitHub work through agentctl, then choose the right GitHub plugin skill or gh path."
+

@@ -1,0 +1,5 @@
+interface:
+  display_name: "Vercel Capability"
+  short_description: "Route Vercel work through agentctl, plugin skills, and the Vercel CLI."
+  default_prompt: "Use this skill to inspect the Vercel capability in agentctl, then choose the right plugin or Vercel CLI route."
+

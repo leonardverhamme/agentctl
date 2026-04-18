@@ -15,7 +15,7 @@
 ## Current Status
 
 - Maintenance status: `ok`
-- Checks passed: 19 / 19
+- Checks passed: 40 / 40
 - Open findings: 0
 - Blocked findings: 0
 
@@ -30,6 +30,7 @@
 
 - Start with `agentctl doctor` when you need a compact health check.
 - Use `agentctl capabilities` when you need the full capability menu and preferred front doors.
+- Use `agentctl capability <key>` when you need the drill-down page for a specific capability or vendor surface.
 - Use `agentctl status --all` to see which durable deep workflows are active now.
 - Use `agentctl maintenance audit` after changing command surface, packaging, state contracts, or docs generators.
 

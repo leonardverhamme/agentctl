@@ -5,9 +5,10 @@ import tomllib
 from pathlib import Path
 from typing import Any
 
-from .capabilities import build_capabilities_report
+from .capabilities import build_capabilities_report, capability_detail, capability_doc_path, capability_keys
 from .common import load_json, print_json, save_json, save_text, utc_now
 from .paths import (
+    AGENTCTL_CAPABILITIES_DOCS_DIR,
     AGENTCTL_DOCS_DIR,
     AGENTCTL_HOME,
     AGENTCTL_MAINTENANCE_SKILL_DIR,
@@ -53,6 +54,7 @@ COMMAND_GROUPS = [
         "items": [
             {"command": "doctor", "usage": "agentctl doctor [--json]", "summary": "Check installed tools, wrappers, auth health, and browser readiness."},
             {"command": "capabilities", "usage": "agentctl capabilities [--json]", "summary": "Emit the machine-readable capability inventory and preferred interfaces."},
+            {"command": "capability", "usage": "agentctl capability <key> [--json]", "summary": "Show the drill-down page for a single capability."},
             {"command": "status", "usage": "agentctl status [--repo <path>] [--all] [--json]", "summary": "Inspect repo-local or registry-backed deep workflow state."},
             {"command": "run", "usage": "agentctl run <workflow> [--repo <path>] [--worker-command <cmd>]", "summary": "Launch or resume a deep workflow through the shared runner."},
         ],
@@ -184,6 +186,14 @@ def _record_reference(name: str, path: Path) -> dict[str, Any]:
         "exists": path.exists(),
         "size": len(content),
     }
+
+
+def _capability_docs(report: dict[str, Any]) -> list[dict[str, Any]]:
+    items: list[dict[str, Any]] = []
+    for key in capability_keys(report["capabilities_snapshot"]):
+        path = AGENTCTL_CAPABILITIES_DOCS_DIR / f"{key}.md"
+        items.append(_record_file(f"capability:{key}", path))
+    return items
 
 
 def _plugin_config_status() -> dict[str, Any]:
@@ -402,6 +412,7 @@ def _build_findings(
 def build_maintenance_report() -> dict[str, Any]:
     capabilities = build_capabilities_report()
     docs = [_record_file(name, path) for name, path in MAINTENANCE_DOCS.items()]
+    docs.extend(_capability_docs({"capabilities_snapshot": capabilities}))
     references = [_record_reference(name, path) for name, path in REFERENCE_DOCS.items()]
     plugin = _plugin_status()
     skills = _skills_status()
@@ -560,6 +571,7 @@ def _render_overview(report: dict[str, Any]) -> str:
         "",
         "- Start with `agentctl doctor` when you need a compact health check.",
         "- Use `agentctl capabilities` when you need the full capability menu and preferred front doors.",
+        "- Use `agentctl capability <key>` when you need the drill-down page for a specific capability or vendor surface.",
         "- Use `agentctl status --all` to see which durable deep workflows are active now.",
         "- Use `agentctl maintenance audit` after changing command surface, packaging, state contracts, or docs generators.",
         "",
@@ -623,6 +635,7 @@ def _render_command_map() -> str:
         "",
         "- `doctor` is the shortest health-oriented entrypoint.",
         "- `capabilities` is the full menu for capability discovery.",
+        "- `capability <key>` is the drill-down page for a single capability and should be preferred before choosing lower-level vendor tools.",
         "- `status` is for workflow progress, not general health.",
         "- `run` is only for deep workflows that use the shared runner/state contract.",
         "- `run` should prefer a real worker runtime such as Codex CLI or an explicit worker command, not chat-only repetition.",
@@ -792,6 +805,7 @@ def _render_capability_registry(report: dict[str, Any]) -> str:
             lines.append(f"  - Overlap policy: {payload.get('overlap_policy', 'Not documented.')}")
             if payload.get("advisory"):
                 lines.append(f"  - Advisory: {payload['advisory']}")
+            lines.append(f"  - Page: `docs/agentctl/capabilities/{payload.get('key', 'unknown')}.md`")
         lines.append("")
     lines.extend(
         [
@@ -836,6 +850,71 @@ def _render_capability_registry(report: dict[str, Any]) -> str:
         for item in overlap_items:
             lines.append(f"- `{item['capability']}`: {item['policy']}")
         lines.append("")
+    return "\n".join(lines).rstrip() + "\n"
+
+
+def _render_capability_page(report: dict[str, Any], key: str) -> str:
+    detail = capability_detail(report["capabilities_snapshot"], key)
+    if detail is None:
+        raise KeyError(f"unknown capability: {key}")
+
+    lines = [
+        AUTO_MARKER,
+        f"# {detail['label']}",
+        "",
+        f"- Key: `{detail['key']}`",
+        f"- Group: `{detail['group']}`",
+        f"- Status: `{detail['status']}`",
+        f"- Front door: `{detail['front_door']}`",
+        "",
+        "## Summary",
+        "",
+        detail["summary"],
+        "",
+    ]
+
+    if detail.get("skills"):
+        lines.extend(["## Navigation Skills", ""])
+        for name in detail["skills"]:
+            lines.append(f"- `{name}`")
+        lines.append("")
+
+    if detail.get("entrypoints"):
+        lines.extend(["## Entry Points", ""])
+        for entry in detail["entrypoints"]:
+            lines.append(f"- `{entry}`")
+        lines.append("")
+
+    if detail.get("routing_notes"):
+        lines.extend(["## Routing Notes", ""])
+        for note in detail["routing_notes"]:
+            lines.append(f"- {note}")
+        lines.append("")
+
+    if detail.get("advisory"):
+        lines.extend(["## Advisory", "", f"- {detail['advisory']}", ""])
+
+    if detail.get("backing_interfaces"):
+        lines.extend(["## Backing Interfaces", ""])
+        for item in detail["backing_interfaces"]:
+            extras: list[str] = []
+            if "enabled" in item:
+                extras.append(f"enabled={str(item['enabled']).lower()}")
+            if "configured" in item:
+                extras.append(f"configured={str(item['configured']).lower()}")
+            suffix = f" ({', '.join(extras)})" if extras else ""
+            lines.append(f"- `{item['kind']}` `{item['name']}` [{item['status']}]"+suffix)
+        lines.append("")
+
+    if detail.get("cloud_readiness"):
+        lines.extend(["## Cloud Readiness", ""])
+        for item in detail["cloud_readiness"]:
+            lines.append(f"- `{item['name']}`: `{item['classification']}`")
+            lines.append(f"  - Requirements: {', '.join(item['requirements'])}")
+            lines.append(f"  - Notes: {item['notes']}")
+        lines.append("")
+
+    lines.extend(["## Overlap Policy", "", f"- {detail['overlap_policy']}", ""])
     return "\n".join(lines).rstrip() + "\n"
 
 
@@ -968,6 +1047,9 @@ def _write_docs(report: dict[str, Any], *, include_all: bool, include_maintenanc
         save_text(MAINTENANCE_DOCS["state-schema"], _render_state_schema(report))
         save_text(MAINTENANCE_DOCS["capability-registry"], _render_capability_registry(report))
         save_text(MAINTENANCE_DOCS["cloud-readiness"], _render_cloud_readiness(report))
+        AGENTCTL_CAPABILITIES_DOCS_DIR.mkdir(parents=True, exist_ok=True)
+        for key in capability_keys(report["capabilities_snapshot"]):
+            save_text(AGENTCTL_CAPABILITIES_DOCS_DIR / f"{key}.md", _render_capability_page(report, key))
     if include_all or include_maintenance_page:
         save_text(MAINTENANCE_DOCS["maintenance"], _render_maintenance(report))
 

@@ -1,0 +1,5 @@
+interface:
+  display_name: "Stripe Capability"
+  short_description: "Route Stripe work through agentctl and the Stripe plugin surface."
+  default_prompt: "Use this skill to inspect the Stripe capability in agentctl, then choose the right Stripe plugin route."
+

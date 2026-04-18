@@ -1,0 +1,5 @@
+interface:
+  display_name: "Supabase Capability"
+  short_description: "Route Supabase work through agentctl with CLI-first defaults."
+  default_prompt: "Use this skill to inspect the Supabase capability in agentctl, then prefer the Supabase CLI unless MCP adds real value."
+

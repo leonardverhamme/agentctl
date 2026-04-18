@@ -17,11 +17,13 @@ class MaintenanceTests(unittest.TestCase):
     def _patch_paths(self, root: Path) -> list[mock._patch]:
         agentctl_home = root / "agentctl"
         docs_dir = root / "docs" / "agentctl"
+        capability_docs_dir = docs_dir / "capabilities"
         refs_dir = agentctl_home / "references"
         plugin_dir = root / "plugins" / "agentctl"
         patches = [
             mock.patch.object(maintenance, "AGENTCTL_HOME", agentctl_home),
             mock.patch.object(maintenance, "AGENTCTL_DOCS_DIR", docs_dir),
+            mock.patch.object(maintenance, "AGENTCTL_CAPABILITIES_DOCS_DIR", capability_docs_dir),
             mock.patch.object(maintenance, "CAPABILITIES_PATH", agentctl_home / "state" / "capabilities.json"),
             mock.patch.object(maintenance, "DOCTOR_REPORT_PATH", agentctl_home / "state" / "doctor-report.json"),
             mock.patch.object(maintenance, "MAINTENANCE_REPORT_PATH", docs_dir / "maintenance-report.json"),
@@ -135,9 +137,11 @@ class MaintenanceTests(unittest.TestCase):
                 report = maintenance.maintenance_fix_docs()
 
                 overview = (root / "docs" / "agentctl" / "overview.md").read_text(encoding="utf-8")
+                capability_page = (root / "docs" / "agentctl" / "capabilities" / "research.md").read_text(encoding="utf-8")
                 state = json.loads((root / ".codex-workflows" / "agentctl-maintenance" / "state.json").read_text(encoding="utf-8"))
 
             self.assertIn("agentctl:auto-generated", overview)
+            self.assertIn("# Research", capability_page)
             self.assertEqual(report["summary"]["status"], "ok")
             self.assertTrue(state["ready_allowed"])
             self.assertEqual(state["status"], "complete")

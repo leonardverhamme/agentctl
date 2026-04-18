@@ -1,0 +1,4 @@
+interface:
+  display_name: "Next.js Runtime Capability"
+  short_description: "Route Next.js runtime work through agentctl and Next DevTools."
+  default_prompt: "Use this skill to inspect the Next.js runtime capability in agentctl before working on a running Next.js app."

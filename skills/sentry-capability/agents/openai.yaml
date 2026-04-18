@@ -1,0 +1,5 @@
+interface:
+  display_name: "Sentry Capability"
+  short_description: "Route Sentry work through agentctl and the Sentry plugin surface."
+  default_prompt: "Use this skill to inspect the Sentry capability in agentctl before doing production-issue or event work."
+

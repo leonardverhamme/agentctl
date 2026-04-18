@@ -3,9 +3,9 @@
 
 ## Last Run
 
-- Generated: `2026-04-18T14:21:15.986767+00:00`
+- Generated: `2026-04-18T14:47:23.516391+00:00`
 - Status: `ok`
-- Checks passed: 19 / 19
+- Checks passed: 40 / 40
 - Open findings: 0
 - Blocked findings: 0
 
