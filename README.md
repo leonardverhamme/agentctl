@@ -8,6 +8,7 @@ It packages:
 - reusable skills for UI, testing, docs, refactor, CI/CD, research, and maintenance
 - the shared deep-workflow runner and guard
 - a local Codex plugin shell for routing and maintenance
+- `automation-core`, a local Gmail + Calendar + Notion bridge for CRM-style inbox automation
 - zero-touch bootstrap plus explicit unattended-worker health checks
 
 The design goal is simple: give coding agents one stable front door for capability discovery, workflow launch, and state tracking without replacing the authoritative tools underneath.
@@ -37,8 +38,14 @@ This repository is structured as a portable `$CODEX_HOME` bundle:
 - `skills/`
 - `plugins/agentctl/`
 - `docs/agentctl/`
+- `automation-core/`
 - `AGENTS.md`
 - `config.toml`
+
+Operational docs for the automation bridge live in:
+
+- [automation-core/README.md](automation-core/README.md)
+- [docs/automation-core.md](docs/automation-core.md)
 
 ## Quick Start
 
@@ -129,6 +136,41 @@ agentctl skills update
 agentctl maintenance audit
 ```
 
+## automation-core
+
+This repo now also contains a workstation-local automation stack for Gmail, Google Calendar, and Notion:
+
+- local approval UI for pending inbox and meeting decisions
+- incremental Gmail and Calendar polling
+- Notion technical tables plus business-record updates
+- Codex automation entrypoints for hourly sync, briefs, reviews, and hygiene sweeps
+
+Typical operator sequence:
+
+```powershell
+cd automation-core
+copy .env.example .env
+npm install
+npm run cli -- schema-bootstrap
+npm run dev
+```
+
+Then connect Google once:
+
+```text
+http://localhost:3010/auth/google/start
+```
+
+And run a first manual sync:
+
+```powershell
+npm run cli -- job gmail-sync
+npm run cli -- job calendar-sync
+npm run cli -- job reconcile
+```
+
+See [docs/automation-core.md](docs/automation-core.md) for the operator contract and [automation-core/README.md](automation-core/README.md) for the project-local command surface.
+
 ## Deep Workflows
 
 The bundled deep workflows are:
@@ -213,6 +255,13 @@ This repo ships with a GitHub Actions workflow that runs:
 - an isolated bundle-install smoke test that runs the installed `agentctl`
 
 The CI workflow is manually runnable with `workflow_dispatch` and uses workflow-level concurrency to cancel stale in-progress runs for the same branch or pull request.
+
+It now also verifies the `automation-core` subproject by running:
+
+- `npm --prefix automation-core ci`
+- `npm --prefix automation-core run typecheck`
+- `npm --prefix automation-core run build`
+- `npm --prefix automation-core test`
 
 ## Releases
 

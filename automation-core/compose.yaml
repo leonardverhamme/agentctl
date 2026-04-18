@@ -1,0 +1,14 @@
+services:
+  automation-core:
+    build:
+      context: .
+    ports:
+      - "3010:3010"
+    env_file:
+      - .env
+    environment:
+      SQLITE_PATH: /data/automation-core.sqlite
+      APP_HOST: 0.0.0.0
+      APP_PORT: 3010
+    volumes:
+      - ./.data:/data

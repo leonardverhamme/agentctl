@@ -1,0 +1,30 @@
+{
+  "name": "automation-core",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Local Gmail + Calendar + Notion automation bridge for Codex-driven CRM workflows.",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx src/server.ts",
+    "start": "node dist/server.js",
+    "cli": "tsx src/cli.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "dependencies": {
+    "@notionhq/client": "^5.1.0",
+    "commander": "^14.0.0",
+    "fastify": "^5.4.0",
+    "googleapis": "^150.0.1",
+    "zod": "^3.25.67"
+  },
+  "devDependencies": {
+    "@types/node": "^24.7.2",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "vitest": "^2.1.9"
+  }
+}

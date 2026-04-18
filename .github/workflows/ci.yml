@@ -33,6 +33,12 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: automation-core/package-lock.json
+
       - name: Verify Python sources compile
         run: python -m compileall agentctl workflow-tools scripts
 
@@ -41,6 +47,18 @@ jobs:
 
       - name: Run workflow-tools tests
         run: python -m unittest discover -s workflow-tools/tests -p "test_*.py"
+
+      - name: Install automation-core dependencies
+        run: npm --prefix automation-core ci
+
+      - name: Typecheck automation-core
+        run: npm --prefix automation-core run typecheck
+
+      - name: Build automation-core
+        run: npm --prefix automation-core run build
+
+      - name: Run automation-core tests
+        run: npm --prefix automation-core test
 
       - name: Smoke maintenance audit
         run: python agentctl/agentctl.py maintenance audit --json

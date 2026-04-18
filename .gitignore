@@ -17,4 +17,6 @@ docs/*-checklist.md
 docs/*-progress.md
 dist/
 node_modules/
-automation-core/
+automation-core/dist/
+automation-core/.data/
+automation-core/.env
