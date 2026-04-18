@@ -82,6 +82,7 @@ def build_parser() -> argparse.ArgumentParser:
     run_parser.add_argument("--checklist", help="Optional checklist path override")
     run_parser.add_argument("--progress", help="Optional progress path override")
     run_parser.add_argument("--worker-command", help="Worker command used by the shared deep runner")
+    run_parser.add_argument("--worker-mode", choices=("auto", "explicit", "codex"), default="auto", help="How agentctl should resolve the deep-workflow worker command")
     run_parser.add_argument("--max-iterations", type=int, default=30)
     run_parser.add_argument("--max-stagnant", type=int, default=3)
 
@@ -130,6 +131,7 @@ def main() -> int:
             checklist=args.checklist,
             progress=args.progress,
             worker_command=args.worker_command,
+            worker_mode=args.worker_mode,
             max_iterations=args.max_iterations,
             max_stagnant=args.max_stagnant,
         )

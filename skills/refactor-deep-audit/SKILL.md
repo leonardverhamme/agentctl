@@ -22,6 +22,12 @@ Use this skill for the heavy refactor workflow that `$refactor-skill` should not
 
 For implementation decisions while working the checklist, load `$refactor-skill` and use it as the base refactor skill. If you need additional migration and phasing guidance, also load `$refactor-orchestrator`.
 
+## Required Entry Point
+
+- If `agentctl` is available, start or resume this workflow through `agentctl run refactor-deep-audit`, not by relying on chat memory alone.
+- Treat `docs/refactor-deep-audit-checklist.md` as the human queue and `.codex-workflows/refactor-deep-audit/state.json` as the machine queue.
+- If unattended execution is expected, the outer loop must use a real worker command such as an explicit worker command or a configured Codex worker template. A checklist file by itself is not a worker.
+
 ## Core Modes
 
 - Full-cycle mode: audit or refresh, then execute the checklist in the same run, then close out.
@@ -45,9 +51,11 @@ If the user explicitly invokes `$refactor-deep-audit` with no meaningful extra i
 ## Default File Contract
 
 - Default checklist path: `docs/refactor-deep-audit-checklist.md`
+- Default state path: `.codex-workflows/refactor-deep-audit/state.json`
 - If the user gives a specific path, use that instead.
 - Treat the checklist file as the queue and source of truth.
 - Re-read the checklist file before each new batch of work instead of trusting chat memory.
+- Re-open the state file at the start of every turn. If checklist and state disagree, repair the state from the checklist before continuing.
 
 ## Shared Runtime Contract
 
@@ -96,7 +104,9 @@ When the user does not clearly choose a mode:
 ## Execution Rules
 
 - Work from the checklist file, not from memory.
+- Work from the state file and checklist together, not from prior chat claims.
 - Pick a coherent batch of unchecked items.
+- Prefer small coherent batches, usually 2 to 6 related items.
 - Implement the refactor wave.
 - Run the smallest correct validation for that batch.
 - Mark items `- [x]` only after implementation and validation.

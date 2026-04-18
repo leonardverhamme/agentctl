@@ -24,6 +24,12 @@ Use this skill for the heavy workflow that your normal UI skill should not absor
 
 For UI implementation decisions while working the checklist, load `$ui-skill` and use it as the base implementation skill.
 
+## Required Entry Point
+
+- If `agentctl` is available, start or resume this workflow through `agentctl run ui-deep-audit`, not by relying on chat memory alone.
+- Treat `docs/ui-deep-audit-checklist.md` as the human queue and `.codex-workflows/ui-deep-audit/state.json` as the machine queue.
+- If unattended execution is expected, the outer loop must use a real worker command such as an explicit worker command or a configured Codex worker template. A checklist file by itself is not a worker.
+
 ## Core Modes
 
 - Audit mode: inspect the full app, map pages and UI zones, and write or refresh the checklist file.
@@ -43,9 +49,11 @@ If the user explicitly invokes `$ui-deep-audit` with no meaningful extra instruc
 ## Default File Contract
 
 - Default checklist path: `docs/ui-deep-audit-checklist.md`
+- Default state path: `.codex-workflows/ui-deep-audit/state.json`
 - If the user gives a specific path, use that instead.
 - Treat the checklist file as the queue and source of truth.
 - Re-read the checklist file before each new batch of work instead of trusting chat memory.
+- Re-open the state file at the start of every turn. If checklist and state disagree, repair the state from the checklist before continuing.
 
 ## Required Workflow
 
@@ -103,7 +111,9 @@ When the user does not clearly choose a mode, infer it from the checklist file s
 ## Execution Rules
 
 - Work from the checklist file, not from memory.
+- Work from the state file and checklist together, not from prior chat claims.
 - Pick a coherent batch of unchecked items.
+- Prefer small coherent batches, usually 2 to 6 related items.
 - Implement the fixes.
 - Run the smallest correct validation.
 - Mark items `- [x]` only after implementation and validation.

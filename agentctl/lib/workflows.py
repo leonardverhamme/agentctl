@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from .common import load_json
+from .codex_runtime import resolve_codex_worker_command
 from .paths import WORKFLOW_REGISTRY_PATH, WORKFLOW_TOOLS_DIR
 
 sys.path.insert(0, str(WORKFLOW_TOOLS_DIR))
@@ -131,10 +132,14 @@ def run_workflow(
     checklist: str | None,
     progress: str | None,
     worker_command: str | None,
+    worker_mode: str,
     max_iterations: int,
     max_stagnant: int,
 ) -> int:
     repo_root = _repo_root(repo)
+    resolved_worker_command = worker_command
+    if not resolved_worker_command and worker_mode in {"auto", "codex"}:
+        resolved_worker_command = resolve_codex_worker_command()
     command = [
         sys.executable,
         str(WORKFLOW_RUNNER),
@@ -151,7 +156,8 @@ def run_workflow(
         command.extend(["--checklist", checklist])
     if progress:
         command.extend(["--progress", progress])
-    if worker_command:
-        command.extend(["--worker-command", worker_command])
+    if resolved_worker_command:
+        command.extend(["--worker-command", resolved_worker_command])
+    command.extend(["--worker-mode", worker_mode])
     result = subprocess.run(command, cwd=str(repo_root), check=False)
     return result.returncode

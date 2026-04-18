@@ -79,6 +79,7 @@ def main() -> int:
     parser.add_argument("--max-iterations", type=int, default=DEFAULT_MAX_ITERATIONS)
     parser.add_argument("--max-stagnant", type=int, default=DEFAULT_MAX_STAGNANT_ITERATIONS)
     parser.add_argument("--worker-command", help="Shell command used to run one deep-skill pass")
+    parser.add_argument("--worker-mode", choices=("auto", "explicit", "codex"), default="auto", help="How the caller resolved the worker command")
     parser.add_argument("--registry", help="Optional override for the global registry path")
     parser.add_argument("--state", help="Optional override for the repo-local workflow state path")
     args = parser.parse_args()
@@ -114,13 +115,18 @@ def main() -> int:
         state["status"] = "blocked"
         state["last_error"] = {
             "timestamp": utc_now(),
-            "message": "no worker command configured; pass --worker-command or set CODEX_WORKFLOW_WORKER_COMMAND",
+            "message": (
+                "no worker command configured; pass --worker-command, set CODEX_WORKFLOW_WORKER_COMMAND, "
+                "or configure AGENTCTL_CODEX_WORKER_TEMPLATE for codex-backed deep runs"
+            ),
         }
+        state["worker_mode"] = args.worker_mode
         persist_state(state_path, state, registry_path)
         print(state["last_error"]["message"])
         return 2
 
     state["worker_command"] = worker_command
+    state["worker_mode"] = args.worker_mode
     persist_state(state_path, state, registry_path)
 
     while True:

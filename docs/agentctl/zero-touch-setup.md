@@ -38,6 +38,18 @@ python .\scripts\install_bundle.py --codex-home C:\Users\you\.codex
    - deep workflow launch
    - maintenance checks
 
+## Unattended Deep Workflows
+
+Deep checklist workflows only count as unattended when `agentctl run <workflow>` can relaunch a real worker.
+
+Use one of these:
+
+- `--worker-command "<real worker command>"`
+- `CODEX_WORKFLOW_WORKER_COMMAND`
+- `AGENTCTL_CODEX_WORKER_TEMPLATE`
+
+The runner loop, checklist, state file, and guard are already deterministic. The missing piece in some environments is the worker runtime. If `agentctl doctor` reports that Codex is installed but not callable, keep the workflow explicit until a real worker command is configured.
+
 ## Script Placement Rule
 
 When an installed skill or workflow needs to create helper scripts for a user task, those scripts belong in the target repo being worked on, not in:

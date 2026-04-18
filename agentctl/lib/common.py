@@ -54,6 +54,8 @@ def run_command(args: list[str], *, timeout: int = 30, cwd: str | Path | None = 
             cwd=str(cwd) if cwd else None,
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             timeout=timeout,
             check=False,
             shell=shell,
@@ -61,11 +63,13 @@ def run_command(args: list[str], *, timeout: int = 30, cwd: str | Path | None = 
         return {
             "ok": completed.returncode == 0,
             "returncode": completed.returncode,
-            "stdout": completed.stdout.strip(),
-            "stderr": completed.stderr.strip(),
+            "stdout": (completed.stdout or "").strip(),
+            "stderr": (completed.stderr or "").strip(),
         }
     except FileNotFoundError:
         return {"ok": False, "returncode": 127, "stdout": "", "stderr": "command not found"}
+    except PermissionError as exc:
+        return {"ok": False, "returncode": 126, "stdout": "", "stderr": str(exc)}
     except subprocess.TimeoutExpired:
         return {"ok": False, "returncode": 124, "stdout": "", "stderr": "command timed out"}
 

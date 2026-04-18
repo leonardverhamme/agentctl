@@ -7,11 +7,24 @@ import tomllib
 from pathlib import Path
 from typing import Any
 
+from .codex_runtime import detect_codex_runtime
 from .common import command_path, print_json, run_command, utc_now
 from .paths import CONFIG_PATH, PLAYWRIGHT_WRAPPER, PLAYWRIGHT_WRAPPER_CMD, SKILLS_DIR
 
 
 CAPABILITY_SPECS: list[dict[str, Any]] = [
+    {
+        "key": "autonomous-deep-runs",
+        "label": "Autonomous deep runs",
+        "group": "control-plane",
+        "required": True,
+        "front_door": "agentctl run",
+        "entrypoints": ["agentctl run <workflow>", "CODEX_WORKFLOW_WORKER_COMMAND", "AGENTCTL_CODEX_WORKER_TEMPLATE"],
+        "skills": [],
+        "interfaces": ["tool:codex"],
+        "availability_mode": "all",
+        "overlap_policy": "The outer execute-until-done loop must use a real worker command, not chat memory. Prefer Codex runtime when it is callable or explicitly templated.",
+    },
     {
         "key": "skills-management",
         "label": "Skills management",
@@ -471,6 +484,8 @@ def _aggregate_status(statuses: list[str], *, mode: str) -> str:
     if mode == "all":
         if len(available) == len(statuses):
             return "ok"
+        if any(status == "degraded" for status in statuses):
+            return "degraded"
         if available:
             return "degraded"
         return "missing"
@@ -620,6 +635,7 @@ def build_capabilities_report() -> dict[str, Any]:
         },
         "npx": _tool_record("npx", command="npx", version_args=["--version"]),
         "skills": _detect_skills_cli(),
+        "codex": detect_codex_runtime(),
         "gh": _detect_gh(),
         "vercel": _tool_record("vercel", command="vercel", version_args=["--version"]),
         "supabase": _tool_record("supabase", command="supabase", version_args=["--version"]),
@@ -740,6 +756,13 @@ def _doctor_notes(payload: dict[str, Any]) -> list[str]:
             + ", ".join(f"`{label}`" for label in optional_unavailable[:6])
             + ("." if len(optional_unavailable) <= 6 else ", and more.")
         )
+    codex = payload.get("tools", {}).get("codex", {})
+    if codex.get("installed") and not codex.get("callable"):
+        notes.append(
+            "Codex CLI is installed but not callable in this environment; unattended deep runs need an explicit worker command or a configured `AGENTCTL_CODEX_WORKER_TEMPLATE`."
+        )
+    elif not codex.get("installed"):
+        notes.append("Codex CLI is not detected locally; unattended deep runs need `--worker-command` or `CODEX_WORKFLOW_WORKER_COMMAND`.")
     return notes
 
 

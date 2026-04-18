@@ -557,6 +557,7 @@ def _render_overview(report: dict[str, Any]) -> str:
         "- Capability discovery: `agentctl doctor` then `agentctl capabilities` if a broader inventory is needed.",
         "- External research: `agentctl research web|github|scout <query>` and carry the JSON evidence + brief into implementation.",
         "- Deep remediation: `agentctl run <workflow>` and trust `.codex-workflows/<workflow>/state.json` over chat history.",
+        "- Autonomous deep remediation only counts when a real worker command exists. The runner loop is deterministic; the worker must be real.",
         "- Control-plane upkeep: `$agentctl-maintenance-engineer` or `agentctl maintenance audit`.",
         "",
         "## Capability-First Rule",
@@ -604,6 +605,7 @@ def _render_command_map() -> str:
         "- `capabilities` is the full menu for capability discovery.",
         "- `status` is for workflow progress, not general health.",
         "- `run` is only for deep workflows that use the shared runner/state contract.",
+        "- `run` should prefer a real worker runtime such as Codex CLI or an explicit worker command, not chat-only repetition.",
         "- `research` is for evidence creation, not implementation.",
         "- `skills` wraps official install/update tooling and provenance checks.",
         "- `maintenance` is only for the control plane itself.",
@@ -624,6 +626,7 @@ def _render_command_map() -> str:
                     "- `agentctl capabilities` if you need the full menu",
                     "- `agentctl status --all` if you need workflow progress",
                     "- `agentctl run <workflow>` only when a deep workflow is the right shape",
+                    "- If no worker runtime is healthy, configure `--worker-command` or `AGENTCTL_CODEX_WORKER_TEMPLATE` before treating the run as unattended",
                 ]
             )
         elif group["group"] == "research":
@@ -841,8 +844,9 @@ def _render_cloud_readiness(report: dict[str, Any]) -> str:
             "- Install the `agentctl` bundle under `$CODEX_HOME`.",
             "- Verify `agentctl doctor` is healthy in the cloud environment itself.",
             "- Verify vendor CLI auth before relying on GitHub-, Vercel-, or Supabase-backed flows.",
-            "- Verify the browser route before relying on research, UI, or test workflows that need runtime inspection.",
-            "- Treat any capability not explicitly marked healthy in cloud as unsupported until proven otherwise.",
+        "- Verify the browser route before relying on research, UI, or test workflows that need runtime inspection.",
+        "- Verify the deep-run worker route before relying on unattended checklist completion. A checklist alone is not a worker.",
+        "- Treat any capability not explicitly marked healthy in cloud as unsupported until proven otherwise.",
             "",
             "## Current Local Signals",
             "",

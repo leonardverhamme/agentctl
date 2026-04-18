@@ -9,7 +9,7 @@ from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from lib.workflows import workflow_status
+from lib.workflows import run_workflow, workflow_status
 
 
 class WorkflowStatusTests(unittest.TestCase):
@@ -155,6 +155,52 @@ class WorkflowStatusTests(unittest.TestCase):
         self.assertEqual(result["summary"]["count"], 1)
         self.assertEqual(result["summary"]["historical_count"], 1)
         self.assertEqual(result["workflows"][0]["workflow_name"], "agentctl-maintenance")
+
+    @mock.patch("lib.workflows.subprocess.run")
+    @mock.patch("lib.workflows.resolve_codex_worker_command")
+    def test_run_workflow_uses_codex_template_in_auto_mode(self, resolve_codex_worker_command: mock.Mock, run_mock: mock.Mock) -> None:
+        resolve_codex_worker_command.return_value = "codex-template-worker"
+        run_mock.return_value = mock.Mock(returncode=0)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            rc = run_workflow(
+                workflow="ui-deep-audit",
+                repo=temp_dir,
+                checklist=None,
+                progress=None,
+                worker_command=None,
+                worker_mode="auto",
+                max_iterations=30,
+                max_stagnant=3,
+            )
+
+        self.assertEqual(rc, 0)
+        command = run_mock.call_args.args[0]
+        self.assertIn("--worker-command", command)
+        self.assertIn("codex-template-worker", command)
+        self.assertIn("--worker-mode", command)
+        self.assertIn("auto", command)
+
+    @mock.patch("lib.workflows.subprocess.run")
+    @mock.patch("lib.workflows.resolve_codex_worker_command")
+    def test_run_workflow_keeps_explicit_worker_command(self, resolve_codex_worker_command: mock.Mock, run_mock: mock.Mock) -> None:
+        resolve_codex_worker_command.return_value = "ignored-template"
+        run_mock.return_value = mock.Mock(returncode=0)
+        with tempfile.TemporaryDirectory() as temp_dir:
+            rc = run_workflow(
+                workflow="test-deep-audit",
+                repo=temp_dir,
+                checklist=None,
+                progress=None,
+                worker_command="explicit-worker",
+                worker_mode="codex",
+                max_iterations=30,
+                max_stagnant=3,
+            )
+
+        self.assertEqual(rc, 0)
+        command = run_mock.call_args.args[0]
+        self.assertIn("explicit-worker", command)
+        self.assertNotIn("ignored-template", command)
 
 
 if __name__ == "__main__":

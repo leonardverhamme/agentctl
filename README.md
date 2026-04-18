@@ -8,6 +8,7 @@ It packages:
 - reusable skills for UI, testing, docs, refactor, CI/CD, research, and maintenance
 - the shared deep-workflow runner and guard
 - a local Codex plugin shell for routing and maintenance
+- zero-touch bootstrap plus explicit unattended-worker health checks
 
 The design goal is simple: give coding agents one stable front door for capability discovery, workflow launch, and state tracking without replacing the authoritative tools underneath.
 
@@ -145,6 +146,8 @@ Each uses repo-local JSON state at:
 ```
 
 The runner owns repetition, retries, and stop conditions. The skill remains the judgment-heavy worker.
+
+Unattended execution only counts when a real worker runtime exists. Use `--worker-command`, `CODEX_WORKFLOW_WORKER_COMMAND`, or `AGENTCTL_CODEX_WORKER_TEMPLATE` instead of relying on chat repetition.
 
 ## Optional Integrations
 

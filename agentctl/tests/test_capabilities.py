@@ -17,6 +17,7 @@ class CapabilitiesTests(unittest.TestCase):
     @mock.patch("lib.capabilities._enabled_plugins_map")
     @mock.patch("lib.capabilities._config_payload")
     @mock.patch("lib.capabilities._installed_skills")
+    @mock.patch("lib.capabilities.detect_codex_runtime")
     @mock.patch("lib.capabilities._detect_playwright")
     @mock.patch("lib.capabilities._detect_gh")
     @mock.patch("lib.capabilities._detect_skills_cli")
@@ -27,6 +28,7 @@ class CapabilitiesTests(unittest.TestCase):
         detect_skills: mock.Mock,
         detect_gh: mock.Mock,
         detect_playwright: mock.Mock,
+        detect_codex: mock.Mock,
         installed_skills: mock.Mock,
         config_payload: mock.Mock,
         enabled_plugins: mock.Mock,
@@ -37,6 +39,7 @@ class CapabilitiesTests(unittest.TestCase):
         detect_skills.return_value = {"installed": True, "status": "ok", "version": "1.5.1"}
         detect_gh.return_value = {"installed": True, "status": "ok", "version": "gh 1.0", "skill_supported": False}
         detect_playwright.return_value = {"installed": True, "status": "degraded", "wrapper_ready": False}
+        detect_codex.return_value = {"installed": True, "status": "ok", "callable": True, "worker_runtime_ready": True}
         installed_skills.return_value = {"status": "ok", "items": [{"name": "ui-skill"}]}
         config_payload.return_value = {}
         enabled_plugins.return_value = {
@@ -64,6 +67,7 @@ class CapabilitiesTests(unittest.TestCase):
         self.assertIn("research", capability_keys)
         self.assertIn("browser-automation", capability_keys)
         self.assertIn("supabase-data", capability_keys)
+        self.assertIn("autonomous-deep-runs", capability_keys)
         self.assertEqual(report["summary"]["installed_skill_count"], 1)
 
     @mock.patch("lib.capabilities._local_skill_names")
@@ -71,6 +75,7 @@ class CapabilitiesTests(unittest.TestCase):
     @mock.patch("lib.capabilities._enabled_plugins_map")
     @mock.patch("lib.capabilities._config_payload")
     @mock.patch("lib.capabilities._installed_skills")
+    @mock.patch("lib.capabilities.detect_codex_runtime")
     @mock.patch("lib.capabilities._detect_playwright")
     @mock.patch("lib.capabilities._detect_gh")
     @mock.patch("lib.capabilities._detect_skills_cli")
@@ -81,6 +86,7 @@ class CapabilitiesTests(unittest.TestCase):
         detect_skills: mock.Mock,
         detect_gh: mock.Mock,
         detect_playwright: mock.Mock,
+        detect_codex: mock.Mock,
         installed_skills: mock.Mock,
         config_payload: mock.Mock,
         enabled_plugins: mock.Mock,
@@ -91,6 +97,7 @@ class CapabilitiesTests(unittest.TestCase):
         detect_skills.return_value = {"installed": True, "status": "ok", "version": "1.5.1"}
         detect_gh.return_value = {"installed": False, "status": "missing", "skill_supported": False}
         detect_playwright.return_value = {"installed": False, "status": "missing", "wrapper_ready": False}
+        detect_codex.return_value = {"installed": True, "status": "ok", "callable": True, "worker_runtime_ready": True}
         installed_skills.return_value = {"status": "ok", "items": []}
         config_payload.return_value = {}
         enabled_plugins.return_value = {"agentctl-platform": {"name": "agentctl-platform", "enabled": True, "status": "ok"}}
