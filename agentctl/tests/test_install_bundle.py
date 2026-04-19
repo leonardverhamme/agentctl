@@ -3,8 +3,15 @@ from __future__ import annotations
 import importlib.util
 import tempfile
 import unittest
+import zipfile
 from pathlib import Path
 from unittest import mock
+
+import sys
+
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from agentctl import bundle_install as bundle_install_module
 
 
 MODULE_PATH = Path(__file__).resolve().parents[2] / "scripts" / "install_bundle.py"
@@ -52,6 +59,29 @@ class InstallBundleTests(unittest.TestCase):
             install_bundle.cleanup_legacy_plugin(target_root)
 
             self.assertFalse(legacy.exists())
+
+    def test_extract_archive_accepts_flat_release_bundle(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            archive_path = root / "bundle.zip"
+            extract_root = root / "extract"
+            with zipfile.ZipFile(archive_path, "w") as bundle:
+                bundle.writestr("agentctl/agentctl.py", "print('ok')\n")
+                bundle.writestr("workflow-tools/workflow_runner.py", "# runner\n")
+                bundle.writestr("skills/test-skill/SKILL.md", "# test skill\n")
+                bundle.writestr("plugins/loopsmith/.codex-plugin/plugin.json", "{}\n")
+                bundle.writestr("README.md", "# loopsmith\n")
+                bundle.writestr("AGENTS.md", "# agents\n")
+                bundle.writestr("loopsmith.cmd", "@echo off\n")
+                bundle.writestr("loopsmith.sh", "#!/bin/sh\n")
+                bundle.writestr("agentctl.cmd", "@echo off\n")
+                bundle.writestr("agentctl.sh", "#!/bin/sh\n")
+                bundle.writestr("docs/loopsmith/overview.md", "# overview\n")
+
+            extracted = bundle_install_module.extract_archive(archive_path, extract_root)
+
+            self.assertEqual(extracted, extract_root)
+            self.assertTrue((extract_root / "agentctl" / "agentctl.py").exists())
 
     @mock.patch("agentctl.bundle_install.subprocess.run")
     def test_run_post_install_checks_writes_bootstrap_report(self, run_mock: mock.Mock) -> None:

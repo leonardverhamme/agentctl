@@ -318,12 +318,20 @@ def download_archive(url: str, destination: Path) -> Path:
 
 
 def extract_archive(archive_path: Path, destination: Path) -> Path:
+    destination.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(archive_path) as bundle:
         bundle.extractall(destination)
-    entries = [path for path in destination.iterdir() if path.is_dir()]
-    if len(entries) == 1:
-        return entries[0]
-    raise RuntimeError(f"Expected one extracted root directory, found {len(entries)}")
+    entries = list(destination.iterdir())
+    directory_entries = [path for path in entries if path.is_dir()]
+    if len(directory_entries) == 1 and len(directory_entries) == len(entries):
+        return directory_entries[0]
+
+    top_level_names = {path.name for path in entries}
+    expected_bundle_entries = {Path(relative).parts[0] for relative in BUNDLE_ITEMS}
+    if expected_bundle_entries.issubset(top_level_names):
+        return destination
+
+    raise RuntimeError(f"Expected one extracted root directory or a flat release bundle, found entries: {sorted(top_level_names)}")
 
 
 def github_archive_url(repo_url: str, *, ref: str, ref_type: str) -> str:
