@@ -70,6 +70,7 @@ jobs:
         env:
           BUNDLE_CODEX_HOME: ${{ runner.temp }}/loopsmith-codex-home
         run: |
+          export CODEX_HOME="$BUNDLE_CODEX_HOME"
           python "$BUNDLE_CODEX_HOME/agentctl/agentctl.py" doctor --json
           python "$BUNDLE_CODEX_HOME/agentctl/agentctl.py" capabilities --json
           python "$BUNDLE_CODEX_HOME/agentctl/agentctl.py" maintenance audit --json
@@ -109,5 +110,6 @@ jobs:
           loopsmith bootstrap --help
           agentctl bootstrap --help
           CODEX_HOME="$BUNDLE_CODEX_HOME" loopsmith bootstrap --source-root "$GITHUB_WORKSPACE"
+          export CODEX_HOME="$BUNDLE_CODEX_HOME"
           python "$BUNDLE_CODEX_HOME/agentctl/agentctl.py" doctor --json
           python "$BUNDLE_CODEX_HOME/agentctl/agentctl.py" self-check --json

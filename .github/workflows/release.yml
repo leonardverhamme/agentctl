@@ -83,5 +83,6 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install dist/*.whl
           CODEX_HOME="$BUNDLE_CODEX_HOME" loopsmith bootstrap --version "$RELEASE_VERSION"
+          export CODEX_HOME="$BUNDLE_CODEX_HOME"
           python "$BUNDLE_CODEX_HOME/agentctl/agentctl.py" doctor --json
           python "$BUNDLE_CODEX_HOME/agentctl/agentctl.py" self-check --json
