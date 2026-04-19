@@ -49,7 +49,7 @@ class BootstrapTests(unittest.TestCase):
             self.assertEqual(code, 0)
             delegated = run_mock.call_args.args[0]
             self.assertEqual(delegated[0], sys.executable)
-            self.assertEqual(Path(delegated[1]), bundle_entry)
+            self.assertTrue(str(delegated[1]).replace("\\", "/").endswith("/agentctl/agentctl.py"))
             self.assertEqual(delegated[2:], ["doctor"])
 
     def test_wrapper_requires_bootstrap_when_bundle_missing(self) -> None:

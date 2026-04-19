@@ -33,6 +33,16 @@ def _windows_global_cli_candidates() -> list[str]:
     return [str(path) for path in candidates if path.exists()]
 
 
+def _is_explicit_path(candidate: str) -> bool:
+    return (
+        "/" in candidate
+        or "\\" in candidate
+        or candidate.startswith(".")
+        or candidate.startswith("~")
+        or (len(candidate) >= 2 and candidate[1] == ":")
+    )
+
+
 def _candidate_paths() -> list[str]:
     values: list[str] = []
     seen: set[str] = set()
@@ -41,10 +51,10 @@ def _candidate_paths() -> list[str]:
     candidates.extend(_windows_global_cli_candidates())
     candidates.extend(DEFAULT_CANDIDATES)
     for candidate in candidates:
-        resolved = command_path(candidate) if Path(candidate).name == candidate else candidate
+        resolved = candidate if _is_explicit_path(candidate) else command_path(candidate)
         if not resolved:
             continue
-        normalized = str(Path(resolved))
+        normalized = resolved
         if normalized not in seen:
             seen.add(normalized)
             values.append(normalized)

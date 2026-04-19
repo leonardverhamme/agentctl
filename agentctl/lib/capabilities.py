@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import ntpath
 import os
 import site
 import sys
@@ -489,31 +490,36 @@ def _tool_record(name: str, *, command: str, version_args: list[str], auth_args:
     return record
 
 
-def _python_user_script_candidates(name: str) -> list[Path]:
-    userbase = Path(site.getuserbase())
-    script_dirs: list[Path]
+def _python_user_script_candidates(name: str) -> list[str]:
+    userbase = site.getuserbase()
     if os.name == "nt":
-        script_dirs = [userbase / "Scripts"]
+        script_dirs: list[str] = [ntpath.join(userbase, "Scripts")]
         usersite = site.getusersitepackages()
         if usersite:
-            script_dirs.append(Path(usersite).resolve().parent / "Scripts")
-        script_dirs.extend(candidate / "Scripts" for candidate in userbase.glob("Python*") if candidate.is_dir())
-        candidates: list[Path] = []
-        seen: set[Path] = set()
+            script_dirs.append(ntpath.join(ntpath.dirname(usersite), "Scripts"))
+        try:
+            for candidate in Path(userbase).glob("Python*"):
+                if candidate.is_dir():
+                    script_dirs.append(ntpath.join(str(candidate), "Scripts"))
+        except (OSError, NotImplementedError):
+            pass
+
+        candidates: list[str] = []
+        seen: set[str] = set()
         for scripts_dir in script_dirs:
             for candidate in (
-                scripts_dir / f"{name}.exe",
-                scripts_dir / f"{name}.cmd",
-                scripts_dir / f"{name}.bat",
-                scripts_dir / name,
+                ntpath.join(scripts_dir, f"{name}.exe"),
+                ntpath.join(scripts_dir, f"{name}.cmd"),
+                ntpath.join(scripts_dir, f"{name}.bat"),
+                ntpath.join(scripts_dir, name),
             ):
                 if candidate not in seen:
                     seen.add(candidate)
                     candidates.append(candidate)
         return candidates
 
-    scripts_dir = userbase / "bin"
-    return [scripts_dir / name]
+    scripts_dir = Path(userbase) / "bin"
+    return [str(scripts_dir / name)]
 
 
 def _detect_skills_cli() -> dict[str, Any]:
@@ -587,8 +593,8 @@ def _detect_ghas_cli() -> dict[str, Any]:
     path = command_path("ghas-cli")
     if not path:
         for candidate in _python_user_script_candidates("ghas-cli"):
-            if candidate.exists():
-                path = str(candidate)
+            if Path(candidate).exists():
+                path = candidate
                 break
 
     record: dict[str, Any] = {

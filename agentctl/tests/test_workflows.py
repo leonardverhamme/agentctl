@@ -75,11 +75,19 @@ if __name__ == "__main__":
         + "\n",
         encoding="utf-8",
     )
-    wrapper_path = root / "fake_codex.cmd"
-    wrapper_path.write_text(
-        f'@echo off\r\n"{sys.executable}" "{script_path}" %*\r\n',
-        encoding="utf-8",
-    )
+    if os.name == "nt":
+        wrapper_path = root / "fake_codex.cmd"
+        wrapper_path.write_text(
+            f'@echo off\r\n"{sys.executable}" "{script_path}" %*\r\n',
+            encoding="utf-8",
+        )
+    else:
+        wrapper_path = root / "fake_codex"
+        wrapper_path.write_text(
+            f'#!/bin/sh\n"{sys.executable}" "{script_path}" "$@"\n',
+            encoding="utf-8",
+        )
+        wrapper_path.chmod(0o755)
     return wrapper_path
 
 

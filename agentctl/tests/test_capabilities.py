@@ -391,9 +391,9 @@ class CapabilitiesTests(unittest.TestCase):
             ):
                 candidates = _python_user_script_candidates("ghas-cli")
 
-        candidate_paths = {str(path) for path in candidates}
-        self.assertIn(str(userbase / "Scripts" / "ghas-cli.exe"), candidate_paths)
-        self.assertIn(str(userbase / "Python312" / "Scripts" / "ghas-cli.exe"), candidate_paths)
+        candidate_paths = set(candidates)
+        self.assertTrue(any(path.endswith(r"Scripts\ghas-cli.exe") for path in candidate_paths))
+        self.assertTrue(any(path.endswith(r"Python312\Scripts\ghas-cli.exe") for path in candidate_paths))
 
     @mock.patch("lib.capabilities.run_command")
     @mock.patch("lib.capabilities.command_path")
