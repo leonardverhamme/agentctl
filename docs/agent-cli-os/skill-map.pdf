@@ -12,7 +12,7 @@ endobj
 << /Type /Font /Subtype /Type1 /BaseFont /Courier >>
 endobj
 5 0 obj
-<< /Length 3928 >>
+<< /Length 4010 >>
 stream
 BT
 /F1 8 Tf
@@ -34,6 +34,8 @@ T*
 T*
 (  - Agent CLI OS maintenance: $agentcli-maintenance-engineer | agentcli maintenance check) Tj
 T*
+(  - Plugin evaluation: $plugin-eval:plugin-eval | agentcli capability plugin-evaluation) Tj
+T*
 () Tj
 T*
 (Workflows:) Tj
@@ -49,6 +51,8 @@ T*
 (  - Refactor workflows: $refactor-skill, $refactor-deep-audit, $refactor-orchestrator | agentcli run refactor-deep-audit) Tj
 T*
 (  - CI/CD workflows: $cicd-skill, $cicd-deep-audit | agentcli run cicd-deep-audit) Tj
+T*
+(  - Code review: $coderabbit:coderabbit-review | agentcli capability code-review) Tj
 T*
 () Tj
 T*
@@ -136,9 +140,7 @@ T*
 T*
 () Tj
 T*
-(Commands: agentcli capabilities | agentcli capability <key> | agentcli inventory show --kind skills) Tj
-T*
-(Generated: 2026-04-20T13:10:51.945161+00:00) Tj
+(... see skill-map.md for the full generated map.) Tj
 ET
 endstream
 endobj
@@ -153,5 +155,5 @@ xref
 trailer
 << /Size 6 /Root 1 0 R >>
 startxref
-4289
+4371
 %%EOF

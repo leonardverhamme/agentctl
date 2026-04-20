@@ -123,10 +123,12 @@ def _detect_tools() -> tuple[dict[str, dict[str, Any]], list[dict[str, Any]], li
         "gh": gh,
         "gh-codeql": caps._detect_gh_codeql(gh_extensions, gh),
         "ghas-cli": caps._detect_ghas_cli(),
+        "coderabbit": caps._tool_record("coderabbit", command="coderabbit", version_args=["--version"]),
         "aws": caps._tool_record("aws", command="aws", version_args=["--version"], detect_only=True),
         "az": caps._tool_record("az", command="az", version_args=["--version"], detect_only=True),
         "gcloud": caps._tool_record("gcloud", command="gcloud", version_args=["--version"], detect_only=True),
         "firebase": caps._tool_record("firebase", command="firebase", version_args=["--version"], detect_only=True),
+        "plugin-eval": caps._detect_plugin_eval(),
         "supabase": caps._tool_record("supabase", command="supabase", version_args=["--version"]),
         "vercel": caps._tool_record("vercel", command="vercel", version_args=["--version"]),
         "playwright": caps._detect_playwright(),
@@ -276,6 +278,14 @@ def _plugin_name_from_skill_path(path: Path) -> str | None:
     return parts[0] if parts else None
 
 
+def _is_fixture_plugin_skill(path: Path) -> bool:
+    try:
+        relative = path.relative_to(PLUGINS_DIR)
+    except ValueError:
+        return False
+    return "fixtures" in relative.parts or "tests" in relative.parts
+
+
 def _plugin_items(config: dict[str, Any]) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     maps = _front_door_maps()
     items_by_name: dict[str, dict[str, Any]] = {}
@@ -331,11 +341,14 @@ def _plugin_items(config: dict[str, Any]) -> tuple[list[dict[str, Any]], list[di
     skill_items: list[dict[str, Any]] = []
     if PLUGINS_DIR.exists():
         for skill_path in sorted(PLUGINS_DIR.glob("**/skills/*/SKILL.md")):
+            if _is_fixture_plugin_skill(skill_path):
+                continue
             plugin_name = _plugin_name_from_skill_path(skill_path)
             if not plugin_name:
                 continue
             skill_name = skill_path.parent.name
             full_name = f"{plugin_name}:{skill_name}"
+            front_door_candidate = maps[SKILL_KIND].get(full_name)
             skill_items.append(
                 _inventory_item(
                     kind=SKILL_KIND,
@@ -344,9 +357,9 @@ def _plugin_items(config: dict[str, Any]) -> tuple[list[dict[str, Any]], list[di
                     status="ok",
                     installed=True,
                     source_path=str(skill_path),
-                    front_door_candidate=maps[SKILL_KIND].get(full_name),
+                    front_door_candidate=front_door_candidate,
                     menu_bucket=_menu_bucket(SKILL_KIND, PLUGIN_SCOPE),
-                    hidden_reason="plugin-provided skill is represented in raw inventory only.",
+                    hidden_reason=None if front_door_candidate else "plugin-provided skill is represented in raw inventory only.",
                 )
             )
     return sorted(items_by_name.values(), key=lambda item: item["name"]), skill_items

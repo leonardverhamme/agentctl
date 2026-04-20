@@ -28,6 +28,9 @@ Control-plane entrypoints for install health, maintenance, and unattended worker
 - `agentcli-maintenance` uses `$agentcli-maintenance-engineer` and is currently `ok`.
   - Overlap policy: Keep maintenance as one capability surface for docs, packaging, registry health, and platform drift.
   - Page: `docs/agent-cli-os/capabilities/agentcli-maintenance.md`
+- `plugin-evaluation` uses `$plugin-eval:plugin-eval` and is currently `missing`.
+  - Overlap policy: Keep plugin and skill evaluation behind one chat-first route instead of scattering analysis, budget, and benchmark commands through the default menu.
+  - Page: `docs/agent-cli-os/capabilities/plugin-evaluation.md`
 
 ### Workflows
 
@@ -51,6 +54,9 @@ Reusable repo-level workflows for UI, tests, docs, refactors, CI/CD, and context
 - `cicd-workflows` uses `$cicd-skill / $cicd-deep-audit` and is currently `ok`.
   - Overlap policy: Surface CI/CD by workflow, not by whether GitHub or Vercel provides the underlying route.
   - Page: `docs/agent-cli-os/capabilities/cicd-workflows.md`
+- `code-review` uses `$coderabbit:coderabbit-review` and is currently `missing`.
+  - Overlap policy: Keep AI-powered code review under one explicit route: the CodeRabbit plugin skill plus a callable CodeRabbit runtime.
+  - Page: `docs/agent-cli-os/capabilities/code-review.md`
 
 ### Research
 
@@ -136,10 +142,10 @@ iOS, macOS, and Android development/testing capability front doors.
   "configured_mcp_count": 0,
   "enabled_plugin_count": 0,
   "installed_skill_count": 6,
-  "local_skill_count": 38,
-  "max_group_size": 6,
-  "optional_attention_count": 7,
-  "optional_capability_count": 12,
+  "local_skill_count": 39,
+  "max_group_size": 7,
+  "optional_attention_count": 9,
+  "optional_capability_count": 14,
   "required_capability_count": 11,
   "status": "ok",
   "visible_group_count": 6
@@ -156,11 +162,13 @@ iOS, macOS, and Android development/testing capability front doors.
 - `autonomous-deep-runs`: The outer execute-until-done loop must use a real worker command, not chat memory. Prefer Codex runtime when it is callable or explicitly templated.
 - `skills-management`: Wrap official skills tooling rather than reimplementing it.
 - `agentcli-maintenance`: Keep maintenance as one capability surface for docs, packaging, registry health, and platform drift.
+- `plugin-evaluation`: Keep plugin and skill evaluation behind one chat-first route instead of scattering analysis, budget, and benchmark commands through the default menu.
 - `ui-workflows`: Surface the UI skills first; plugin support stays a backing capability, not a separate menu.
 - `test-workflows`: Collapse testing transports behind one testing surface; use repo-native CLIs and Playwright first.
 - `docs-workflows`: Keep docs work in the docs skills and hide transport details entirely.
 - `refactor-workflows`: Use the local refactor skills as the capability surface; do not split by underlying tooling.
 - `cicd-workflows`: Surface CI/CD by workflow, not by whether GitHub or Vercel provides the underlying route.
+- `code-review`: Keep AI-powered code review under one explicit route: the CodeRabbit plugin skill plus a callable CodeRabbit runtime.
 - `research`: Hide web, GitHub, and browser transport choices behind one research surface and one evidence contract.
 - `github-workflows`: Collapse GitHub plugin skills and gh into one capability entry instead of separate transport menus.
 - `github-advanced-security`: Use `gh api` and `gh codeql` as the authoritative GitHub security routes, with `ghas-cli` as the rollout-at-scale helper when it is healthy. Do not assume generic GitHub plugin skills cover GHAS-specific work.

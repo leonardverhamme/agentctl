@@ -14,6 +14,7 @@ Reusable repo-level workflows for UI, tests, docs, refactors, CI/CD, and context
 - `docs-workflows` uses `$docs-skill / $docs-deep-audit` and is currently `ok`.
 - `refactor-workflows` uses `$refactor-skill / $refactor-deep-audit` and is currently `ok`.
 - `cicd-workflows` uses `$cicd-skill / $cicd-deep-audit` and is currently `ok`.
+- `code-review` uses `$coderabbit:coderabbit-review` and is currently `missing` optional.
 
 ## Menu Budget
 

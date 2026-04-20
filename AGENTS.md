@@ -4,7 +4,7 @@
 - Use `agentcli capabilities` as the default front door. Use `agentcli inventory show` only when the raw installed or autodetected surface matters.
 - Keep the default surface compact: no flat dumps, no automatic promotion from detected tools into front-door capabilities, and no bloated capability skills.
 - Prefer `agentcli run <workflow>` for named deep workflows. Use `$loopsmith` with `agentcli loop <name>` for durable large tasks that need disk-backed state.
-- When a local front-door skill is actually being used, mention it once in chat with the literal `$skill-name` so the human can see the highlighted route.
+- When a curated front-door skill is actually being used, mention it once in chat with the literal `$skill-name` so the human can see the highlighted route. This applies to local skills and plugin-backed front doors.
 - After routing, prefer the healthiest authoritative interface that `agentcli` reports. Vendor CLIs remain authoritative for their own systems.
 - Require a real Playwright verification pass for runnable UI or browser-facing work.
 - When asked to add tests, use `$test-skill` and choose the materially needed layers.

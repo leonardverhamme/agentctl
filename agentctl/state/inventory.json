@@ -1,235 +1,1112 @@
 {
-  "schema_version": 1,
-  "generated_at": "2026-04-19T00:00:00+00:00",
-  "summary": {
-    "status": "ok",
-    "max_bucket_size": 1
-  },
-  "menu_budget": {
-    "max_items": 25
-  },
-  "tool_map": {
-    "python": {
+  "generated_at": "2026-04-20T13:24:59.510937+00:00",
+  "items": [
+    {
+      "configured": true,
+      "front_door_candidate": "$agentcli-maintenance-engineer",
+      "hidden_reason": null,
+      "id": "plugin:agent-cli-os@user",
       "installed": true,
-      "status": "ok",
-      "version": "3.12.0"
+      "kind": "plugin",
+      "menu_bucket": "plugin:user",
+      "name": "agent-cli-os",
+      "source_path": "C:\\Users\\leona\\Documents\\Playground\\agentctl\\plugins\\agent-cli-os",
+      "source_scope": "user",
+      "status": "ok"
     },
-    "npx": {
+    {
+      "front_door_candidate": null,
+      "hidden_reason": "plugin-provided skill is represented in raw inventory only.",
+      "id": "skill:agent-cli-os:agentcli-router@plugin",
       "installed": true,
-      "status": "ok",
-      "version": "10.0.0"
+      "kind": "skill",
+      "menu_bucket": "skill:plugin",
+      "name": "agent-cli-os:agentcli-router",
+      "source_path": "C:\\Users\\leona\\Documents\\Playground\\agentctl\\plugins\\agent-cli-os\\skills\\agentcli-router\\SKILL.md",
+      "source_scope": "plugin",
+      "status": "ok"
     },
-    "skills": {
+    {
+      "front_door_candidate": "$agentcli-maintenance-engineer",
+      "hidden_reason": null,
+      "id": "skill:agentcli-maintenance-engineer@repo",
       "installed": true,
+      "kind": "skill",
+      "menu_bucket": "skill:repo",
+      "name": "agentcli-maintenance-engineer",
+      "source_hint": "npx skills ls",
+      "source_scope": "repo",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": null,
+      "hidden_reason": "skill is installed but not promoted into the curated front-door menu.",
+      "id": "skill:editskill@repo",
+      "installed": true,
+      "kind": "skill",
+      "menu_bucket": "skill:repo",
+      "name": "editskill",
+      "source_hint": "npx skills ls",
+      "source_scope": "repo",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": null,
+      "hidden_reason": "skill is installed but not promoted into the curated front-door menu.",
+      "id": "skill:skill-edit-mode@repo",
+      "installed": true,
+      "kind": "skill",
+      "menu_bucket": "skill:repo",
+      "name": "skill-edit-mode",
+      "source_hint": "npx skills ls",
+      "source_scope": "repo",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": "$agentcli-maintenance-engineer",
+      "hidden_reason": null,
+      "id": "skill:agentcli-maintenance-engineer@user",
+      "installed": true,
+      "kind": "skill",
+      "menu_bucket": "skill:user:a-r",
+      "name": "agentcli-maintenance-engineer",
+      "source_hint": "npx skills ls -g",
+      "source_path": "C:\\Users\\leona\\Documents\\Playground\\agentctl\\skills\\agentcli-maintenance-engineer\\SKILL.md",
+      "source_scope": "user",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": "$android-testing-capability",
+      "hidden_reason": null,
+      "id": "skill:android-testing-capability@user",
+      "installed": true,
+      "kind": "skill",
+      "menu_bucket": "skill:user:a-r",
+      "name": "android-testing-capability",
+      "source_path": "C:\\Users\\leona\\Documents\\Playground\\agentctl\\skills\\android-testing-capability\\SKILL.md",
+      "source_scope": "user",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": "$autonomous-deep-runs-capability",
+      "hidden_reason": null,
+      "id": "skill:autonomous-deep-runs-capability@user",
+      "installed": true,
+      "kind": "skill",
+      "menu_bucket": "skill:user:a-r",
+      "name": "autonomous-deep-runs-capability",
+      "source_path": "C:\\Users\\leona\\Documents\\Playground\\agentctl\\skills\\autonomous-deep-runs-capability\\SKILL.md",
+      "source_scope": "user",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": "$browser-capability",
+      "hidden_reason": null,
+      "id": "skill:browser-capability@user",
+      "installed": true,
+      "kind": "skill",
+      "menu_bucket": "skill:user:a-r",
+      "name": "browser-capability",
+      "source_path": "C:\\Users\\leona\\Documents\\Playground\\agentctl\\skills\\browser-capability\\SKILL.md",
+      "source_scope": "user",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": "$cicd-skill / $cicd-deep-audit",
+      "hidden_reason": null,
+      "id": "skill:cicd-deep-audit@user",
+      "installed": true,
+      "kind": "skill",
+      "menu_bucket": "skill:user:a-r",
+      "name": "cicd-deep-audit",
+      "source_path": "C:\\Users\\leona\\Documents\\Playground\\agentctl\\skills\\cicd-deep-audit\\SKILL.md",
+      "source_scope": "user",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": "$cicd-skill / $cicd-deep-audit",
+      "hidden_reason": null,
+      "id": "skill:cicd-skill@user",
+      "installed": true,
+      "kind": "skill",
+      "menu_bucket": "skill:user:a-r",
+      "name": "cicd-skill",
+      "source_path": "C:\\Users\\leona\\Documents\\Playground\\agentctl\\skills\\cicd-skill\\SKILL.md",
+      "source_scope": "user",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": "$context-skill",
+      "hidden_reason": null,
+      "id": "skill:context-skill@user",
+      "installed": true,
+      "kind": "skill",
+      "menu_bucket": "skill:user:a-r",
+      "name": "context-skill",
+      "source_path": "C:\\Users\\leona\\Documents\\Playground\\agentctl\\skills\\context-skill\\SKILL.md",
+      "source_scope": "user",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": null,
+      "hidden_reason": "skill is installed but not promoted into the curated front-door menu.",
+      "id": "skill:doc@user",
+      "installed": true,
+      "kind": "skill",
+      "menu_bucket": "skill:user:a-r",
+      "name": "doc",
+      "source_hint": "npx skills ls -g",
+      "source_scope": "user",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": "$docs-skill / $docs-deep-audit",
+      "hidden_reason": null,
+      "id": "skill:docs-deep-audit@user",
+      "installed": true,
+      "kind": "skill",
+      "menu_bucket": "skill:user:a-r",
+      "name": "docs-deep-audit",
+      "source_path": "C:\\Users\\leona\\Documents\\Playground\\agentctl\\skills\\docs-deep-audit\\SKILL.md",
+      "source_scope": "user",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": "$docs-skill / $docs-deep-audit",
+      "hidden_reason": null,
+      "id": "skill:docs-skill@user",
+      "installed": true,
+      "kind": "skill",
+      "menu_bucket": "skill:user:a-r",
+      "name": "docs-skill",
+      "source_path": "C:\\Users\\leona\\Documents\\Playground\\agentctl\\skills\\docs-skill\\SKILL.md",
+      "source_scope": "user",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": null,
+      "hidden_reason": "skill is installed but not promoted into the curated front-door menu.",
+      "id": "skill:editskill@user",
+      "installed": true,
+      "kind": "skill",
+      "menu_bucket": "skill:user:a-r",
+      "name": "editskill",
+      "source_hint": "npx skills ls -g",
+      "source_path": "C:\\Users\\leona\\Documents\\Playground\\agentctl\\skills\\editskill\\SKILL.md",
+      "source_scope": "user",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": "$figma-capability",
+      "hidden_reason": null,
+      "id": "skill:figma-capability@user",
+      "installed": true,
+      "kind": "skill",
+      "menu_bucket": "skill:user:a-r",
+      "name": "figma-capability",
+      "source_path": "C:\\Users\\leona\\Documents\\Playground\\agentctl\\skills\\figma-capability\\SKILL.md",
+      "source_scope": "user",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": "$github-capability",
+      "hidden_reason": null,
+      "id": "skill:github-capability@user",
+      "installed": true,
+      "kind": "skill",
+      "menu_bucket": "skill:user:a-r",
+      "name": "github-capability",
+      "source_path": "C:\\Users\\leona\\Documents\\Playground\\agentctl\\skills\\github-capability\\SKILL.md",
+      "source_scope": "user",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": "$research-capability",
+      "hidden_reason": null,
+      "id": "skill:github-researcher@user",
+      "installed": true,
+      "kind": "skill",
+      "menu_bucket": "skill:user:a-r",
+      "name": "github-researcher",
+      "source_path": "C:\\Users\\leona\\Documents\\Playground\\agentctl\\skills\\github-researcher\\SKILL.md",
+      "source_scope": "user",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": "$github-security-capability",
+      "hidden_reason": null,
+      "id": "skill:github-security-capability@user",
+      "installed": true,
+      "kind": "skill",
+      "menu_bucket": "skill:user:a-r",
+      "name": "github-security-capability",
+      "source_path": "C:\\Users\\leona\\Documents\\Playground\\agentctl\\skills\\github-security-capability\\SKILL.md",
+      "source_scope": "user",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": "$research-capability",
+      "hidden_reason": null,
+      "id": "skill:internet-researcher@user",
+      "installed": true,
+      "kind": "skill",
+      "menu_bucket": "skill:user:a-r",
+      "name": "internet-researcher",
+      "source_path": "C:\\Users\\leona\\Documents\\Playground\\agentctl\\skills\\internet-researcher\\SKILL.md",
+      "source_scope": "user",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": "$ios-development-capability",
+      "hidden_reason": null,
+      "id": "skill:ios-development-capability@user",
+      "installed": true,
+      "kind": "skill",
+      "menu_bucket": "skill:user:a-r",
+      "name": "ios-development-capability",
+      "source_path": "C:\\Users\\leona\\Documents\\Playground\\agentctl\\skills\\ios-development-capability\\SKILL.md",
+      "source_scope": "user",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": "$loopsmith",
+      "hidden_reason": null,
+      "id": "skill:loopsmith@user",
+      "installed": true,
+      "kind": "skill",
+      "menu_bucket": "skill:user:a-r",
+      "name": "loopsmith",
+      "source_path": "C:\\Users\\leona\\Documents\\Playground\\agentctl\\skills\\loopsmith\\SKILL.md",
+      "source_scope": "user",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": "$macos-development-capability",
+      "hidden_reason": null,
+      "id": "skill:macos-development-capability@user",
+      "installed": true,
+      "kind": "skill",
+      "menu_bucket": "skill:user:a-r",
+      "name": "macos-development-capability",
+      "source_path": "C:\\Users\\leona\\Documents\\Playground\\agentctl\\skills\\macos-development-capability\\SKILL.md",
+      "source_scope": "user",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": "$nextjs-runtime-capability",
+      "hidden_reason": null,
+      "id": "skill:nextjs-runtime-capability@user",
+      "installed": true,
+      "kind": "skill",
+      "menu_bucket": "skill:user:a-r",
+      "name": "nextjs-runtime-capability",
+      "source_path": "C:\\Users\\leona\\Documents\\Playground\\agentctl\\skills\\nextjs-runtime-capability\\SKILL.md",
+      "source_scope": "user",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": null,
+      "hidden_reason": "skill is installed but not promoted into the curated front-door menu.",
+      "id": "skill:pdf@user",
+      "installed": true,
+      "kind": "skill",
+      "menu_bucket": "skill:user:a-r",
+      "name": "pdf",
+      "source_hint": "npx skills ls -g",
+      "source_scope": "user",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": "$browser-capability",
+      "hidden_reason": null,
+      "id": "skill:playwright@user",
+      "installed": true,
+      "kind": "skill",
+      "menu_bucket": "skill:user:a-r",
+      "name": "playwright",
+      "source_path": "C:\\Users\\leona\\Documents\\Playground\\agentctl\\skills\\playwright\\SKILL.md",
+      "source_scope": "user",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": "$refactor-skill / $refactor-deep-audit",
+      "hidden_reason": null,
+      "id": "skill:refactor-deep-audit@user",
+      "installed": true,
+      "kind": "skill",
+      "menu_bucket": "skill:user:a-r",
+      "name": "refactor-deep-audit",
+      "source_path": "C:\\Users\\leona\\Documents\\Playground\\agentctl\\skills\\refactor-deep-audit\\SKILL.md",
+      "source_scope": "user",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": "$refactor-skill / $refactor-deep-audit",
+      "hidden_reason": null,
+      "id": "skill:refactor-orchestrator@user",
+      "installed": true,
+      "kind": "skill",
+      "menu_bucket": "skill:user:a-r",
+      "name": "refactor-orchestrator",
+      "source_path": "C:\\Users\\leona\\Documents\\Playground\\agentctl\\skills\\refactor-orchestrator\\SKILL.md",
+      "source_scope": "user",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": "$refactor-skill / $refactor-deep-audit",
+      "hidden_reason": null,
+      "id": "skill:refactor-skill@user",
+      "installed": true,
+      "kind": "skill",
+      "menu_bucket": "skill:user:a-r",
+      "name": "refactor-skill",
+      "source_path": "C:\\Users\\leona\\Documents\\Playground\\agentctl\\skills\\refactor-skill\\SKILL.md",
+      "source_scope": "user",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": "$research-capability",
+      "hidden_reason": null,
+      "id": "skill:research-capability@user",
+      "installed": true,
+      "kind": "skill",
+      "menu_bucket": "skill:user:r-w",
+      "name": "research-capability",
+      "source_path": "C:\\Users\\leona\\Documents\\Playground\\agentctl\\skills\\research-capability\\SKILL.md",
+      "source_scope": "user",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": "$sentry-capability",
+      "hidden_reason": null,
+      "id": "skill:sentry-capability@user",
+      "installed": true,
+      "kind": "skill",
+      "menu_bucket": "skill:user:r-w",
+      "name": "sentry-capability",
+      "source_path": "C:\\Users\\leona\\Documents\\Playground\\agentctl\\skills\\sentry-capability\\SKILL.md",
+      "source_scope": "user",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": null,
+      "hidden_reason": "skill is installed but not promoted into the curated front-door menu.",
+      "id": "skill:skill-edit-mode@user",
+      "installed": true,
+      "kind": "skill",
+      "menu_bucket": "skill:user:r-w",
+      "name": "skill-edit-mode",
+      "source_hint": "npx skills ls -g",
+      "source_path": "C:\\Users\\leona\\Documents\\Playground\\agentctl\\skills\\skill-edit-mode\\SKILL.md",
+      "source_scope": "user",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": "$skills-management-capability",
+      "hidden_reason": null,
+      "id": "skill:skills-management-capability@user",
+      "installed": true,
+      "kind": "skill",
+      "menu_bucket": "skill:user:r-w",
+      "name": "skills-management-capability",
+      "source_path": "C:\\Users\\leona\\Documents\\Playground\\agentctl\\skills\\skills-management-capability\\SKILL.md",
+      "source_scope": "user",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": null,
+      "hidden_reason": "skill is installed but not promoted into the curated front-door menu.",
+      "id": "skill:sora@user",
+      "installed": true,
+      "kind": "skill",
+      "menu_bucket": "skill:user:r-w",
+      "name": "sora",
+      "source_hint": "npx skills ls -g",
+      "source_scope": "user",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": "$stripe-capability",
+      "hidden_reason": null,
+      "id": "skill:stripe-capability@user",
+      "installed": true,
+      "kind": "skill",
+      "menu_bucket": "skill:user:r-w",
+      "name": "stripe-capability",
+      "source_path": "C:\\Users\\leona\\Documents\\Playground\\agentctl\\skills\\stripe-capability\\SKILL.md",
+      "source_scope": "user",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": "$supabase-capability",
+      "hidden_reason": null,
+      "id": "skill:supabase-capability@user",
+      "installed": true,
+      "kind": "skill",
+      "menu_bucket": "skill:user:r-w",
+      "name": "supabase-capability",
+      "source_path": "C:\\Users\\leona\\Documents\\Playground\\agentctl\\skills\\supabase-capability\\SKILL.md",
+      "source_scope": "user",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": "$test-skill / $test-deep-audit",
+      "hidden_reason": null,
+      "id": "skill:test-deep-audit@user",
+      "installed": true,
+      "kind": "skill",
+      "menu_bucket": "skill:user:r-w",
+      "name": "test-deep-audit",
+      "source_path": "C:\\Users\\leona\\Documents\\Playground\\agentctl\\skills\\test-deep-audit\\SKILL.md",
+      "source_scope": "user",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": "$test-skill / $test-deep-audit",
+      "hidden_reason": null,
+      "id": "skill:test-skill@user",
+      "installed": true,
+      "kind": "skill",
+      "menu_bucket": "skill:user:r-w",
+      "name": "test-skill",
+      "source_path": "C:\\Users\\leona\\Documents\\Playground\\agentctl\\skills\\test-skill\\SKILL.md",
+      "source_scope": "user",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": "$ui-skill / $ui-deep-audit",
+      "hidden_reason": null,
+      "id": "skill:ui-deep-audit@user",
+      "installed": true,
+      "kind": "skill",
+      "menu_bucket": "skill:user:r-w",
+      "name": "ui-deep-audit",
+      "source_path": "C:\\Users\\leona\\Documents\\Playground\\agentctl\\skills\\ui-deep-audit\\SKILL.md",
+      "source_scope": "user",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": "$ui-skill / $ui-deep-audit",
+      "hidden_reason": null,
+      "id": "skill:ui-skill@user",
+      "installed": true,
+      "kind": "skill",
+      "menu_bucket": "skill:user:r-w",
+      "name": "ui-skill",
+      "source_path": "C:\\Users\\leona\\Documents\\Playground\\agentctl\\skills\\ui-skill\\SKILL.md",
+      "source_scope": "user",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": "$vercel-capability",
+      "hidden_reason": null,
+      "id": "skill:vercel-capability@user",
+      "installed": true,
+      "kind": "skill",
+      "menu_bucket": "skill:user:r-w",
+      "name": "vercel-capability",
+      "source_path": "C:\\Users\\leona\\Documents\\Playground\\agentctl\\skills\\vercel-capability\\SKILL.md",
+      "source_scope": "user",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": "$research-capability",
+      "hidden_reason": null,
+      "id": "skill:web-github-scout@user",
+      "installed": true,
+      "kind": "skill",
+      "menu_bucket": "skill:user:r-w",
+      "name": "web-github-scout",
+      "source_path": "C:\\Users\\leona\\Documents\\Playground\\agentctl\\skills\\web-github-scout\\SKILL.md",
+      "source_scope": "user",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": null,
+      "hidden_reason": "detected for diagnostics only; no curated front door is registered yet.",
+      "id": "tool:aws@system",
+      "installed": false,
+      "kind": "tool",
+      "menu_bucket": "tool:system",
+      "name": "aws",
+      "source_hint": "aws",
+      "source_scope": "system",
+      "status": "missing"
+    },
+    {
+      "front_door_candidate": null,
+      "hidden_reason": "detected for diagnostics only; no curated front door is registered yet.",
+      "id": "tool:az@system",
+      "installed": false,
+      "kind": "tool",
+      "menu_bucket": "tool:system",
+      "name": "az",
+      "source_hint": "az",
+      "source_scope": "system",
+      "status": "missing"
+    },
+    {
+      "front_door_candidate": "$coderabbit:coderabbit-review",
+      "hidden_reason": null,
+      "id": "tool:coderabbit@system",
+      "installed": false,
+      "kind": "tool",
+      "menu_bucket": "tool:system",
+      "name": "coderabbit",
+      "source_hint": "coderabbit",
+      "source_scope": "system",
+      "status": "missing"
+    },
+    {
+      "front_door_candidate": "$autonomous-deep-runs-capability",
+      "hidden_reason": null,
+      "id": "tool:codex@system",
+      "installed": true,
+      "kind": "tool",
+      "menu_bucket": "tool:system",
+      "name": "codex",
+      "source_path": "C:\\Users\\leona\\AppData\\Roaming\\npm\\codex.cmd",
+      "source_scope": "system",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": null,
+      "hidden_reason": "detected for diagnostics only; no curated front door is registered yet.",
+      "id": "tool:docker@system",
+      "installed": true,
+      "kind": "tool",
+      "menu_bucket": "tool:system",
+      "name": "docker",
+      "source_hint": "docker",
+      "source_path": "C:\\Program Files\\Docker\\Docker\\resources\\bin\\docker.EXE",
+      "source_scope": "system",
+      "status": "ok",
+      "version": "Docker version 28.5.2, build ecc6942"
+    },
+    {
+      "front_door_candidate": null,
+      "hidden_reason": "detected for diagnostics only; no curated front door is registered yet.",
+      "id": "tool:firebase@system",
+      "installed": true,
+      "kind": "tool",
+      "menu_bucket": "tool:system",
+      "name": "firebase",
+      "source_hint": "firebase",
+      "source_path": "C:\\Users\\leona\\AppData\\Roaming\\npm\\firebase.CMD",
+      "source_scope": "system",
+      "status": "ok",
+      "version": "15.7.0"
+    },
+    {
+      "front_door_candidate": null,
+      "hidden_reason": "detected for diagnostics only; no curated front door is registered yet.",
+      "id": "tool:gcloud@system",
+      "installed": true,
+      "kind": "tool",
+      "menu_bucket": "tool:system",
+      "name": "gcloud",
+      "source_hint": "gcloud",
+      "source_path": "C:\\Program Files (x86)\\Google\\Cloud SDK\\google-cloud-sdk\\bin\\gcloud.CMD",
+      "source_scope": "system",
+      "status": "ok",
+      "version": "Google Cloud SDK 557.0.0"
+    },
+    {
+      "front_door_candidate": "$github-capability",
+      "hidden_reason": null,
+      "id": "tool:gh@system",
+      "installed": true,
+      "kind": "tool",
+      "menu_bucket": "tool:system",
+      "name": "gh",
+      "source_hint": "gh",
+      "source_path": "C:\\Program Files\\GitHub CLI\\gh.EXE",
+      "source_scope": "system",
+      "status": "ok",
+      "version": "gh version 2.87.2 (2026-02-20)"
+    },
+    {
+      "front_door_candidate": "$github-security-capability",
+      "hidden_reason": null,
+      "id": "tool:gh-codeql@system",
+      "installed": true,
+      "kind": "tool",
+      "menu_bucket": "tool:system",
+      "name": "gh-codeql",
+      "source_hint": "gh codeql",
+      "source_path": "C:\\Program Files\\GitHub CLI\\gh.EXE",
+      "source_scope": "system",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": "$github-security-capability",
+      "hidden_reason": null,
+      "id": "tool:ghas-cli@system",
+      "installed": true,
+      "kind": "tool",
+      "menu_bucket": "tool:system",
+      "name": "ghas-cli",
+      "source_hint": "ghas-cli",
+      "source_path": "C:\\Users\\leona\\AppData\\Roaming\\npm\\ghas-cli.CMD",
+      "source_scope": "system",
+      "status": "ok",
+      "version": "Usage: cli.py [OPTIONS] COMMAND [ARGS]..."
+    },
+    {
+      "front_door_candidate": null,
+      "hidden_reason": "detected for diagnostics only; no curated front door is registered yet.",
+      "id": "tool:node@system",
+      "installed": true,
+      "kind": "tool",
+      "menu_bucket": "tool:system",
+      "name": "node",
+      "source_hint": "node",
+      "source_path": "C:\\Program Files\\nodejs\\node.EXE",
+      "source_scope": "system",
+      "status": "ok",
+      "version": "v24.13.1"
+    },
+    {
+      "front_door_candidate": "$skills-management-capability",
+      "hidden_reason": null,
+      "id": "tool:npx@system",
+      "installed": true,
+      "kind": "tool",
+      "menu_bucket": "tool:system",
+      "name": "npx",
+      "source_hint": "npx",
+      "source_path": "C:\\Program Files\\nodejs\\npx.CMD",
+      "source_scope": "system",
+      "status": "ok",
+      "version": "11.8.0"
+    },
+    {
+      "front_door_candidate": "$browser-capability",
+      "hidden_reason": null,
+      "id": "tool:playwright@system",
+      "installed": true,
+      "kind": "tool",
+      "menu_bucket": "tool:system",
+      "name": "playwright",
+      "source_hint": "python playwright_cli.py",
+      "source_path": "C:\\Users\\leona\\.codex\\agentctl\\playwright_cli.py",
+      "source_scope": "system",
+      "status": "ok"
+    },
+    {
+      "front_door_candidate": "$plugin-eval:plugin-eval",
+      "hidden_reason": null,
+      "id": "tool:plugin-eval@system",
+      "installed": true,
+      "kind": "tool",
+      "menu_bucket": "tool:system",
+      "name": "plugin-eval",
+      "source_hint": "node \"C:\\Users\\leona\\.codex\\plugins\\cache\\openai-curated\\plugin-eval\\b1986b3d3da5bb8a04d3cb1e69af5a29bb5c2c04\\scripts\\plugin-eval.js\"",
+      "source_path": "C:\\Users\\leona\\.codex\\plugins\\cache\\openai-curated\\plugin-eval\\b1986b3d3da5bb8a04d3cb1e69af5a29bb5c2c04\\scripts\\plugin-eval.js",
+      "source_scope": "system",
+      "status": "ok",
+      "version": "bundled 0.1.0"
+    },
+    {
+      "front_door_candidate": null,
+      "hidden_reason": "detected for diagnostics only; no curated front door is registered yet.",
+      "id": "tool:python@system",
+      "installed": true,
+      "kind": "tool",
+      "menu_bucket": "tool:system",
+      "name": "python",
+      "source_hint": "python",
+      "source_path": "C:\\Users\\leona\\AppData\\Local\\Microsoft\\WindowsApps\\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\\python.exe",
+      "source_scope": "system",
+      "status": "ok",
+      "version": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]"
+    },
+    {
+      "front_door_candidate": "$skills-management-capability",
+      "hidden_reason": null,
+      "id": "tool:skills@system",
+      "installed": true,
+      "kind": "tool",
+      "menu_bucket": "tool:system",
+      "name": "skills",
+      "source_hint": "npx",
+      "source_path": "C:\\Program Files\\nodejs\\npx.CMD",
+      "source_scope": "system",
       "status": "ok",
       "version": "1.5.1"
     },
-    "codex": {
+    {
+      "front_door_candidate": "$supabase-capability",
+      "hidden_reason": null,
+      "id": "tool:supabase@system",
       "installed": true,
+      "kind": "tool",
+      "menu_bucket": "tool:system",
+      "name": "supabase",
+      "source_hint": "supabase",
+      "source_path": "C:\\Users\\leona\\AppData\\Roaming\\npm\\supabase.CMD",
+      "source_scope": "system",
       "status": "ok",
+      "version": "2.75.0"
+    },
+    {
+      "front_door_candidate": "$vercel-capability",
+      "hidden_reason": null,
+      "id": "tool:vercel@system",
+      "installed": true,
+      "kind": "tool",
+      "menu_bucket": "tool:system",
+      "name": "vercel",
+      "source_hint": "vercel",
+      "source_path": "C:\\Users\\leona\\AppData\\Roaming\\npm\\vercel.CMD",
+      "source_scope": "system",
+      "status": "ok",
+      "version": "50.25.1"
+    }
+  ],
+  "menu_buckets": [
+    {
+      "base_bucket": "plugin:user",
+      "count": 1,
+      "item_ids": [
+        "plugin:agent-cli-os@user"
+      ],
+      "key": "plugin:user",
+      "split": false
+    },
+    {
+      "base_bucket": "skill:plugin",
+      "count": 1,
+      "item_ids": [
+        "skill:agent-cli-os:agentcli-router@plugin"
+      ],
+      "key": "skill:plugin",
+      "split": false
+    },
+    {
+      "base_bucket": "skill:repo",
+      "count": 3,
+      "item_ids": [
+        "skill:agentcli-maintenance-engineer@repo",
+        "skill:editskill@repo",
+        "skill:skill-edit-mode@repo"
+      ],
+      "key": "skill:repo",
+      "split": false
+    },
+    {
+      "base_bucket": "skill:user",
+      "count": 25,
+      "item_ids": [
+        "skill:agentcli-maintenance-engineer@user",
+        "skill:android-testing-capability@user",
+        "skill:autonomous-deep-runs-capability@user",
+        "skill:browser-capability@user",
+        "skill:cicd-deep-audit@user",
+        "skill:cicd-skill@user",
+        "skill:context-skill@user",
+        "skill:doc@user",
+        "skill:docs-deep-audit@user",
+        "skill:docs-skill@user",
+        "skill:editskill@user",
+        "skill:figma-capability@user",
+        "skill:github-capability@user",
+        "skill:github-researcher@user",
+        "skill:github-security-capability@user",
+        "skill:internet-researcher@user",
+        "skill:ios-development-capability@user",
+        "skill:loopsmith@user",
+        "skill:macos-development-capability@user",
+        "skill:nextjs-runtime-capability@user",
+        "skill:pdf@user",
+        "skill:playwright@user",
+        "skill:refactor-deep-audit@user",
+        "skill:refactor-orchestrator@user",
+        "skill:refactor-skill@user"
+      ],
+      "key": "skill:user:a-r",
+      "split": true
+    },
+    {
+      "base_bucket": "skill:user",
+      "count": 13,
+      "item_ids": [
+        "skill:research-capability@user",
+        "skill:sentry-capability@user",
+        "skill:skill-edit-mode@user",
+        "skill:skills-management-capability@user",
+        "skill:sora@user",
+        "skill:stripe-capability@user",
+        "skill:supabase-capability@user",
+        "skill:test-deep-audit@user",
+        "skill:test-skill@user",
+        "skill:ui-deep-audit@user",
+        "skill:ui-skill@user",
+        "skill:vercel-capability@user",
+        "skill:web-github-scout@user"
+      ],
+      "key": "skill:user:r-w",
+      "split": true
+    },
+    {
+      "base_bucket": "tool:system",
+      "count": 18,
+      "item_ids": [
+        "tool:aws@system",
+        "tool:az@system",
+        "tool:coderabbit@system",
+        "tool:codex@system",
+        "tool:docker@system",
+        "tool:firebase@system",
+        "tool:gcloud@system",
+        "tool:gh@system",
+        "tool:gh-codeql@system",
+        "tool:ghas-cli@system",
+        "tool:node@system",
+        "tool:npx@system",
+        "tool:playwright@system",
+        "tool:plugin-eval@system",
+        "tool:python@system",
+        "tool:skills@system",
+        "tool:supabase@system",
+        "tool:vercel@system"
+      ],
+      "key": "tool:system",
+      "split": false
+    }
+  ],
+  "menu_budget": {
+    "max_items": 25
+  },
+  "repo_root": "C:\\Users\\leona\\Documents\\Playground\\agentctl",
+  "schema_version": 1,
+  "sources": [
+    {
+      "detail": "18 detected tools",
+      "name": "tools",
+      "status": "ok"
+    },
+    {
+      "detail": "",
+      "name": "skills-global",
+      "status": "ok"
+    },
+    {
+      "detail": "3 project skills",
+      "name": "skills-project",
+      "status": "ok"
+    }
+  ],
+  "summary": {
+    "bucket_count": 6,
+    "hidden_count": 15,
+    "kind_counts": {
+      "plugin": 1,
+      "skill": 42,
+      "tool": 18
+    },
+    "max_bucket_size": 25,
+    "status": "ok",
+    "total_items": 61
+  },
+  "tool_map": {
+    "aws": {
+      "auth": "unknown",
+      "command": "aws",
+      "detect_only": true,
+      "installed": false,
+      "name": "aws",
+      "path": null,
+      "status": "missing",
+      "version": null
+    },
+    "az": {
+      "auth": "unknown",
+      "command": "az",
+      "detect_only": true,
+      "installed": false,
+      "name": "az",
+      "path": null,
+      "status": "missing",
+      "version": null
+    },
+    "coderabbit": {
+      "auth": "unknown",
+      "command": "coderabbit",
+      "detect_only": false,
+      "installed": false,
+      "name": "coderabbit",
+      "path": null,
+      "status": "missing",
+      "version": null
+    },
+    "codex": {
+      "builtin_worker_wrapper": "C:\\Users\\leona\\Documents\\Playground\\agentctl\\agentctl\\codex_worker.py",
+      "call_detail": "Codex CLI\n\nIf no subcommand is specified, options will be forwarded to the interactive CLI.\n\nUsage: codex [OPTIONS] [PROMPT]\n       codex [OPTIONS] <COMMAND> [ARGS]\n\nCommands:\n  exec         Run Codex non-interactively [aliases: e]\n  review       Run a code review non-interactively\n  login        Manage login\n  logout       Remove stored authentication credentials\n  mcp          Manage external MCP servers for Codex\n  marketplace  Manage plugin marketplaces for Codex\n  mcp-server   Start Codex as an MCP server (stdio)\n  app-server   [experimental] Run the app server or related tooling\n  completion   Generate shell completion scripts\n  sandbox      Run commands within a Codex-provided sandbox\n  debug        Debugging tools\n  apply        Apply the latest diff produced by Codex agent as a `git apply` to your local working\n               tree [aliases: a]\n  resume       Resume a previous interactive session (picker by default; use --last to continue the\n               most recent)\n  fork         Fork a previous interactive session (picker by default; use --last to fork the most\n               recent)\n  cloud        [EXPERIMENTAL] Browse tasks from Codex Cloud and apply changes locally\n  exec-server  [EXPERIMENTAL] Run the standalone exec-server service\n  features     Inspect feature flags\n  help         Print this message or the help of the given subcommand(s)\n\nArguments:\n  [PROMPT]\n          Optional user prompt to start the session\n\nOptions:\n  -c, --config <key=value>\n          Override a configuration value that would otherwise be loaded from `~/.codex/config.toml`.\n          Use a dotted path (`foo.bar.baz`) to override nested values. The `value` portion is parsed\n          as TOML. If it fails to parse as TOML, the raw string is used as a literal.\n          \n          Examples: - `-c model=\"o3\"` - `-c 'sandbox_permissions=[\"disk-full-read-access\"]'` - `-c\n          shell_environment_policy.inherit=all`\n\n      --enable <FEATURE>\n          Enable a feature (repeatable). Equivalent to `-c features.<name>=true`\n\n      --disable <FEATURE>\n          Disable a feature (repeatable). Equivalent to `-c features.<name>=false`\n\n      --remote <ADDR>\n          Connect the TUI to a remote app server websocket endpoint.\n          \n          Accepted forms: `ws://host:port` or `wss://host:port`.\n\n      --remote-auth-token-env <ENV_VAR>\n          Name of the environment variable containing the bearer token to send to a remote app\n          server websocket\n\n  -i, --image <FILE>...\n          Optional image(s) to attach to the initial prompt\n\n  -m, --model <MODEL>\n          Model the agent should use\n\n      --oss\n          Convenience flag to select the local open source model provider. Equivalent to -c\n          model_provider=oss; verifies a local LM Studio or Ollama server is running\n\n      --local-provider <OSS_PROVIDER>\n          Specify which local provider to use (lmstudio or ollama). If not specified with --oss,\n          will use config default or show selection\n\n  -p, --profile <CONFIG_PROFILE>\n          Configuration profile from config.toml to specify default options\n\n  -s, --sandbox <SANDBOX_MODE>\n          Select the sandbox policy to use when executing model-generated shell commands\n          \n          [possible values: read-only, workspace-write, danger-full-access]\n\n  -a, --ask-for-approval <APPROVAL_POLICY>\n          Configure when the model requires human approval before executing a command\n\n          Possible values:\n          - untrusted:  Only run \"trusted\" commands (e.g. ls, cat, sed) without asking for user\n            approval. Will escalate to the user if the model proposes a command that is not in the\n            \"trusted\" set\n          - on-failure: DEPRECATED: Run all commands without asking for user approval. Only asks for\n            approval if a command fails to execute, in which case it will escalate to the user to\n            ask for un-sandboxed execution. Prefer `on-request` for interactive runs or `never` for\n            non-interactive runs\n          - on-request: The model decides when to ask the user for approval\n          - never:      Never ask for user approval Execution failures are immediately returned to\n            the model\n\n      --full-auto\n          Convenience alias for low-friction sandboxed automatic execution (-a on-request, --sandbox\n          workspace-write)\n\n      --dangerously-bypass-approvals-and-sandbox\n          Skip all confirmation prompts and execute commands without sandboxing. EXTREMELY\n          DANGEROUS. Intended solely for running in environments that are externally sandboxed\n\n  -C, --cd <DIR>\n          Tell the agent to use the specified directory as its working root. In remote mode, the\n          path is forwarded to the server and resolved there\n\n      --search\n          Enable live web search. When enabled, the native Responses `web_search` tool is available\n          to the model (no per\u2011call approval)\n\n      --add-dir <DIR>\n          Additional directories that should be writable alongside the primary workspace\n\n      --no-alt-screen\n          Disable alternate screen mode\n          \n          Runs the TUI in inline mode, preserving terminal scrollback history. This is useful in\n          terminal multiplexers like Zellij that follow the xterm spec strictly and disable\n          scrollback in alternate screen buffers.\n\n  -h, --help\n          Print help (see a summary with '-h')\n\n  -V, --version\n          Print version",
       "callable": true,
+      "candidates": [
+        "C:\\Users\\leona\\AppData\\Roaming\\npm\\codex.cmd",
+        "C:\\Users\\leona\\AppData\\Roaming\\npm\\codex.ps1",
+        "C:\\Users\\leona\\AppData\\Roaming\\npm\\codex",
+        "C:\\Users\\leona\\AppData\\Roaming\\npm\\codex.CMD",
+        "C:\\Program Files\\WindowsApps\\OpenAI.Codex_26.409.7971.0_x64__2p2nqsd0c76g0\\app\\resources\\codex.exe"
+      ],
+      "installed": true,
+      "name": "codex",
+      "path": "C:\\Users\\leona\\AppData\\Roaming\\npm\\codex.cmd",
+      "path_env": "AGENTCTL_CODEX_PATH",
+      "status": "ok",
+      "template_configured": false,
+      "template_env": "AGENTCTL_CODEX_WORKER_TEMPLATE",
       "worker_runtime_ready": true
     },
-    "gh": {
+    "docker": {
+      "auth": "unknown",
+      "command": "docker",
+      "detect_only": false,
       "installed": true,
+      "name": "docker",
+      "path": "C:\\Program Files\\Docker\\Docker\\resources\\bin\\docker.EXE",
       "status": "ok",
-      "skill_supported": false
+      "version": "Docker version 28.5.2, build ecc6942"
+    },
+    "firebase": {
+      "auth": "unknown",
+      "command": "firebase",
+      "detect_only": true,
+      "installed": true,
+      "name": "firebase",
+      "path": "C:\\Users\\leona\\AppData\\Roaming\\npm\\firebase.CMD",
+      "status": "ok",
+      "version": "15.7.0"
+    },
+    "gcloud": {
+      "auth": "unknown",
+      "command": "gcloud",
+      "detect_only": true,
+      "installed": true,
+      "name": "gcloud",
+      "path": "C:\\Program Files (x86)\\Google\\Cloud SDK\\google-cloud-sdk\\bin\\gcloud.CMD",
+      "status": "ok",
+      "version": "Google Cloud SDK 557.0.0"
+    },
+    "gh": {
+      "auth": "ok",
+      "auth_detail": "github.com",
+      "command": "gh",
+      "detect_only": false,
+      "installed": true,
+      "name": "gh",
+      "path": "C:\\Program Files\\GitHub CLI\\gh.EXE",
+      "skill_detail": "Unknown help topic [`skill`]\nUsage:  gh <command> <subcommand> [flags]\n\nAvailable commands:\n  agent-task\n  alias\n  api\n  attestation\n  auth\n  browse\n  cache\n  co\n  codeql\n  codespace\n  completion\n  config\n  copilot\n  extension\n  gist\n  gpg-key\n  issue\n  label\n  licenses\n  org\n  pr\n  preview\n  project\n  release\n  repo\n  ruleset\n  run\n  search\n  secret\n  ssh-key\n  status\n  variable\n  workflow",
+      "skill_supported": false,
+      "status": "ok",
+      "version": "gh version 2.87.2 (2026-02-20)"
     },
     "gh-codeql": {
+      "command": "gh codeql",
       "installed": true,
+      "name": "gh-codeql",
+      "path": "C:\\Program Files\\GitHub CLI\\gh.EXE",
+      "repo": "github/gh-codeql",
+      "revision": "cb1d8f37",
       "status": "ok"
     },
     "ghas-cli": {
+      "auth": "unknown",
+      "callable": true,
+      "command": "ghas-cli",
       "installed": true,
+      "name": "ghas-cli",
+      "path": "C:\\Users\\leona\\AppData\\Roaming\\npm\\ghas-cli.CMD",
       "status": "ok",
-      "callable": true
+      "version": "Usage: cli.py [OPTIONS] COMMAND [ARGS]..."
     },
-    "vercel": {
+    "node": {
+      "auth": "unknown",
+      "command": "node",
+      "detect_only": false,
       "installed": true,
-      "status": "ok"
+      "name": "node",
+      "path": "C:\\Program Files\\nodejs\\node.EXE",
+      "status": "ok",
+      "version": "v24.13.1"
     },
-    "supabase": {
+    "npx": {
+      "auth": "unknown",
+      "command": "npx",
+      "detect_only": false,
       "installed": true,
-      "status": "ok"
-    },
-    "firebase": {
-      "installed": false,
-      "status": "missing",
-      "detect_only": true
-    },
-    "gcloud": {
-      "installed": false,
-      "status": "missing",
-      "detect_only": true
+      "name": "npx",
+      "path": "C:\\Program Files\\nodejs\\npx.CMD",
+      "status": "ok",
+      "version": "11.8.0"
     },
     "playwright": {
+      "browser_binaries": {
+        "chrome": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+        "chromium": "C:\\Users\\leona\\AppData\\Local\\ms-playwright\\chromium-1208\\chrome-win64\\chrome.exe",
+        "msedge": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe"
+      },
+      "cmd_wrapper": "C:\\Users\\leona\\.codex\\agentctl\\playwright.cmd",
+      "command": "python playwright_cli.py",
       "installed": true,
+      "mcp_status": "unknown",
+      "name": "playwright",
+      "path": "C:\\Users\\leona\\.codex\\agentctl\\playwright_cli.py",
       "status": "ok",
+      "wrapper_detail": "playwright-cli - run playwright mcp commands from terminal\n\nUsage: playwright-cli <command> [args] [options]\nUsage: playwright-cli -s=<session> <command> [args] [options]\n\nCore:\n  open [url]                  open the browser\n  attach [name]               attach to a running playwright browser\n  close                       close the browser\n  goto <url>                  navigate to a url\n  type <text>                 type text into editable element\n  click <target> [button]     perform click on a web page\n  dblclick <target> [button]  perform double click on a web page\n  fill <target> <text>        fill text into editable element\n  drag <startElement> <endElement> perform drag and drop between two elements\n  hover <target>              hover over element on page\n  select <target> <val>       select an option in a dropdown\n  upload <file>               upload one or multiple files\n  check <target>              check a checkbox or radio button\n  uncheck <target>            uncheck a checkbox or radio button\n  snapshot [element]          capture page snapshot to obtain element ref\n  eval <func> [element]       evaluate javascript expression on page or element\n  dialog-accept [prompt]      accept a dialog\n  dialog-dismiss              dismiss a dialog\n  resize <w> <h>              resize the browser window\n  delete-data                 delete session data\n\nNavigation:\n  go-back                     go back to the previous page\n  go-forward                  go forward to the next page\n  reload                      reload the current page\n\nKeyboard:\n  press <key>                 press a key on the keyboard, `a`, `arrowleft`\n  keydown <key>               press a key down on the keyboard\n  keyup <key>                 press a key up on the keyboard\n\nMouse:\n  mousemove <x> <y>           move mouse to a given position\n  mousedown [button]          press mouse down\n  mouseup [button]            press mouse up\n  mousewheel <dx> <dy>        scroll mouse wheel\n\nSave as:\n  screenshot [target]         screenshot of the current page or element\n  pdf                         save page as pdf\n\nTabs:\n  tab-list                    list all tabs\n  tab-new [url]               create a new tab\n  tab-close [index]           close a browser tab\n  tab-select <index>          select a browser tab\n\nStorage:\n  state-load <filename>       loads browser storage (authentication) state from a file\n  state-save [filename]       saves the current storage (authentication) state to a file\n  cookie-list                 list all cookies (optionally filtered by domain/path)\n  cookie-get <name>           get a specific cookie by name\n  cookie-set <name> <value>   set a cookie with optional flags\n  cookie-delete <name>        delete a specific cookie\n  cookie-clear                clear all cookies\n  localstorage-list           list all localstorage key-value pairs\n  localstorage-get <key>      get a localstorage item by key\n  localstorage-set <key> <value> set a localstorage item\n  localstorage-delete <key>   delete a localstorage item\n  localstorage-clear          clear all localstorage\n  sessionstorage-list         list all sessionstorage key-value pairs\n  sessionstorage-get <key>    get a sessionstorage item by key\n  sessionstorage-set <key> <value> set a sessionstorage item\n  sessionstorage-delete <key> delete a sessionstorage item\n  sessionstorage-clear        clear all sessionstorage\n\nNetwork:\n  route <pattern>             mock network requests matching a url pattern\n  route-list                  list all active network routes\n  unroute [pattern]           remove routes matching a pattern (or all routes)\n  network-state-set <state>   set the browser network state to online or offline\n\nDevTools:\n  console [min-level]         list console messages\n  run-code [code]             run playwright code snippet\n  network                     list all network requests since loading the page\n  tracing-start               start trace recording\n  tracing-stop                stop trace recording\n  video-start [filename]      start video recording\n  video-stop                  stop video recording\n  video-chapter <title>       add a chapter marker to the video recording\n  show                        show browser devtools\n  pause-at <location>         run the test up to a specific location and pause there\n  resume                      resume the test execution\n  step-over                   step over the next call in the test\n\nInstall:\n  install                     initialize workspace\n  install-browser [browser]   install browser\n\nBrowser sessions:\n  list                        list browser sessions\n  close-all                   close all browser sessions\n  kill-all                    forcefully kill all browser sessions (for stale/zombie processes)\n\nGlobal options:\n  --help [command]            print help\n  --raw                       output only the result value, without status and code\n  --version                   print version",
       "wrapper_ready": true
+    },
+    "plugin-eval": {
+      "auth": "unknown",
+      "command": "node \"C:\\Users\\leona\\.codex\\plugins\\cache\\openai-curated\\plugin-eval\\b1986b3d3da5bb8a04d3cb1e69af5a29bb5c2c04\\scripts\\plugin-eval.js\"",
+      "detect_only": false,
+      "installed": true,
+      "name": "plugin-eval",
+      "path": "C:\\Users\\leona\\.codex\\plugins\\cache\\openai-curated\\plugin-eval\\b1986b3d3da5bb8a04d3cb1e69af5a29bb5c2c04\\scripts\\plugin-eval.js",
+      "status": "ok",
+      "version": "bundled 0.1.0",
+      "wrapper_ready": true
+    },
+    "python": {
+      "command": "python",
+      "installed": true,
+      "name": "python",
+      "path": "C:\\Users\\leona\\AppData\\Local\\Microsoft\\WindowsApps\\PythonSoftwareFoundation.Python.3.12_qbz5n2kfra8p0\\python.exe",
+      "status": "ok",
+      "version": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]"
+    },
+    "skills": {
+      "auth": "unknown",
+      "command": "npx",
+      "detect_only": false,
+      "installed": true,
+      "invocation": "npx skills",
+      "name": "skills",
+      "path": "C:\\Program Files\\nodejs\\npx.CMD",
+      "status": "ok",
+      "version": "1.5.1"
+    },
+    "supabase": {
+      "auth": "unknown",
+      "command": "supabase",
+      "detect_only": false,
+      "installed": true,
+      "name": "supabase",
+      "path": "C:\\Users\\leona\\AppData\\Roaming\\npm\\supabase.CMD",
+      "status": "ok",
+      "version": "2.75.0"
+    },
+    "vercel": {
+      "auth": "unknown",
+      "command": "vercel",
+      "detect_only": false,
+      "installed": true,
+      "name": "vercel",
+      "path": "C:\\Users\\leona\\AppData\\Roaming\\npm\\vercel.CMD",
+      "status": "ok",
+      "version": "50.25.1"
     }
-  },
-  "items": [
-    {
-      "kind": "skill",
-      "name": "loopsmith",
-      "source_scope": "user",
-      "status": "ok",
-      "source_hint": "npx skills ls -g"
-    },
-    {
-      "kind": "skill",
-      "name": "autonomous-deep-runs-capability",
-      "source_scope": "user",
-      "status": "ok",
-      "source_hint": "npx skills ls -g"
-    },
-    {
-      "kind": "skill",
-      "name": "skills-management-capability",
-      "source_scope": "user",
-      "status": "ok",
-      "source_hint": "npx skills ls -g"
-    },
-    {
-      "kind": "skill",
-      "name": "agentcli-maintenance-engineer",
-      "source_scope": "user",
-      "status": "ok",
-      "source_hint": "npx skills ls -g"
-    },
-    {
-      "kind": "skill",
-      "name": "context-skill",
-      "source_scope": "user",
-      "status": "ok",
-      "source_hint": "npx skills ls -g"
-    },
-    {
-      "kind": "skill",
-      "name": "ui-skill",
-      "source_scope": "user",
-      "status": "ok",
-      "source_hint": "npx skills ls -g"
-    },
-    {
-      "kind": "skill",
-      "name": "ui-deep-audit",
-      "source_scope": "user",
-      "status": "ok",
-      "source_hint": "npx skills ls -g"
-    },
-    {
-      "kind": "skill",
-      "name": "test-skill",
-      "source_scope": "user",
-      "status": "ok",
-      "source_hint": "npx skills ls -g"
-    },
-    {
-      "kind": "skill",
-      "name": "test-deep-audit",
-      "source_scope": "user",
-      "status": "ok",
-      "source_hint": "npx skills ls -g"
-    },
-    {
-      "kind": "skill",
-      "name": "docs-skill",
-      "source_scope": "user",
-      "status": "ok",
-      "source_hint": "npx skills ls -g"
-    },
-    {
-      "kind": "skill",
-      "name": "docs-deep-audit",
-      "source_scope": "user",
-      "status": "ok",
-      "source_hint": "npx skills ls -g"
-    },
-    {
-      "kind": "skill",
-      "name": "refactor-skill",
-      "source_scope": "user",
-      "status": "ok",
-      "source_hint": "npx skills ls -g"
-    },
-    {
-      "kind": "skill",
-      "name": "refactor-deep-audit",
-      "source_scope": "user",
-      "status": "ok",
-      "source_hint": "npx skills ls -g"
-    },
-    {
-      "kind": "skill",
-      "name": "refactor-orchestrator",
-      "source_scope": "user",
-      "status": "ok",
-      "source_hint": "npx skills ls -g"
-    },
-    {
-      "kind": "skill",
-      "name": "cicd-skill",
-      "source_scope": "user",
-      "status": "ok",
-      "source_hint": "npx skills ls -g"
-    },
-    {
-      "kind": "skill",
-      "name": "cicd-deep-audit",
-      "source_scope": "user",
-      "status": "ok",
-      "source_hint": "npx skills ls -g"
-    },
-    {
-      "kind": "skill",
-      "name": "supabase-capability",
-      "source_scope": "user",
-      "status": "ok",
-      "source_hint": "npx skills ls -g"
-    },
-    {
-      "kind": "skill",
-      "name": "github-security-capability",
-      "source_scope": "user",
-      "status": "ok",
-      "source_hint": "npx skills ls -g"
-    },
-    {
-      "kind": "skill",
-      "name": "research-capability",
-      "source_scope": "user",
-      "status": "ok",
-      "source_hint": "npx skills ls -g"
-    },
-    {
-      "kind": "skill",
-      "name": "internet-researcher",
-      "source_scope": "user",
-      "status": "ok",
-      "source_hint": "npx skills ls -g"
-    },
-    {
-      "kind": "skill",
-      "name": "github-researcher",
-      "source_scope": "user",
-      "status": "ok",
-      "source_hint": "npx skills ls -g"
-    },
-    {
-      "kind": "skill",
-      "name": "web-github-scout",
-      "source_scope": "user",
-      "status": "ok",
-      "source_hint": "npx skills ls -g"
-    },
-    {
-      "kind": "plugin",
-      "name": "agent-cli-os",
-      "source_scope": "user",
-      "status": "ok",
-      "enabled": true
-    }
-  ],
-  "menu_buckets": []
+  }
 }

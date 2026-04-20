@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from lib.inventory import _apply_bucket_splitting, _merge_duplicate_items, build_inventory_snapshot, filter_inventory_items, inventory_item
+from lib.inventory import _apply_bucket_splitting, _merge_duplicate_items, _plugin_items, build_inventory_snapshot, filter_inventory_items, inventory_item
 
 
 class InventoryTests(unittest.TestCase):
@@ -69,6 +70,34 @@ class InventoryTests(unittest.TestCase):
         self.assertIn("source_hint", merged[0])
         self.assertIn("source_path", merged[0])
 
+    def test_plugin_items_skip_fixture_skills(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            plugins_root = Path(temp_dir)
+            real_skill = plugins_root / "cache" / "openai-curated" / "plugin-eval" / "hash123" / "skills" / "plugin-eval" / "SKILL.md"
+            fixture_skill = (
+                plugins_root
+                / "cache"
+                / "openai-curated"
+                / "plugin-eval"
+                / "hash123"
+                / "fixtures"
+                / "minimal-plugin"
+                / "skills"
+                / "minimal-plugin-skill"
+                / "SKILL.md"
+            )
+            real_skill.parent.mkdir(parents=True, exist_ok=True)
+            fixture_skill.parent.mkdir(parents=True, exist_ok=True)
+            real_skill.write_text("---\nname: plugin-eval\n---\n", encoding="utf-8")
+            fixture_skill.write_text("---\nname: minimal-plugin-skill\n---\n", encoding="utf-8")
+
+            with mock.patch("lib.inventory.PLUGINS_DIR", plugins_root):
+                _, skill_items = _plugin_items({"plugins": {"plugin-eval@openai-curated": {"enabled": True}}})
+
+        names = {item["name"] for item in skill_items}
+        self.assertIn("plugin-eval:plugin-eval", names)
+        self.assertNotIn("plugin-eval:minimal-plugin-skill", names)
+
     @mock.patch("lib.capabilities.run_command")
     @mock.patch("lib.capabilities._installed_skills")
     @mock.patch("lib.capabilities._detect_playwright")
@@ -125,6 +154,8 @@ class InventoryTests(unittest.TestCase):
         self.assertIn("plugin", kinds)
         self.assertIn("mcp", kinds)
         self.assertIn("gh", tool_names)
+        self.assertIn("coderabbit", tool_names)
+        self.assertIn("plugin-eval", tool_names)
         self.assertIn("supabase", tool_names)
         self.assertEqual(snapshot["summary"]["status"], "ok")
 

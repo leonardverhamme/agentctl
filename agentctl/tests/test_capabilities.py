@@ -33,6 +33,8 @@ class CapabilitiesTests(unittest.TestCase):
                 "gh": {"installed": True, "status": "ok", "version": "gh 2.0", "skill_supported": False},
                 "gh-codeql": {"installed": True, "status": "ok"},
                 "ghas-cli": {"installed": True, "status": "ok", "callable": True},
+                "coderabbit": {"installed": True, "status": "ok", "version": "1.0.0"},
+                "plugin-eval": {"installed": True, "status": "ok", "version": "bundled 0.1.0"},
                 "vercel": {"installed": True, "status": "ok"},
                 "supabase": {"installed": True, "status": "ok"},
                 "firebase": {"installed": False, "status": "missing", "detect_only": True},
@@ -60,6 +62,8 @@ class CapabilitiesTests(unittest.TestCase):
                 {"kind": "skill", "name": "refactor-orchestrator", "source_scope": "user", "status": "ok", "source_hint": "npx skills ls -g"},
                 {"kind": "skill", "name": "cicd-skill", "source_scope": "user", "status": "ok", "source_hint": "npx skills ls -g"},
                 {"kind": "skill", "name": "cicd-deep-audit", "source_scope": "user", "status": "ok", "source_hint": "npx skills ls -g"},
+                {"kind": "skill", "name": "coderabbit:coderabbit-review", "source_scope": "plugin", "status": "ok", "source_path": r"C:\plugins\coderabbit\skills\coderabbit-review\SKILL.md"},
+                {"kind": "skill", "name": "plugin-eval:plugin-eval", "source_scope": "plugin", "status": "ok", "source_path": r"C:\plugins\plugin-eval\skills\plugin-eval\SKILL.md"},
                 {"kind": "skill", "name": "github-capability", "source_scope": "user", "status": "ok", "source_hint": "npx skills ls -g"},
                 {"kind": "skill", "name": "github-security-capability", "source_scope": "user", "status": "ok", "source_hint": "npx skills ls -g"},
                 {"kind": "skill", "name": "browser-capability", "source_scope": "user", "status": "ok", "source_hint": "npx skills ls -g"},
@@ -71,6 +75,8 @@ class CapabilitiesTests(unittest.TestCase):
                 {"kind": "skill", "name": "macos-development-capability", "source_scope": "user", "status": "ok", "source_hint": "npx skills ls -g"},
                 {"kind": "skill", "name": "android-testing-capability", "source_scope": "user", "status": "ok", "source_hint": "npx skills ls -g"},
                 {"kind": "plugin", "name": "agent-cli-os", "source_scope": "user", "status": "ok", "enabled": True},
+                {"kind": "plugin", "name": "coderabbit@openai-curated", "source_scope": "user", "status": "ok", "enabled": True},
+                {"kind": "plugin", "name": "plugin-eval@openai-curated", "source_scope": "user", "status": "ok", "enabled": True},
                 {"kind": "plugin", "name": "github@openai-curated", "source_scope": "user", "status": "ok", "enabled": True},
                 {"kind": "mcp", "name": "supabase", "source_scope": "user", "status": "configured", "configured": True},
                 {"kind": "mcp", "name": "playwright", "source_scope": "user", "status": "configured", "configured": True},
@@ -87,6 +93,8 @@ class CapabilitiesTests(unittest.TestCase):
         self.assertIn("github-advanced-security", capability_keys)
         self.assertIn("autonomous-deep-runs", capability_keys)
         self.assertIn("long-task-loops", capability_keys)
+        self.assertIn("code-review", capability_keys)
+        self.assertIn("plugin-evaluation", capability_keys)
         self.assertEqual(report["summary"]["installed_skill_count"], 30)
         self.assertEqual(report["inventory_summary"]["status"], "ok")
 
@@ -148,6 +156,23 @@ class CapabilitiesTests(unittest.TestCase):
         self.assertIn("gh codeql", detail["entrypoints"])
         self.assertIn("gh api", detail["entrypoints"])
         self.assertTrue(any("GHAS-specific" in note for note in detail["routing_notes"]))
+
+    def test_capability_detail_exposes_plugin_backed_review_and_evaluation_routes(self) -> None:
+        report = build_capabilities_report(inventory_snapshot=self._inventory())
+
+        code_review = capability_detail(report, "code-review")
+        self.assertIsNotNone(code_review)
+        assert code_review is not None
+        self.assertEqual(code_review["front_door"], "$coderabbit:coderabbit-review")
+        self.assertIn("coderabbit review --agent", code_review["entrypoints"])
+        self.assertEqual(code_review["status"], "ok")
+
+        plugin_eval = capability_detail(report, "plugin-evaluation")
+        self.assertIsNotNone(plugin_eval)
+        assert plugin_eval is not None
+        self.assertEqual(plugin_eval["front_door"], "$plugin-eval:plugin-eval")
+        self.assertTrue(any("Fixture skills" in note for note in plugin_eval["routing_notes"]))
+        self.assertEqual(plugin_eval["status"], "ok")
 
     def test_plugin_items_with_configured_flag_count_as_healthy(self) -> None:
         inventory = self._inventory()
@@ -223,9 +248,9 @@ class CapabilitiesTests(unittest.TestCase):
         self.assertTrue(record["callable"])
         self.assertEqual(record["version"], "Usage: cli.py [OPTIONS] COMMAND [ARGS]...")
 
-    def test_every_capability_has_a_local_skill_front_door(self) -> None:
+    def test_every_capability_has_a_skill_front_door(self) -> None:
         for spec in CAPABILITY_SPECS:
-            self.assertTrue(spec.get("skills"), f"{spec['key']} should expose at least one local skill")
+            self.assertTrue(spec.get("skills"), f"{spec['key']} should expose at least one skill")
             self.assertIn("$", spec["front_door"], f"{spec['key']} should route through a skill front door")
 
 

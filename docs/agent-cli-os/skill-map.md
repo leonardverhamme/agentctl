@@ -21,6 +21,7 @@ flowchart TD
   group_core --> group_core_long_task_loops["Long task loops\n$loopsmith"]
   group_core --> group_core_skills_management["Skills management\n$skills-management-capability"]
   group_core --> group_core_agentcli_maintenance["Agent CLI OS maintenance\n$agentcli-maintenance-engineer"]
+  group_core --> group_core_plugin_evaluation["Plugin evaluation\n$plugin-eval:plugin-eval"]
   root --> group_workflows["Workflows"]
   group_workflows --> group_workflows_context_workflows["Repo context workflows\n$context-skill"]
   group_workflows --> group_workflows_ui_workflows["UI workflows\n$ui-skill / $ui-deep-audit"]
@@ -28,6 +29,7 @@ flowchart TD
   group_workflows --> group_workflows_docs_workflows["Documentation workflows\n$docs-skill / $docs-deep-audit"]
   group_workflows --> group_workflows_refactor_workflows["Refactor workflows\n$refactor-skill / $refactor-deep-audit"]
   group_workflows --> group_workflows_cicd_workflows["CI/CD workflows\n$cicd-skill / $cicd-deep-audit"]
+  group_workflows --> group_workflows_code_review["Code review\n$coderabbit:coderabbit-review"]
   root --> group_research["Research"]
   group_research --> group_research_research["Research\n$research-capability"]
   root --> group_platforms["Platforms"]
@@ -59,6 +61,7 @@ Control-plane entrypoints for install health, maintenance, and unattended worker
 | Long task loops | `loopsmith` | `agentcli capability long-task-loops` |
 | Skills management | `skills-management-capability` | `agentcli capability skills-management` |
 | Agent CLI OS maintenance | `agentcli-maintenance-engineer` | `agentcli maintenance check` |
+| Plugin evaluation | `plugin-eval:plugin-eval` | `agentcli capability plugin-evaluation` |
 
 ### Workflows
 
@@ -72,6 +75,7 @@ Reusable repo-level workflows for UI, tests, docs, refactors, CI/CD, and context
 | Documentation workflows | `docs-skill`, `docs-deep-audit` | `agentcli run docs-deep-audit` |
 | Refactor workflows | `refactor-skill`, `refactor-deep-audit`, `refactor-orchestrator` | `agentcli run refactor-deep-audit` |
 | CI/CD workflows | `cicd-skill`, `cicd-deep-audit` | `agentcli run cicd-deep-audit` |
+| Code review | `coderabbit:coderabbit-review` | `agentcli capability code-review` |
 
 ### Research
 
@@ -142,7 +146,7 @@ iOS, macOS, and Android development/testing capability front doors.
 
 ```json
 {
-  "front_door_skill_count": 33,
+  "front_door_skill_count": 35,
   "group_count": 6,
   "helper_skill_count": 5,
   "plugin_family_count": 1,

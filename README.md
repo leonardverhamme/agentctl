@@ -42,6 +42,7 @@ That is the main onboarding path.
 - `agentcli` as the public wrapper command
 - the internal `agentctl/` bundle under `CODEX_HOME`
 - reusable local skills for UI, tests, docs, refactor, CI/CD, research, and maintenance
+- optional curated plugin-backed routes for CodeRabbit review and Plugin Eval analysis when those plugins are enabled
 - a local plugin shell for Codex routing
 - deep workflow state under `.codex-workflows/<workflow>/state.json`
 
@@ -63,6 +64,8 @@ agentcli config show
 agentcli self-check
 agentcli upgrade
 agentcli maintenance audit
+agentcli capability code-review
+agentcli capability plugin-evaluation
 ```
 
 ## Examples

@@ -14,7 +14,7 @@ from .codex_runtime import detect_codex_runtime
 from .common import command_path, print_json, run_command, utc_now
 from .config_layers import effective_config
 from .inventory import load_inventory_snapshot
-from .paths import AGENTCTL_CAPABILITIES_DOCS_DIR, CONFIG_PATH, PLAYWRIGHT_WRAPPER, PLAYWRIGHT_WRAPPER_CMD, SKILLS_DIR
+from .paths import AGENTCTL_CAPABILITIES_DOCS_DIR, CONFIG_PATH, PLAYWRIGHT_WRAPPER, PLAYWRIGHT_WRAPPER_CMD, PLUGINS_DIR, SKILLS_DIR
 
 
 CAPABILITY_SPECS: list[dict[str, Any]] = [
@@ -107,6 +107,30 @@ CAPABILITY_SPECS: list[dict[str, Any]] = [
         ],
     },
     {
+        "key": "plugin-evaluation",
+        "label": "Plugin evaluation",
+        "group": "core",
+        "required": False,
+        "front_door": "$plugin-eval:plugin-eval",
+        "entrypoints": [
+            "$plugin-eval:plugin-eval",
+            "$plugin-eval:evaluate-plugin",
+            "$plugin-eval:evaluate-skill",
+            f"{PUBLIC_COMMAND} capability plugin-evaluation",
+            'plugin-eval start <path> --request "<natural request>"',
+        ],
+        "skills": ["plugin-eval:plugin-eval"],
+        "interfaces": ["plugin:plugin-eval@openai-curated", "tool:plugin-eval"],
+        "availability_mode": "paired",
+        "overlap_policy": "Keep plugin and skill evaluation behind one chat-first route instead of scattering analysis, budget, and benchmark commands through the default menu.",
+        "summary": "Use for evaluating skills and plugins, explaining token budgets, and planning or running local benchmark workflows.",
+        "routing_notes": [
+            "Start with `$plugin-eval:plugin-eval` for chat-first evaluation requests such as score explanations, fix-first prioritization, and benchmark planning.",
+            "Use the local `plugin-eval` command when you want the exact analyze, explain-budget, measurement-plan, or benchmark workflow on disk.",
+            "Fixture skills bundled with the Plugin Eval repo are test data and stay hidden from the curated capability surface.",
+        ],
+    },
+    {
         "key": "context-workflows",
         "label": "Repo context workflows",
         "group": "workflows",
@@ -177,6 +201,28 @@ CAPABILITY_SPECS: list[dict[str, Any]] = [
         "interfaces": [],
         "availability_mode": "all",
         "overlap_policy": "Surface CI/CD by workflow, not by whether GitHub or Vercel provides the underlying route.",
+    },
+    {
+        "key": "code-review",
+        "label": "Code review",
+        "group": "workflows",
+        "required": False,
+        "front_door": "$coderabbit:coderabbit-review",
+        "entrypoints": [
+            "$coderabbit:coderabbit-review",
+            f"{PUBLIC_COMMAND} capability code-review",
+            "coderabbit review --agent",
+        ],
+        "skills": ["coderabbit:coderabbit-review"],
+        "interfaces": ["plugin:coderabbit@openai-curated", "tool:coderabbit"],
+        "availability_mode": "paired",
+        "overlap_policy": "Keep AI-powered code review under one explicit route: the CodeRabbit plugin skill plus a callable CodeRabbit runtime.",
+        "summary": "Use for AI-powered review of the current diff, structured findings, and follow-up fix guidance.",
+        "routing_notes": [
+            "Start with `$coderabbit:coderabbit-review` when you want a real AI review of the current changes rather than an ad hoc chat review.",
+            "Keep CodeRabbit findings separate from human findings and do not claim manual review output came from CodeRabbit.",
+            "If the CodeRabbit CLI is not callable, keep the capability visible but marked degraded until the runtime is installed or linked.",
+        ],
     },
     {
         "key": "research",
@@ -467,7 +513,9 @@ CAPABILITY_CLOUD_READINESS = {
     "autonomous-deep-runs": [],
     "skills-management": ["skills wrapper layer"],
     "agentcli-maintenance": ["agent-cli-os core"],
+    "plugin-evaluation": ["plugin-eval"],
     "research": ["research web", "research github", "research scout"],
+    "code-review": ["coderabbit"],
     "browser-automation": ["Playwright CLI", "Playwright MCP"],
     "github-workflows": ["gh"],
     "github-advanced-security": ["gh", "gh-codeql", "ghas-cli"],
@@ -829,13 +877,23 @@ def _tool_status(tools: dict[str, Any], name: str) -> str:
     return tools.get(name, {}).get("status", "missing")
 
 
+def _plugin_payload(plugins: dict[str, Any], name: str) -> dict[str, Any] | None:
+    candidates = [name]
+    if name == PUBLIC_PRODUCT_NAME:
+        candidates.extend(LEGACY_PLUGIN_NAMES)
+    if name.endswith("@openai-curated"):
+        candidates.append(name.split("@", 1)[0])
+    else:
+        candidates.append(f"{name}@openai-curated")
+    for candidate in candidates:
+        item = plugins.get(candidate)
+        if item:
+            return item
+    return None
+
+
 def _plugin_status(plugins: dict[str, Any], name: str) -> str:
-    item = plugins.get(name)
-    if not item and name == PUBLIC_PRODUCT_NAME:
-        for legacy_name in LEGACY_PLUGIN_NAMES:
-            item = plugins.get(legacy_name)
-            if item:
-                break
+    item = _plugin_payload(plugins, name)
     if not item:
         return "missing"
     if item.get("status") in {"ok", "configured"}:
@@ -850,8 +908,14 @@ def _mcp_status(mcp_servers: dict[str, Any], name: str) -> str:
     return item.get("status", "configured")
 
 
-def _skill_status(local_skill_names: set[str], name: str) -> str:
-    return "ok" if name in local_skill_names else "missing"
+def _skill_status(local_skill_names: set[str], plugins: dict[str, Any], name: str) -> str:
+    if name in local_skill_names:
+        return "ok"
+    if ":" in name:
+        plugin_name = name.split(":", 1)[0]
+        if _plugin_status(plugins, plugin_name) == "ok" or _plugin_status(plugins, f"{plugin_name}@openai-curated") == "ok":
+            return "ok"
+    return "missing"
 
 
 def _interface_record(
@@ -867,7 +931,7 @@ def _interface_record(
         payload = tools.get(name, {})
         return {"kind": kind, "name": name, "status": payload.get("status", "missing")}
     if kind == "plugin":
-        payload = plugins.get(name)
+        payload = _plugin_payload(plugins, name)
         return {
             "kind": kind,
             "name": name,
@@ -878,7 +942,7 @@ def _interface_record(
         payload = mcp_servers.get(name)
         return {"kind": kind, "name": name, "status": _mcp_status(mcp_servers, name), "configured": bool(payload)}
     if kind == "skill":
-        return {"kind": kind, "name": name, "status": _skill_status(local_skill_names, name)}
+        return {"kind": kind, "name": name, "status": _skill_status(local_skill_names, plugins, name)}
     return {"kind": kind, "name": name, "status": "unknown"}
 
 
@@ -891,7 +955,7 @@ def _capability_record(
     local_skill_names: set[str],
 ) -> dict[str, Any]:
     skill_records = [
-        {"kind": "skill", "name": name, "status": _skill_status(local_skill_names, name)}
+        {"kind": "skill", "name": name, "status": _skill_status(local_skill_names, plugins, name)}
         for name in spec.get("skills", [])
     ]
     interface_records = [
@@ -994,8 +1058,73 @@ def _inventory_local_skill_names(payload: dict[str, Any]) -> set[str]:
     return {
         item["name"]
         for item in _inventory_items(payload, "skill")
-        if item.get("source_scope") in {"user", "repo"} and ":" not in item.get("name", "")
+        if item.get("source_scope") in {"user", "repo", "plugin"}
     }
+
+
+def _cached_plugin_roots(plugin_name: str) -> list[Path]:
+    cache_root = PLUGINS_DIR / "cache"
+    if not cache_root.exists():
+        return []
+    roots: list[Path] = []
+    for marketplace_dir in sorted(path for path in cache_root.iterdir() if path.is_dir()):
+        plugin_dir = marketplace_dir / plugin_name
+        if not plugin_dir.exists():
+            continue
+        roots.extend(sorted(path for path in plugin_dir.iterdir() if path.is_dir()))
+    return roots
+
+
+def _detect_plugin_eval() -> dict[str, Any]:
+    record = _tool_record("plugin-eval", command="plugin-eval", version_args=["--help"])
+    if record["installed"]:
+        return record
+
+    node_path = command_path("node")
+    script_candidates = [root / "scripts" / "plugin-eval.js" for root in _cached_plugin_roots("plugin-eval")]
+    script_path = next((path for path in script_candidates if path.exists()), None)
+
+    fallback: dict[str, Any] = {
+        "name": "plugin-eval",
+        "command": "plugin-eval",
+        "path": str(script_path) if script_path else None,
+        "installed": bool(script_path),
+        "detect_only": False,
+        "version": None,
+        "auth": "unknown",
+        "status": "missing",
+    }
+    if not script_path:
+        return fallback
+    if not node_path:
+        fallback["status"] = "degraded"
+        fallback["runtime_error"] = "Node.js is required to run the bundled Plugin Eval CLI."
+        return fallback
+
+    help_result = run_command([node_path, str(script_path), "--help"], timeout=20)
+    package_path = script_path.parent.parent / "package.json"
+    package_version: str | None = None
+    if package_path.exists():
+        try:
+            payload = json.loads(package_path.read_text(encoding="utf-8"))
+            raw_version = payload.get("version")
+            if isinstance(raw_version, str) and raw_version.strip():
+                package_version = raw_version.strip()
+        except json.JSONDecodeError:
+            package_version = None
+    if help_result["ok"]:
+        output_lines = (help_result["stdout"] or help_result["stderr"] or "").splitlines()
+        fallback["status"] = "ok"
+        fallback["command"] = f'node "{script_path}"'
+        fallback["version"] = f"bundled {package_version}" if package_version else (output_lines[0] if output_lines else "bundled plugin-eval script")
+        fallback["wrapper_ready"] = True
+        return fallback
+
+    fallback["status"] = "degraded"
+    fallback["command"] = f'node "{script_path}"'
+    fallback["wrapper_ready"] = False
+    fallback["runtime_error"] = help_result["stderr"] or help_result["stdout"] or "failed to execute bundled Plugin Eval CLI"
+    return fallback
 
 
 def _inventory_plugins_map(payload: dict[str, Any]) -> dict[str, Any]:
