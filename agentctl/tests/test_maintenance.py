@@ -210,6 +210,7 @@ class MaintenanceTests(unittest.TestCase):
                 "install-on-another-computer.md",
                 "unattended-worker-setup.md",
                 "maintainer-guide.md",
+                "pypi-publishing.md",
                 "skill-governance.md",
             ):
                 (docs_dir / name).write_text(f"# {name}\n", encoding="utf-8")
@@ -275,6 +276,7 @@ class MaintenanceTests(unittest.TestCase):
                 "install-on-another-computer.md",
                 "unattended-worker-setup.md",
                 "maintainer-guide.md",
+                "pypi-publishing.md",
                 "skill-governance.md",
             ):
                 (workspace.docs_dir / name).write_text(f"# {name}\n", encoding="utf-8")

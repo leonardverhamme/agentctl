@@ -23,6 +23,7 @@ Hand-maintained docs:
 - `docs/agent-cli-os/zero-touch-setup.md`
 - `docs/agent-cli-os/install-on-another-computer.md`
 - `docs/agent-cli-os/unattended-worker-setup.md`
+- `docs/agent-cli-os/pypi-publishing.md`
 - `docs/agent-cli-os/skill-governance.md`
 - this file
 
@@ -64,6 +65,7 @@ If install or upgrade logic changes:
 - `scripts/install_bundle.py`
 - `scripts/build_release_bundle.py`
 - release workflows
+- `scripts/check_pypi_release.py`
 - setup docs
 
 If capability groups or skill front doors change:
@@ -103,6 +105,12 @@ python -m build --sdist --wheel --outdir verify-dist
 python scripts/build_release_bundle.py --version v0.0.0-test --output-dir verify-dist
 ```
 
+For a real tagged release, also verify the live PyPI version once upload succeeds:
+
+```powershell
+python scripts/check_pypi_release.py --package agent-cli-os --version <released-version>
+```
+
 For installability:
 
 ```powershell
@@ -117,9 +125,11 @@ Tagged releases should:
 - build the `agent-cli-os-bundle-<version>.zip`
 - publish GitHub release assets
 - publish the Python package to PyPI
+- support trusted publishing or a `PYPI_API_TOKEN` fallback when trusted publishing is temporarily unavailable
 - keep bootstrap and upgrade working from released artifacts
 - isolate release artifacts in a clean output directory instead of reusing stale `dist/` contents
 - fail if legacy-named `loopsmith*` or `agentctl*` release artifacts are about to ship
+- verify that the released package version becomes visible on live PyPI before the publish phase is treated as complete
 
 ## Maintainability Contract
 

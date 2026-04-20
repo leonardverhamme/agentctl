@@ -32,6 +32,8 @@ jobs:
       RELEASE_VERSION: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref_name }}
       RELEASE_DIR: release-dist
       RELEASE_TITLE: Agent CLI OS ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref_name }}
+      PYPI_PROJECT: agent-cli-os
+      PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
 
     steps:
       - uses: actions/checkout@v4
@@ -114,25 +116,49 @@ jobs:
           python "$BUNDLE_CODEX_HOME/agentctl/agentctl.py" doctor --json
           python "$BUNDLE_CODEX_HOME/agentctl/agentctl.py" self-check --json
 
-      - name: Publish to PyPI
-        id: pypi_publish
+      - name: Publish to PyPI via trusted publisher
+        id: pypi_publish_trusted
+        if: env.PYPI_API_TOKEN == ''
         continue-on-error: true
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: ${{ env.RELEASE_DIR }}/
 
+      - name: Publish to PyPI via API token fallback
+        id: pypi_publish_token
+        if: env.PYPI_API_TOKEN != ''
+        continue-on-error: true
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: ${{ env.RELEASE_DIR }}/
+          user: __token__
+          password: ${{ env.PYPI_API_TOKEN }}
+
+      - name: Wait for live PyPI installability
+        if: steps.pypi_publish_trusted.outcome == 'success' || steps.pypi_publish_token.outcome == 'success'
+        run: python scripts/check_pypi_release.py --package "$PYPI_PROJECT" --version "$PACKAGE_VERSION" --timeout 180 --interval 10
+
       - name: Report PyPI publish drift
-        if: steps.pypi_publish.outcome != 'success'
+        if: steps.pypi_publish_trusted.outcome != 'success' && steps.pypi_publish_token.outcome != 'success'
         run: |
-          echo "::warning::PyPI trusted publishing is not configured for leonardverhamme/agent-cli-os/.github/workflows/release.yml. GitHub release assets were published, but PyPI upload needs a matching trusted publisher entry."
+          if [ -n "$PYPI_API_TOKEN" ]; then
+            echo "::warning::PyPI upload did not succeed with the configured PYPI_API_TOKEN secret. GitHub release assets were published, but PyPI is still not live."
+          else
+            echo "::warning::PyPI trusted publishing is not configured for leonardverhamme/agent-cli-os/.github/workflows/release.yml. GitHub release assets were published, but PyPI upload needs a matching trusted publisher entry."
+          fi
           {
             echo "## PyPI publish skipped"
             echo
             echo "GitHub release assets were published successfully."
-            echo "PyPI rejected trusted publishing because no matching publisher was found for:"
-            echo "- repository: \`leonardverhamme/agent-cli-os\`"
-            echo "- workflow: \`.github/workflows/release.yml\`"
-            echo "- environment: \`pypi\`"
-            echo
-            echo "Update the PyPI trusted publisher entry to match this repo/workflow/environment, then rerun the release."
+            if [ -n "$PYPI_API_TOKEN" ]; then
+              echo "PyPI upload was attempted with the \`PYPI_API_TOKEN\` secret but did not succeed."
+              echo "Check that the token belongs to the \`agent-cli-os\` project and still has upload permission."
+            else
+              echo "PyPI rejected trusted publishing because no matching publisher was found for:"
+              echo "- repository: \`leonardverhamme/agent-cli-os\`"
+              echo "- workflow: \`.github/workflows/release.yml\`"
+              echo "- environment: \`pypi\`"
+              echo
+              echo "Update the PyPI trusted publisher entry to match this repo/workflow/environment, then rerun the release."
+            fi
           } >> "$GITHUB_STEP_SUMMARY"

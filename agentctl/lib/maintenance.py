@@ -344,6 +344,7 @@ def _manual_guides_map() -> dict[str, Path]:
         "install-on-another-computer": AGENTCTL_DOCS_DIR / "install-on-another-computer.md",
         "unattended-worker-setup": AGENTCTL_DOCS_DIR / "unattended-worker-setup.md",
         "maintainer-guide": AGENTCTL_DOCS_DIR / "maintainer-guide.md",
+        "pypi-publishing": AGENTCTL_DOCS_DIR / "pypi-publishing.md",
         "skill-governance": AGENTCTL_DOCS_DIR / "skill-governance.md",
     }
 

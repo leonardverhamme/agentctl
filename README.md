@@ -23,6 +23,12 @@ pipx install git+https://github.com/leonardverhamme/agent-cli-os.git
 
 As of April 20, 2026, this GitHub install path is the verified public path. PyPI publishing is wired in CI, but `agent-cli-os` is not yet live on PyPI.
 
+The remaining maintainer-side fix is documented in [docs/agent-cli-os/pypi-publishing.md](docs/agent-cli-os/pypi-publishing.md). Once that PyPI project configuration is in place, the intended public install becomes:
+
+```powershell
+pipx install agent-cli-os
+```
+
 Bootstrap the real bundle into your `CODEX_HOME`:
 
 ```powershell
@@ -304,6 +310,7 @@ That keeps existing installs and repo assumptions stable while the public produc
 - [docs/agent-cli-os/install-on-another-computer.md](docs/agent-cli-os/install-on-another-computer.md)
 - [docs/agent-cli-os/unattended-worker-setup.md](docs/agent-cli-os/unattended-worker-setup.md)
 - [docs/agent-cli-os/maintainer-guide.md](docs/agent-cli-os/maintainer-guide.md)
+- [docs/agent-cli-os/pypi-publishing.md](docs/agent-cli-os/pypi-publishing.md)
 - [docs/agent-cli-os/skill-governance.md](docs/agent-cli-os/skill-governance.md)
 - [docs/agent-cli-os/inventory.md](docs/agent-cli-os/inventory.md)
 
@@ -313,6 +320,7 @@ That keeps existing installs and repo assumptions stable while the public produc
 - canonical repo: `https://github.com/leonardverhamme/agent-cli-os`
 - GitHub Releases carry the versioned bundle zip used by `bootstrap` and `upgrade`
 - tagged releases are configured to build wheel, sdist, bundle zip, checksum, and publish to PyPI
+- tagged releases now wait for the package version to appear on live PyPI before calling the publish step complete
 - verify live PyPI availability for each release instead of assuming the publish step already succeeded
 
 ## Maintenance

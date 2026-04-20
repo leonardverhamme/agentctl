@@ -89,8 +89,8 @@ Required top-level fields:
 {
   "blocked_findings": 0,
   "open_findings": 0,
-  "passed_checks": 83,
+  "passed_checks": 84,
   "status": "ok",
-  "total_checks": 83
+  "total_checks": 84
 }
 ```

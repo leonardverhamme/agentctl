@@ -12,6 +12,14 @@ agentcli doctor --fix
 
 That is the canonical public setup path.
 
+When the PyPI project is live, this becomes the public one-liner:
+
+```powershell
+pipx install agent-cli-os
+```
+
+The one-time maintainer setup for that path is tracked in [pypi-publishing.md](pypi-publishing.md).
+
 ## What Bootstrap Does
 
 - installs the bundle into `CODEX_HOME`
