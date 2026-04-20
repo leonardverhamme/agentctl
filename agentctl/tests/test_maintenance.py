@@ -153,6 +153,21 @@ class MaintenanceTests(unittest.TestCase):
             "items": [],
         }
 
+    def _official_skill_loader_report(self, *, missing_names: list[str] | None = None, status: str | None = None) -> dict:
+        names = ["agentcli-maintenance-engineer", "ui-skill"]
+        missing = sorted(missing_names or [])
+        actual = [name for name in names if name not in missing]
+        return {
+            "status": status or ("error" if missing else "ok"),
+            "mode": "mirror-global-list",
+            "command": "npx skills ls -g --json",
+            "expected_names": names,
+            "actual_names": actual,
+            "missing_names": missing,
+            "extra_names": [],
+            "stderr": "" if not status or status == "ok" else "skills loader failed",
+        }
+
     def test_build_report_surfaces_missing_docs(self) -> None:
         with tempfile.TemporaryDirectory() as temp_dir:
             root = Path(temp_dir)
@@ -171,6 +186,7 @@ class MaintenanceTests(unittest.TestCase):
                 stack.enter_context(mock.patch.object(maintenance, "build_capabilities_report", return_value=self._capabilities_report()))
                 stack.enter_context(mock.patch.object(maintenance, "refresh_inventory_snapshot", return_value=self._inventory_report()))
                 stack.enter_context(mock.patch.object(maintenance, "refresh_guidance_snapshot", return_value=self._guidance_report()))
+                stack.enter_context(mock.patch.object(maintenance, "_official_skill_loader_health", return_value=self._official_skill_loader_report()))
                 for patcher in patches:
                     stack.enter_context(patcher)
                 report = maintenance.build_maintenance_report()
@@ -233,6 +249,7 @@ class MaintenanceTests(unittest.TestCase):
                 stack.enter_context(mock.patch.object(maintenance, "build_capabilities_report", return_value=self._capabilities_report()))
                 stack.enter_context(mock.patch.object(maintenance, "refresh_inventory_snapshot", return_value=self._inventory_report()))
                 stack.enter_context(mock.patch.object(maintenance, "refresh_guidance_snapshot", return_value=self._guidance_report()))
+                stack.enter_context(mock.patch.object(maintenance, "_official_skill_loader_health", return_value=self._official_skill_loader_report()))
                 for patcher in patches:
                     stack.enter_context(patcher)
                 report = maintenance.maintenance_fix_docs()
@@ -302,6 +319,7 @@ class MaintenanceTests(unittest.TestCase):
                 stack.enter_context(mock.patch.object(maintenance, "build_capabilities_report", return_value=self._capabilities_report()))
                 stack.enter_context(mock.patch.object(maintenance, "refresh_inventory_snapshot", return_value=self._inventory_report()))
                 stack.enter_context(mock.patch.object(maintenance, "refresh_guidance_snapshot", return_value=self._guidance_report()))
+                stack.enter_context(mock.patch.object(maintenance, "_official_skill_loader_health", return_value=self._official_skill_loader_report()))
                 stack.enter_context(mock.patch.object(maintenance, "maintenance_workspace", return_value=workspace))
                 stack.enter_context(mock.patch.object(maintenance, "SAFE_MAINTENANCE_ROOTS", (root,)))
                 report = maintenance.maintenance_fix_docs(cwd=root)
@@ -312,6 +330,35 @@ class MaintenanceTests(unittest.TestCase):
             self.assertTrue((workspace.docs_dir / "skill-map.md").exists())
             self.assertTrue((workspace.docs_dir / "skill-map.pdf").exists())
             self.assertTrue((workspace.capabilities_docs_dir / "research.md").exists())
+
+    def test_build_findings_surfaces_official_loader_mismatch(self) -> None:
+        findings = maintenance._build_findings(
+            docs=[],
+            generated_assets=[],
+            references=[],
+            manual_guides=[],
+            plugin={
+                "exists": True,
+                "manifest_exists": True,
+                "router_skill_exists": True,
+                "manifest_name": "agent-cli-os",
+                "manifest_path": "plugin.json",
+                "router_skill_path": "router/SKILL.md",
+                "config": {"enabled": True, "path": "config.toml"},
+            },
+            skills=[{"name": "agentcli-maintenance-engineer", "exists": True, "path": "skills/agentcli-maintenance-engineer"}],
+            tests=[],
+            capability_skill_budget=[],
+            skill_loader_health=[],
+            official_skill_loader=self._official_skill_loader_report(missing_names=["ui-skill"]),
+            automation_core_hits=[],
+            inventory=self._inventory_report(),
+            guidance=self._guidance_report(),
+            capabilities=self._capabilities_report(),
+        )
+
+        finding_ids = {finding["id"] for finding in findings}
+        self.assertIn("skills-cli-missing", finding_ids)
 
 
 if __name__ == "__main__":

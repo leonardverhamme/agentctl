@@ -95,6 +95,7 @@ If skill files stop appearing in the official skills list:
 - check `SKILL.md` starts with `---` at byte zero
 - remove any UTF-8 BOM before frontmatter
 - verify with `npx skills ls -g --json`, not only Agent CLI OS inventory
+- remember maintenance now performs a safe mirrored `npx skills ls -g --json` check automatically for the current local skill tree
 
 If the generic long-task loop changes:
 

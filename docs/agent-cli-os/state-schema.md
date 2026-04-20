@@ -25,6 +25,7 @@ Top-level report fields:
 - `cloud_readiness`
 - `inventory_snapshot`
 - `guidance_snapshot`
+- `official_skill_loader`
 - `capabilities_snapshot`
 - `known_limitations`
 - `findings`
@@ -89,8 +90,8 @@ Required top-level fields:
 {
   "blocked_findings": 0,
   "open_findings": 0,
-  "passed_checks": 129,
+  "passed_checks": 130,
   "status": "ok",
-  "total_checks": 129
+  "total_checks": 130
 }
 ```

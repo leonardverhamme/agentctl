@@ -3,9 +3,9 @@
 
 ## Last Run
 
-- Generated: `2026-04-20T14:02:45.160542+00:00`
+- Generated: `2026-04-20T14:28:04.131470+00:00`
 - Status: `ok`
-- Checks passed: 129 / 129
+- Checks passed: 130 / 130
 - Open findings: 0
 - Blocked findings: 0
 
@@ -22,9 +22,10 @@
 2. If command surface, docs, or packaging changed, run `agentcli maintenance audit`.
 3. Read `maintenance.md`, `maintenance-report.json`, and `.codex-workflows/agentcli-maintenance/state.json` together.
 4. Inspect `agentcli inventory show` when a capability surface looks wrong or unexpectedly large.
-5. Inspect `agentcli self-check` when config, guidance, or menu budgets may be part of the problem.
-6. If findings are doc-only, prefer `agentcli maintenance fix-docs` over hand edits.
-7. Re-run the relevant tests and smoke checks before trusting a green maintenance state.
+5. Remember that maintenance now includes a safe mirrored `npx skills ls -g --json` check for the current local skill tree.
+6. Inspect `agentcli self-check` when config, guidance, or menu budgets may be part of the problem.
+7. If findings are doc-only, prefer `agentcli maintenance fix-docs` over hand edits.
+8. Re-run the relevant tests and smoke checks before trusting a green maintenance state.
 
 ## What Must Be Updated After Changes
 

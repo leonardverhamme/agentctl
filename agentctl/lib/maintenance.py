@@ -2,7 +2,11 @@ from __future__ import annotations
 
 from contextlib import contextmanager
 import json
+import os
 from pathlib import Path
+import shutil
+import subprocess
+import tempfile
 from typing import Any
 
 from . import config_layers as config_layers_module
@@ -223,6 +227,7 @@ CLOUD_READINESS = [
 AUTOMATION_CORE_PATTERN = "automation" + "-core"
 CAPABILITY_SKILL_LINE_BUDGET = 160
 UTF8_BOM = b"\xef\xbb\xbf"
+SKILLS_LOADER_TIMEOUT_SECONDS = 60
 
 
 def _maintenance_docs_map(docs_dir: Path) -> dict[str, Path]:
@@ -446,6 +451,119 @@ def _skill_loader_health() -> list[dict[str, Any]]:
     return records
 
 
+def _top_level_skill_names() -> list[str]:
+    names: list[str] = []
+    if not SKILLS_DIR.exists():
+        return names
+    for path in sorted(SKILLS_DIR.glob("*/SKILL.md")):
+        relative = path.parent.relative_to(SKILLS_DIR)
+        if relative.parts and relative.parts[0].startswith("."):
+            continue
+        names.append(path.parent.name)
+    return names
+
+
+def _official_skill_loader_health() -> dict[str, Any]:
+    expected_names = _top_level_skill_names()
+    if not expected_names:
+        return {
+            "status": "ok",
+            "mode": "mirror-global-list",
+            "command": "npx skills ls -g --json",
+            "expected_names": [],
+            "actual_names": [],
+            "missing_names": [],
+            "extra_names": [],
+            "stderr": "",
+        }
+
+    try:
+        with tempfile.TemporaryDirectory(prefix=f"{PUBLIC_COMMAND}-skills-loader-") as temp_dir:
+            mirror_root = Path(temp_dir)
+            mirror_skills_root = mirror_root / "skills"
+            mirror_skills_root.mkdir(parents=True, exist_ok=True)
+            for name in expected_names:
+                shutil.copytree(SKILLS_DIR / name, mirror_skills_root / name)
+
+            executable = shutil.which("npx") or "npx"
+            suffix = Path(executable).suffix.lower()
+            shell = suffix in {".cmd", ".bat", ".ps1"}
+            command_args = [executable, "skills", "ls", "-g", "--json"]
+            command: list[str] | str = subprocess.list2cmdline(command_args) if shell else command_args
+            env = os.environ.copy()
+            env["CODEX_HOME"] = str(mirror_root)
+            env["PYTHONUTF8"] = "1"
+            completed = subprocess.run(
+                command,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                timeout=SKILLS_LOADER_TIMEOUT_SECONDS,
+                check=False,
+                shell=shell,
+                env=env,
+            )
+
+            stdout = (completed.stdout or "").strip()
+            stderr = (completed.stderr or "").strip()
+            if completed.returncode != 0:
+                return {
+                    "status": "error",
+                    "mode": "mirror-global-list",
+                    "command": "npx skills ls -g --json",
+                    "expected_names": expected_names,
+                    "actual_names": [],
+                    "missing_names": expected_names,
+                    "extra_names": [],
+                    "stderr": stderr or stdout,
+                }
+            try:
+                payload = json.loads(stdout or "[]")
+            except json.JSONDecodeError as exc:
+                return {
+                    "status": "error",
+                    "mode": "mirror-global-list",
+                    "command": "npx skills ls -g --json",
+                    "expected_names": expected_names,
+                    "actual_names": [],
+                    "missing_names": expected_names,
+                    "extra_names": [],
+                    "stderr": f"failed to parse skills output: {exc}",
+                }
+
+            actual_names = sorted(
+                item["name"]
+                for item in payload
+                if isinstance(item, dict) and isinstance(item.get("name"), str)
+            )
+            expected_set = set(expected_names)
+            actual_set = set(actual_names)
+            missing_names = sorted(expected_set - actual_set)
+            extra_names = sorted(actual_set - expected_set)
+            return {
+                "status": "ok" if not missing_names else "error",
+                "mode": "mirror-global-list",
+                "command": "npx skills ls -g --json",
+                "expected_names": expected_names,
+                "actual_names": actual_names,
+                "missing_names": missing_names,
+                "extra_names": extra_names,
+                "stderr": stderr,
+            }
+    except (FileNotFoundError, PermissionError, OSError, subprocess.TimeoutExpired) as exc:
+        return {
+            "status": "error",
+            "mode": "mirror-global-list",
+            "command": "npx skills ls -g --json",
+            "expected_names": expected_names,
+            "actual_names": [],
+            "missing_names": expected_names,
+            "extra_names": [],
+            "stderr": str(exc),
+        }
+
+
 def _repo_scan_files() -> list[Path]:
     repo_root = AGENTCTL_HOME.parent
     roots = [
@@ -622,6 +740,7 @@ def _build_findings(
     tests: list[dict[str, Any]],
     capability_skill_budget: list[dict[str, Any]],
     skill_loader_health: list[dict[str, Any]],
+    official_skill_loader: dict[str, Any],
     automation_core_hits: list[dict[str, Any]],
     inventory: dict[str, Any],
     guidance: dict[str, Any],
@@ -849,6 +968,33 @@ def _build_findings(
                 path=record["path"],
             )
 
+    if official_skill_loader.get("status") != "ok":
+        missing_names = official_skill_loader.get("missing_names", [])
+        if missing_names:
+            _add_finding(
+                findings,
+                finding_id="skills-cli-missing",
+                title="Official skills loader skipped local skills",
+                severity="error",
+                detail=(
+                    "The official `skills` CLI did not list every expected top-level local skill when run against a safe mirrored skill tree. "
+                    f"Missing: {', '.join(missing_names)}."
+                ),
+                path=str(SKILLS_DIR),
+            )
+        else:
+            _add_finding(
+                findings,
+                finding_id="skills-cli-error",
+                title="Official skills loader check failed",
+                severity="error",
+                detail=(
+                    "Agent CLI OS could not complete the safe mirrored `npx skills ls -g --json` check. "
+                    f"Error: {official_skill_loader.get('stderr', 'unknown error')}"
+                ),
+                path=str(SKILLS_DIR),
+            )
+
     menu_budget = capabilities.get("menu_budget", {})
     visible_group_count = capabilities.get("summary", {}).get("visible_group_count", 0)
     max_group_size = capabilities.get("summary", {}).get("max_group_size", 0)
@@ -909,6 +1055,7 @@ def build_maintenance_report() -> dict[str, Any]:
     tests = _tests_status()
     capability_skill_budget = _capability_skill_budget()
     skill_loader_health = _skill_loader_health()
+    official_skill_loader = _official_skill_loader_health()
     automation_core_hits = _automation_core_hits()
     findings = _build_findings(
         docs=docs,
@@ -920,13 +1067,14 @@ def build_maintenance_report() -> dict[str, Any]:
         tests=tests,
         capability_skill_budget=capability_skill_budget,
         skill_loader_health=skill_loader_health,
+        official_skill_loader=official_skill_loader,
         automation_core_hits=automation_core_hits,
         inventory=inventory,
         guidance=guidance,
         capabilities=capabilities,
     )
 
-    total_checks = len(docs) + len(generated_assets) + len(references) + len(manual_guides) + len(skills) + len(tests) + len(capability_skill_budget) + len(skill_loader_health) + 9
+    total_checks = len(docs) + len(generated_assets) + len(references) + len(manual_guides) + len(skills) + len(tests) + len(capability_skill_budget) + len(skill_loader_health) + 10
     blocked_findings = [item for item in findings if item["severity"] == "error"]
     open_findings = len(findings)
     passed_checks = max(total_checks - open_findings, 0)
@@ -960,6 +1108,7 @@ def build_maintenance_report() -> dict[str, Any]:
         "skills": skills,
         "capability_skill_budget": capability_skill_budget,
         "skill_loader_health": skill_loader_health,
+        "official_skill_loader": official_skill_loader,
         "plugin": plugin,
         "tests": tests,
         "cloud_readiness": CLOUD_READINESS,
@@ -1282,6 +1431,7 @@ def _render_state_schema(report: dict[str, Any]) -> str:
         "- `cloud_readiness`",
         "- `inventory_snapshot`",
         "- `guidance_snapshot`",
+        "- `official_skill_loader`",
         "- `capabilities_snapshot`",
         "- `known_limitations`",
         "- `findings`",
@@ -1645,9 +1795,10 @@ def _render_maintenance(report: dict[str, Any]) -> str:
         f"2. If command surface, docs, or packaging changed, run `{PUBLIC_COMMAND} maintenance audit`.",
         f"3. Read `maintenance.md`, `maintenance-report.json`, and `.codex-workflows/{MAINTENANCE_WORKFLOW_NAME}/state.json` together.",
         f"4. Inspect `{PUBLIC_COMMAND} inventory show` when a capability surface looks wrong or unexpectedly large.",
-        f"5. Inspect `{PUBLIC_COMMAND} self-check` when config, guidance, or menu budgets may be part of the problem.",
-        f"6. If findings are doc-only, prefer `{PUBLIC_COMMAND} maintenance fix-docs` over hand edits.",
-        "7. Re-run the relevant tests and smoke checks before trusting a green maintenance state.",
+        "5. Remember that maintenance now includes a safe mirrored `npx skills ls -g --json` check for the current local skill tree.",
+        f"6. Inspect `{PUBLIC_COMMAND} self-check` when config, guidance, or menu budgets may be part of the problem.",
+        f"7. If findings are doc-only, prefer `{PUBLIC_COMMAND} maintenance fix-docs` over hand edits.",
+        "8. Re-run the relevant tests and smoke checks before trusting a green maintenance state.",
         "",
         "## What Must Be Updated After Changes",
         "",
