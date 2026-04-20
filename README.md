@@ -256,6 +256,8 @@ That is why the `$` picker is much larger than the compact `agentcli capabilitie
 
 When an agent actively routes through one of those local front-door skills, it should mention the literal `$skill-name` once in chat so the human can see the highlighted skill route immediately.
 
+If the desktop app still shows an old `$` list after a bundle sync, open a new thread or restart the app. The active session can keep a stale skill index even when the files on disk are already correct.
+
 Use:
 
 ```powershell

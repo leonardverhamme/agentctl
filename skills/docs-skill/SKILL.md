@@ -5,6 +5,11 @@ description: Durable repo documentation workflow for README updates, architectur
 
 # Docs Skill
 
+## Visible Skill Usage
+
+- When this skill is actively being used in chat, mention `$docs-skill` once in a user-visible update so the human can see the highlighted skill route.
+- Keep that mention concise and do not repeat it in every paragraph.
+
 ## Skill Stability Rule
 
 - Treat this skill as stable infrastructure.

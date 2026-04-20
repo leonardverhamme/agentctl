@@ -12,7 +12,7 @@ endobj
 << /Type /Font /Subtype /Type1 /BaseFont /Courier >>
 endobj
 5 0 obj
-<< /Length 3742 >>
+<< /Length 3928 >>
 stream
 BT
 /F1 8 Tf
@@ -130,11 +130,15 @@ T*
 T*
 (legacy alias.) Tj
 T*
+(  - If the active desktop thread still shows an old `$` list after a bundle sync, open a new thread or restart the app;) Tj
+T*
+(the current session can keep a stale skill index.) Tj
+T*
 () Tj
 T*
 (Commands: agentcli capabilities | agentcli capability <key> | agentcli inventory show --kind skills) Tj
 T*
-(Generated: 2026-04-20T10:46:00.335010+00:00) Tj
+(Generated: 2026-04-20T13:10:51.945161+00:00) Tj
 ET
 endstream
 endobj
@@ -149,5 +153,5 @@ xref
 trailer
 << /Size 6 /Root 1 0 R >>
 startxref
-4103
+4289
 %%EOF

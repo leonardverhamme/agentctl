@@ -9,6 +9,7 @@ This is the human-facing one-page map of the curated menu and the local front-do
 - `$context-skill` is still present. It lives under `Workflows -> Repo context workflows`.
 - The `$` picker looks much larger because Codex also shows curated plugin skills, not just the local Agent CLI OS front-door skills.
 - `$editskill` is the preferred direct helper for intentional skill-system changes. `$skill-edit-mode` stays as a legacy alias.
+- If the active desktop thread still shows an old `$` list after a bundle sync, open a new thread or restart the app; the current session can keep a stale skill index.
 
 ## Menu Diagram
 

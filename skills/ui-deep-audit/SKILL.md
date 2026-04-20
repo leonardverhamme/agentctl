@@ -5,6 +5,11 @@ description: Full-app UI audit and checklist-driven remediation workflow for Rea
 
 # UI Deep Audit
 
+## Visible Skill Usage
+
+- When this skill is actively being used in chat, mention `$ui-deep-audit` once in a user-visible update so the human can see the highlighted skill route.
+- Keep that mention concise and do not repeat it in every paragraph.
+
 ## Skill Stability Rule
 
 - Treat this skill as stable infrastructure.

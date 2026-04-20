@@ -26,8 +26,8 @@
       "Write"
     ],
     "defaultPrompt": [
-      "Use $agentctl-router to pick the right agentctl command or workflow.",
-      "Use $agentctl-router to check whether maintenance or a deep workflow is the next step."
+      "Use $agentcli-router to pick the right Agent CLI OS command or workflow.",
+      "Use $agentcli-router to check whether maintenance, a capability page, or a deep workflow is the next step."
     ],
     "brandColor": "#2563EB"
   }

@@ -5,6 +5,11 @@ description: "Full-repo documentation audit and checklist-driven remediation wor
 
 # Docs Deep Audit
 
+## Visible Skill Usage
+
+- When this skill is actively being used in chat, mention `$docs-deep-audit` once in a user-visible update so the human can see the highlighted skill route.
+- Keep that mention concise and do not repeat it in every paragraph.
+
 ## Skill Stability Rule
 
 - Treat this skill as stable infrastructure.

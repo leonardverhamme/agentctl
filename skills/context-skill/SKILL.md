@@ -5,6 +5,11 @@ description: General repo-context maintenance workflow for coding agents and hum
 
 # Context Skill
 
+## Visible Skill Usage
+
+- When this skill is actively being used in chat, mention `$context-skill` once in a user-visible update so the human can see the highlighted skill route.
+- Keep that mention concise and do not repeat it in every paragraph.
+
 ## Skill Stability Rule
 
 - Treat this skill as stable infrastructure.
