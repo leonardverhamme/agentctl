@@ -15,11 +15,13 @@ It does not replace the authoritative tools underneath. It routes into them.
 
 ## 5-Minute Setup
 
-Install the public wrapper:
+Install the public wrapper from the verified public source:
 
 ```powershell
 pipx install git+https://github.com/leonardverhamme/agent-cli-os.git
 ```
+
+As of April 20, 2026, this GitHub install path is the verified public path. PyPI publishing is wired in CI, but `agent-cli-os` is not yet live on PyPI.
 
 Bootstrap the real bundle into your `CODEX_HOME`:
 
@@ -310,7 +312,8 @@ That keeps existing installs and repo assumptions stable while the public produc
 - Python package: `agent-cli-os`
 - canonical repo: `https://github.com/leonardverhamme/agent-cli-os`
 - GitHub Releases carry the versioned bundle zip used by `bootstrap` and `upgrade`
-- tagged releases build wheel, sdist, bundle zip, checksum, and publish to PyPI
+- tagged releases are configured to build wheel, sdist, bundle zip, checksum, and publish to PyPI
+- verify live PyPI availability for each release instead of assuming the publish step already succeeded
 
 ## Maintenance
 

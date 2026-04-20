@@ -29,6 +29,8 @@ jobs:
     env:
       CODEX_HOME: ${{ github.workspace }}
       RELEASE_VERSION: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref_name }}
+      RELEASE_DIR: release-dist
+      RELEASE_TITLE: Agent CLI OS ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref_name }}
 
     steps:
       - uses: actions/checkout@v4
@@ -37,31 +39,54 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Resolve package version
+        run: |
+          echo "PACKAGE_VERSION=$(python -c \"import tomllib; from pathlib import Path; data = tomllib.loads(Path('pyproject.toml').read_text(encoding='utf-8')); print(data['project']['version'])\")" >> "$GITHUB_ENV"
+
+      - name: Clean generated packaging outputs
+        run: |
+          rm -rf "$RELEASE_DIR" build
+          find . -maxdepth 1 -type d \( -name "*.egg-info" -o -name "*.dist-info" \) -exec rm -rf {} +
+
       - name: Build Python package artifacts
         run: |
           python -m pip install build
-          python -m build --sdist --wheel --outdir dist
+          python -m build --sdist --wheel --outdir "$RELEASE_DIR"
 
       - name: Verify Python distributions
         run: |
           python -m pip install twine
-          twine check dist/*
+          twine check "$RELEASE_DIR"/*.whl "$RELEASE_DIR"/*.tar.gz
 
       - name: Build release bundle
-        run: python scripts/build_release_bundle.py --version "$RELEASE_VERSION" --output-dir dist
+        run: python scripts/build_release_bundle.py --version "$RELEASE_VERSION" --output-dir "$RELEASE_DIR"
+
+      - name: Verify release artifact names
+        run: |
+          ls -1 "$RELEASE_DIR"
+          test -f "$RELEASE_DIR/agent_cli_os-$PACKAGE_VERSION-py3-none-any.whl"
+          test -f "$RELEASE_DIR/agent_cli_os-$PACKAGE_VERSION.tar.gz"
+          test -f "$RELEASE_DIR/agent-cli-os-bundle-$RELEASE_VERSION.zip"
+          test -f "$RELEASE_DIR/agent-cli-os-bundle-$RELEASE_VERSION.zip.sha256"
+          if find "$RELEASE_DIR" -maxdepth 1 -type f \( -name 'loopsmith*' -o -name 'agentctl*' \) | grep -q .; then
+            echo "Legacy-named release artifacts are present in $RELEASE_DIR"
+            exit 1
+          fi
 
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: ${{ env.RELEASE_DIR }}/
 
       - name: Upload release bundle artifact
         uses: actions/upload-artifact@v4
         with:
           name: agent-cli-os-${{ env.RELEASE_VERSION }}
           path: |
-            dist/*.zip
-            dist/*.sha256
-            dist/*.whl
-            dist/*.tar.gz
+            ${{ env.RELEASE_DIR }}/*.zip
+            ${{ env.RELEASE_DIR }}/*.sha256
+            ${{ env.RELEASE_DIR }}/*.whl
+            ${{ env.RELEASE_DIR }}/*.tar.gz
           retention-days: 30
 
       - name: Publish GitHub release assets
@@ -69,9 +94,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           if gh release view "$RELEASE_VERSION" >/dev/null 2>&1; then
-            gh release upload "$RELEASE_VERSION" dist/* --clobber
+            gh release edit "$RELEASE_VERSION" --title "$RELEASE_TITLE"
+            gh release upload "$RELEASE_VERSION" "$RELEASE_DIR"/* --clobber
           else
-            gh release create "$RELEASE_VERSION" dist/* --title "$RELEASE_VERSION" --generate-notes
+            gh release create "$RELEASE_VERSION" "$RELEASE_DIR"/* --title "$RELEASE_TITLE" --generate-notes
           fi
 
       - name: Smoke bootstrap from released artifacts
@@ -81,7 +107,7 @@ jobs:
           python -m venv .venv-release
           . .venv-release/bin/activate
           python -m pip install --upgrade pip
-          python -m pip install dist/*.whl
+          python -m pip install "$RELEASE_DIR"/*.whl
           CODEX_HOME="$BUNDLE_CODEX_HOME" agentcli bootstrap --version "$RELEASE_VERSION"
           export CODEX_HOME="$BUNDLE_CODEX_HOME"
           python "$BUNDLE_CODEX_HOME/agentctl/agentctl.py" doctor --json

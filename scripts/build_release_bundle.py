@@ -2,8 +2,13 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import sys
 import zipfile
 from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 from agentctl.lib.branding import COMPATIBILITY_COMMAND, LEGACY_COMMAND, PUBLIC_COMMAND, PUBLIC_DOCS_DIRNAME, PUBLIC_DISPLAY_NAME, RELEASE_BUNDLE_PREFIX
 

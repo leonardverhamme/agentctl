@@ -99,8 +99,8 @@ If the generic long-task loop changes:
 python -m unittest discover -s agentctl/tests -p "test_*.py"
 python -m unittest discover -s workflow-tools/tests -p "test_*.py"
 agentcli maintenance audit --json
-python -m build --sdist --wheel --outdir dist
-python scripts/build_release_bundle.py --version v0.0.0-test --output-dir dist
+python -m build --sdist --wheel --outdir verify-dist
+python scripts/build_release_bundle.py --version v0.0.0-test --output-dir verify-dist
 ```
 
 For installability:
@@ -118,6 +118,8 @@ Tagged releases should:
 - publish GitHub release assets
 - publish the Python package to PyPI
 - keep bootstrap and upgrade working from released artifacts
+- isolate release artifacts in a clean output directory instead of reusing stale `dist/` contents
+- fail if legacy-named `loopsmith*` or `agentctl*` release artifacts are about to ship
 
 ## Maintainability Contract
 

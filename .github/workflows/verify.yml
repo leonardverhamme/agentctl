@@ -17,6 +17,7 @@ jobs:
 
     env:
       CODEX_HOME: ${{ github.workspace }}
+      VERIFY_DIST_DIR: verify-dist
 
     steps:
       - uses: actions/checkout@v4
@@ -46,8 +47,9 @@ jobs:
 
       - name: Build package artifacts
         run: |
+          rm -rf "$VERIFY_DIST_DIR"
           python -m pip install build
-          python -m build --sdist --wheel --outdir dist
+          python -m build --sdist --wheel --outdir "$VERIFY_DIST_DIR"
 
   bundle-smoke:
     name: Bundle smoke test
