@@ -3,7 +3,7 @@
 
 ## Last Run
 
-- Generated: `2026-04-22T11:59:13.847560+00:00`
+- Generated: `2026-04-24T15:32:04.057172+00:00`
 - Status: `degraded`
 - Checks passed: 149 / 150
 - Open findings: 1
@@ -57,7 +57,7 @@
 
 - [ ] Trusted repo-intel audit is not healthy
   - Severity: `warn`
-  - Detail: Trusted repos should stay graph-backed by default so agents can route repo-first before broad raw-file search. Current non-fresh counts: stale_code=3. Run `agentcli repo-intel audit --all-trusted --fix`.
+  - Detail: Trusted repos should stay graph-backed by default so agents can route repo-first before broad raw-file search. Current non-fresh counts: stale_code=2. Run `agentcli repo-intel audit --all-trusted --fix`.
   - Path: `C:\Users\leona\.codex\agentctl\state\workspace-graph.json`
 
 ## Known Limitations

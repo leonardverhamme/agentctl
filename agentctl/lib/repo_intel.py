@@ -515,6 +515,7 @@ def _repo_intel_policy(repo_root: Path, *, config: dict[str, Any], status: str) 
                 ]
             )
         agent_path.append(f"Use `{PUBLIC_COMMAND} computer-intel ...` only when the target repo is unknown or the task is explicitly cross-repo.")
+        agent_path.append(f"If `{PUBLIC_COMMAND}` or `loopsmith` is not on PATH, repair the public launcher with the bundle-local `agentctl.py doctor --fix` path before continuing; do not replace a requested loop with docs-only tracking.")
         agent_path.append("Treat the current local branch as canonical for normal solo work; do not create or switch branches just to preserve agent changes.")
         agent_path.append("Treat Codex-managed worktrees as temporary isolation only; if work should be kept and pushed, continue from the local checkout so local commits and pushes do not require merging a worktree branch back.")
         agent_path.append("Create a separate branch only when explicitly requested or when a real PR flow or parallel-agent workflow needs branch isolation.")
@@ -708,6 +709,7 @@ def _repo_intel_agents_block() -> str:
             f"- On repo entry or before broad raw-file search, run `{PUBLIC_COMMAND} repo-intel status`; if repo-intel is missing, stale, or broken for a trusted repo, run `{PUBLIC_COMMAND} repo-intel ensure`.",
             "- If `graphify-out/GRAPH_REPORT.md` exists and repo-intel is healthy, read it before broad raw-file search.",
             f"- Prefer `{PUBLIC_COMMAND} repo-intel query \"<question>\"` or `{PUBLIC_COMMAND} repo-intel serve` for architecture and path questions before wide grep; open targeted raw files only after graph routing.",
+            f"- If `{PUBLIC_COMMAND}` or `loopsmith` is not available on PATH, repair the public launcher with the bundle-local `agentctl.py doctor --fix` path before continuing; do not replace requested loops with docs-only tracking.",
             "- Treat the current local branch as the canonical place for normal solo work; do not create or switch branches just to preserve agent changes.",
             "- Treat Codex-managed worktrees as temporary isolation only; if work should be kept and pushed, continue from the local checkout so local commits and pushes do not require merging a worktree branch back.",
             "- Create a separate branch only when explicitly requested or when a real PR flow or parallel-agent workflow needs branch isolation.",

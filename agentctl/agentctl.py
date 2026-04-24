@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 try:
-    from .bundle_install import default_codex_home, repair_install, upgrade_bundle
+    from .bundle_install import default_codex_home, public_launcher_health, repair_install, upgrade_bundle
     from .lib.branding import COMPATIBILITY_COMMAND, PUBLIC_COMMAND, PUBLIC_DISPLAY_NAME
     from .lib.capabilities import (
         build_capabilities_report,
@@ -66,7 +66,7 @@ try:
     from .lib.skills_ops import add_skill, check_skills, list_skills, update_skills
     from .lib.workflows import run_workflow, workflow_status
 except ImportError:
-    from bundle_install import default_codex_home, repair_install, upgrade_bundle
+    from bundle_install import default_codex_home, public_launcher_health, repair_install, upgrade_bundle
     from lib.branding import COMPATIBILITY_COMMAND, PUBLIC_COMMAND, PUBLIC_DISPLAY_NAME
     from lib.capabilities import (
         build_capabilities_report,
@@ -376,11 +376,20 @@ def main() -> int:
             save_json(CAPABILITIES_PATH, report)
             guidance = load_guidance_snapshot(refresh=True)
             doctor_summary = dict(report.get("summary", {}))
+            launcher_health = public_launcher_health()
             if not guidance.get("summary", {}).get("within_budget", True) and doctor_summary.get("status") == "ok":
+                doctor_summary["status"] = "degraded"
+            if launcher_health.get("status") != "ok" and doctor_summary.get("status") == "ok":
                 doctor_summary["status"] = "degraded"
             if inventory.get("summary", {}).get("max_bucket_size", 0) > inventory.get("menu_budget", {}).get("max_items", 25):
                 doctor_summary["status"] = "error"
-            doctor_report = {**report, "summary": doctor_summary, "inventory_snapshot": inventory, "guidance_snapshot": guidance}
+            doctor_report = {
+                **report,
+                "summary": doctor_summary,
+                "inventory_snapshot": inventory,
+                "guidance_snapshot": guidance,
+                "public_launcher": launcher_health,
+            }
             if repair_summary is not None:
                 doctor_report["repair"] = repair_summary
             save_json(DOCTOR_REPORT_PATH, doctor_report)

@@ -74,6 +74,8 @@ DEFAULT_REPO_URL = PUBLIC_REPO_URL
 DEFAULT_UPDATE_CHANNEL = "latest"
 DEFAULT_UPDATE_SOURCE = "github-release"
 UTF8_BOM = b"\xef\xbb\xbf"
+LAUNCHER_OVERRIDE_ENV = "AGENTCLI_LAUNCHER_DIR"
+LAUNCHER_COMMANDS = (PUBLIC_COMMAND, COMPATIBILITY_COMMAND, LEGACY_COMMAND)
 
 
 def repo_root() -> Path:
@@ -82,6 +84,201 @@ def repo_root() -> Path:
 
 def default_codex_home() -> Path:
     return Path(os.environ.get("CODEX_HOME") or (Path.home() / ".codex")).resolve()
+
+
+def _path_key(path: Path) -> str:
+    value = str(path.expanduser().resolve())
+    return value.casefold() if os.name == "nt" else value
+
+
+def _path_entries() -> set[str]:
+    raw = os.environ.get("PATH", "")
+    return {_path_key(Path(entry)) for entry in raw.split(os.pathsep) if entry}
+
+
+def launcher_dir_candidates() -> list[Path]:
+    override = os.environ.get(LAUNCHER_OVERRIDE_ENV, "").strip()
+    if override:
+        return [Path(override).expanduser()]
+
+    home = Path.home()
+    if os.name == "nt":
+        local_app_data = Path(os.environ.get("LOCALAPPDATA") or (home / "AppData" / "Local"))
+        app_data = Path(os.environ.get("APPDATA") or (home / "AppData" / "Roaming"))
+        return [
+            app_data / "Python" / "Scripts",
+            local_app_data / "Microsoft" / "WinGet" / "Links",
+            local_app_data / "OpenAI" / "Codex" / "bin",
+        ]
+
+    return [home / ".local" / "bin", home / "bin"]
+
+
+def preferred_launcher_dir() -> Path | None:
+    candidates = [candidate.expanduser() for candidate in launcher_dir_candidates()]
+    if not candidates:
+        return None
+
+    path_entries = _path_entries()
+    visible_candidates = [candidate for candidate in candidates if _path_key(candidate) in path_entries]
+    for candidate in visible_candidates:
+        if candidate.exists():
+            return candidate
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+    return visible_candidates[0] if visible_candidates else candidates[0]
+
+
+def _launcher_filename(name: str) -> str:
+    return f"{name}.cmd" if os.name == "nt" else name
+
+
+def _command_filenames(name: str) -> list[str]:
+    if os.name != "nt" or Path(name).suffix:
+        return [name]
+    pathext = os.environ.get("PATHEXT") or ".COM;.EXE;.BAT;.CMD"
+    extensions = [ext.lower() for ext in pathext.split(";") if ext]
+    names = [name]
+    for ext in extensions:
+        names.append(f"{name}{ext}")
+    # Agent CLI OS publishes .cmd launchers; keep that extension available even
+    # when PATHEXT is stripped in tests or minimal shells.
+    if f"{name}.cmd" not in names:
+        names.append(f"{name}.cmd")
+    return names
+
+
+def _resolve_public_command(name: str) -> str | None:
+    cwd_key = _path_key(Path.cwd())
+    for entry in os.environ.get("PATH", "").split(os.pathsep):
+        if not entry:
+            continue
+        directory = Path(entry)
+        try:
+            if _path_key(directory) == cwd_key:
+                continue
+        except OSError:
+            continue
+        for filename in _command_filenames(name):
+            candidate = directory / filename
+            try:
+                if candidate.is_file():
+                    return str(candidate.resolve())
+            except OSError:
+                continue
+
+    resolved_raw = shutil.which(name)
+    if not resolved_raw:
+        return None
+    candidate = Path(resolved_raw)
+    if not candidate.is_absolute():
+        candidate = (Path.cwd() / candidate).resolve()
+    if _path_key(candidate.parent) == cwd_key:
+        return None
+    return str(candidate)
+
+
+def _launcher_content(target_root: Path) -> str:
+    codex_home = str(target_root.resolve())
+    if os.name == "nt":
+        codex_home = codex_home.replace("/", "\\")
+        return (
+            "@echo off\r\n"
+            "setlocal\r\n"
+            f'if "%CODEX_HOME%"=="" set "CODEX_HOME={codex_home}"\r\n'
+            'python "%CODEX_HOME%\\agentctl\\agentctl.py" %*\r\n'
+        )
+
+    return (
+        "#!/usr/bin/env sh\n"
+        "set -eu\n"
+        f'export CODEX_HOME="${{CODEX_HOME:-{target_root.resolve().as_posix()}}}"\n'
+        'exec python3 "$CODEX_HOME/agentctl/agentctl.py" "$@"\n'
+    )
+
+
+def should_publish_launchers(target_root: Path, explicit: bool | None = None) -> bool:
+    if explicit is not None:
+        return explicit
+    return target_root.resolve() == default_codex_home()
+
+
+def publish_public_launchers(target_root: Path) -> dict[str, Any]:
+    launcher_dir = preferred_launcher_dir()
+    if launcher_dir is None:
+        return {
+            "status": "error",
+            "detail": "No launcher directory candidates are available for this machine.",
+            "launcher_dir": None,
+            "path_visible": False,
+            "commands": {},
+            "override_env": LAUNCHER_OVERRIDE_ENV,
+        }
+
+    launcher_dir.mkdir(parents=True, exist_ok=True)
+    payload = _launcher_content(target_root)
+    commands: dict[str, str] = {}
+    for name in LAUNCHER_COMMANDS:
+        launcher_path = launcher_dir / _launcher_filename(name)
+        launcher_path.write_text(payload, encoding="utf-8")
+        if os.name != "nt":
+            launcher_path.chmod(0o755)
+        commands[name] = str(launcher_path)
+
+    path_visible = _path_key(launcher_dir) in _path_entries()
+    detail = (
+        f"Published launcher shims into {launcher_dir}."
+        if path_visible
+        else f"Published launcher shims into {launcher_dir}, but that directory is not on PATH."
+    )
+    return {
+        "status": "ok" if path_visible else "degraded",
+        "detail": detail,
+        "launcher_dir": str(launcher_dir),
+        "path_visible": path_visible,
+        "commands": commands,
+        "override_env": LAUNCHER_OVERRIDE_ENV,
+    }
+
+
+def public_launcher_health(target_root: Path | None = None) -> dict[str, Any]:
+    root = (target_root or default_codex_home()).resolve()
+    launcher_dir = preferred_launcher_dir()
+    path_visible = bool(launcher_dir and _path_key(launcher_dir) in _path_entries())
+    command_records: dict[str, dict[str, Any]] = {}
+    for name in LAUNCHER_COMMANDS:
+        expected_path = launcher_dir / _launcher_filename(name) if launcher_dir else None
+        resolved_path = _resolve_public_command(name)
+        command_records[name] = {
+            "resolved_path": resolved_path,
+            "expected_path": str(expected_path) if expected_path else None,
+            "published": bool(expected_path and expected_path.exists()),
+        }
+
+    public_record = command_records[PUBLIC_COMMAND]
+    if public_record["resolved_path"]:
+        status = "ok"
+        detail = f"`{PUBLIC_COMMAND}` resolves at {public_record['resolved_path']}."
+    elif public_record["published"] and not path_visible:
+        status = "degraded"
+        detail = f"`{PUBLIC_COMMAND}` was published to {public_record['expected_path']}, but that directory is not on PATH."
+    elif public_record["published"]:
+        status = "degraded"
+        detail = f"`{PUBLIC_COMMAND}` was published to {public_record['expected_path']}, but the current shell still cannot resolve it."
+    else:
+        status = "missing"
+        detail = f"`{PUBLIC_COMMAND}` is not available on PATH and no published launcher shim was found."
+
+    return {
+        "status": status,
+        "detail": detail,
+        "target_codex_home": str(root),
+        "launcher_dir": str(launcher_dir) if launcher_dir else None,
+        "path_visible": path_visible,
+        "commands": command_records,
+        "override_env": LAUNCHER_OVERRIDE_ENV,
+    }
 
 
 def install_metadata_path(target_root: Path) -> Path:
@@ -300,6 +497,10 @@ def repair_install(target_root: Path, *, reason: str = "doctor-fix") -> dict[str
     ensure_plugin_enabled(target_root / "config.toml")
     metadata = read_install_metadata(target_root)
     changed = bool(removed)
+    launchers = None
+    if should_publish_launchers(target_root):
+        launchers = publish_public_launchers(target_root)
+        changed = changed or launchers.get("status") in {"ok", "degraded"}
     if not metadata:
         write_install_metadata(
             target_root,
@@ -315,6 +516,7 @@ def repair_install(target_root: Path, *, reason: str = "doctor-fix") -> dict[str
         "removed_legacy_plugins": removed,
         "config_path": str(target_root / "config.toml"),
         "install_metadata_path": str(install_metadata_path(target_root)),
+        "launchers": launchers,
     }
 
 
@@ -359,6 +561,7 @@ def install_bundle(
     source_root: Path,
     target_root: Path,
     skip_post_checks: bool = False,
+    publish_shims: bool | None = None,
     source_kind: str = "local-source",
     repo_url: str = PUBLIC_REPO_URL,
     version: str = "dev",
@@ -382,6 +585,9 @@ def install_bundle(
         update_source=update_source,
         source_ref=source_ref,
     )
+    launcher_summary = None
+    if should_publish_launchers(target_root, explicit=publish_shims):
+        launcher_summary = publish_public_launchers(target_root)
 
     summary: dict[str, object] = {
         "status": "ok",
@@ -389,6 +595,7 @@ def install_bundle(
         "post_checks": None,
         "removed_legacy_plugins": removed,
         "install_metadata_path": str(metadata_path),
+        "launchers": launcher_summary,
     }
     if not skip_post_checks:
         summary["post_checks"] = run_post_install_checks(target_root)

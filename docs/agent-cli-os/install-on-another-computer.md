@@ -18,6 +18,9 @@ cd agent-cli-os
 python .\scripts\install_bundle.py --codex-home C:\Users\you\.codex
 ```
 
+When that target is the machine's default `CODEX_HOME`, the installer also publishes PATH launcher shims for `agentcli`, `loopsmith`, and `agentctl`.
+Use `--publish-shims` if you need the same launcher publishing behavior for a custom `CODEX_HOME`.
+
 Or:
 
 ```powershell
@@ -54,6 +57,7 @@ agentcli maintenance audit
 Good state:
 
 - install metadata exists at `agentctl/state/install-metadata.json`
+- `agentcli` resolves from PATH in a fresh shell
 - `maintenance audit` returns `ok`
 - generated docs exist under `docs/agent-cli-os/`
 - the plugin is enabled

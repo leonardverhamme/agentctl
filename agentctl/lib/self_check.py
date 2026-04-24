@@ -7,14 +7,14 @@ from pathlib import Path
 from typing import Any
 
 try:
-    from ..bundle_install import read_install_metadata
+    from ..bundle_install import public_launcher_health, read_install_metadata
     from .branding import LEGACY_PRODUCT_NAME, PUBLIC_PRODUCT_NAME
     from .common import print_json, utc_now
     from .config_layers import CONFIG_SCHEMA_VERSION, config_snapshot
     from .guidance import GUIDANCE_SCHEMA_VERSION
     from .inventory import INVENTORY_SCHEMA_VERSION
 except ImportError:
-    from bundle_install import read_install_metadata
+    from bundle_install import public_launcher_health, read_install_metadata
     from lib.branding import LEGACY_PRODUCT_NAME, PUBLIC_PRODUCT_NAME
     from lib.common import print_json, utc_now
     from lib.config_layers import CONFIG_SCHEMA_VERSION, config_snapshot
@@ -51,6 +51,7 @@ def build_self_check(
     repo: str | Path | None = None,
 ) -> dict[str, Any]:
     install_metadata = read_install_metadata()
+    launcher = public_launcher_health()
     effective_config = config_snapshot(repo)
     wrapper = wrapper_version()
     bundle = install_metadata.get("version") or _pyproject_version()
@@ -106,6 +107,11 @@ def build_self_check(
             "status": "ok" if install_metadata else "degraded",
             "detail": json.dumps(install_metadata, sort_keys=True) if install_metadata else "install metadata missing",
         },
+        {
+            "name": "public-launcher",
+            "status": "ok" if launcher.get("status") == "ok" else "degraded",
+            "detail": launcher.get("detail", "public launcher health unavailable"),
+        },
     ]
     statuses = {item["status"] for item in checks}
     status = "error" if "error" in statuses else "degraded" if "degraded" in statuses else "ok"
@@ -115,6 +121,7 @@ def build_self_check(
         "wrapper_version": wrapper,
         "bundle_version": bundle,
         "install_metadata": install_metadata,
+        "public_launcher": launcher,
         "config": effective_config,
         "inventory": inventory,
         "guidance": guidance,

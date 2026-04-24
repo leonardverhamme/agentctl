@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-22T11:58:57.529337+00:00",
+  "generated_at": "2026-04-24T15:31:40.679802+00:00",
   "items": [
     {
       "configured": true,
@@ -26,20 +26,6 @@
       "name": "gmail",
       "source_hint": "codex_apps_tools cache",
       "source_path": "C:\\Users\\leona\\.codex\\.tmp\\plugins\\plugins\\gmail\\.app.json",
-      "source_scope": "user",
-      "status": "ok"
-    },
-    {
-      "configured": true,
-      "connector_id": "connector_947e0d954944416db111db556030eea6",
-      "front_door_candidate": null,
-      "hidden_reason": "active app connector is detected for diagnostics only and is not auto-promoted into the curated front-door menu.",
-      "id": "app:google-calendar@user",
-      "kind": "app",
-      "menu_bucket": "app:user",
-      "name": "google-calendar",
-      "source_hint": "codex_apps_tools cache",
-      "source_path": "C:\\Users\\leona\\.codex\\.tmp\\plugins\\plugins\\google-calendar\\.app.json",
       "source_scope": "user",
       "status": "ok"
     },
@@ -1265,8 +1251,8 @@
       "kind": "tool",
       "menu_bucket": "tool:system",
       "name": "plugin-eval",
-      "source_hint": "node \"C:\\Users\\leona\\.codex\\plugins\\cache\\openai-curated\\plugin-eval\\b1986b3d3da5bb8a04d3cb1e69af5a29bb5c2c04\\scripts\\plugin-eval.js\"",
-      "source_path": "C:\\Users\\leona\\.codex\\plugins\\cache\\openai-curated\\plugin-eval\\b1986b3d3da5bb8a04d3cb1e69af5a29bb5c2c04\\scripts\\plugin-eval.js",
+      "source_hint": "node \"C:\\Users\\leona\\.codex\\plugins\\cache\\openai-curated\\plugin-eval\\f09cfd210e21e96a0031f4d247be5f2e416d23b1\\scripts\\plugin-eval.js\"",
+      "source_path": "C:\\Users\\leona\\.codex\\plugins\\cache\\openai-curated\\plugin-eval\\f09cfd210e21e96a0031f4d247be5f2e416d23b1\\scripts\\plugin-eval.js",
       "source_scope": "system",
       "status": "ok",
       "version": "bundled 0.1.0"
@@ -1331,11 +1317,10 @@
   "menu_buckets": [
     {
       "base_bucket": "app:user",
-      "count": 6,
+      "count": 5,
       "item_ids": [
         "app:github@user",
         "app:gmail@user",
-        "app:google-calendar@user",
         "app:notion@user",
         "app:stripe@user",
         "app:vercel@user"
@@ -1520,28 +1505,28 @@
       "status": "ok"
     },
     {
-      "detail": "100 manifests, 101 mapped connectors",
+      "detail": "100 manifests, 100 mapped connectors",
       "name": "apps-temp",
       "status": "ok"
     },
     {
-      "detail": "6 active connectors, 6 helper connectors ignored, 1 cache files",
+      "detail": "5 active connectors, 6 helper connectors ignored, 1 cache files",
       "name": "apps-active",
       "status": "ok"
     }
   ],
   "summary": {
     "bucket_count": 8,
-    "hidden_count": 22,
+    "hidden_count": 21,
     "kind_counts": {
-      "app": 6,
+      "app": 5,
       "plugin": 1,
       "skill": 77,
       "tool": 20
     },
     "max_bucket_size": 25,
     "status": "ok",
-    "total_items": 104
+    "total_items": 103
   },
   "tool_map": {
     "aws": {
@@ -1709,11 +1694,11 @@
     },
     "plugin-eval": {
       "auth": "unknown",
-      "command": "node \"C:\\Users\\leona\\.codex\\plugins\\cache\\openai-curated\\plugin-eval\\b1986b3d3da5bb8a04d3cb1e69af5a29bb5c2c04\\scripts\\plugin-eval.js\"",
+      "command": "node \"C:\\Users\\leona\\.codex\\plugins\\cache\\openai-curated\\plugin-eval\\f09cfd210e21e96a0031f4d247be5f2e416d23b1\\scripts\\plugin-eval.js\"",
       "detect_only": false,
       "installed": true,
       "name": "plugin-eval",
-      "path": "C:\\Users\\leona\\.codex\\plugins\\cache\\openai-curated\\plugin-eval\\b1986b3d3da5bb8a04d3cb1e69af5a29bb5c2c04\\scripts\\plugin-eval.js",
+      "path": "C:\\Users\\leona\\.codex\\plugins\\cache\\openai-curated\\plugin-eval\\f09cfd210e21e96a0031f4d247be5f2e416d23b1\\scripts\\plugin-eval.js",
       "status": "ok",
       "version": "bundled 0.1.0",
       "wrapper_ready": true

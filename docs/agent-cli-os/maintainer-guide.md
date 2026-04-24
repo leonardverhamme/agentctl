@@ -169,6 +169,7 @@ Tagged releases should:
 - publish the Python package to PyPI
 - support trusted publishing or a `PYPI_API_TOKEN` fallback when trusted publishing is temporarily unavailable
 - keep bootstrap and upgrade working from released artifacts
+- keep PATH launcher publishing working for `agentcli`, `loopsmith`, and `agentctl` so bundle-only installs still resolve in normal shells
 - isolate release artifacts in a clean output directory instead of reusing stale `dist/` contents
 - fail if legacy-named `loopsmith*` or `agentctl*` release artifacts are about to ship
 - verify that the released package version becomes visible on live PyPI before the publish phase is treated as complete

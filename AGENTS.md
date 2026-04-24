@@ -18,6 +18,7 @@
 - On repo entry or before broad raw-file search, run `agentcli repo-intel status`; if repo-intel is missing, stale, or broken for a trusted repo, run `agentcli repo-intel ensure`.
 - If `graphify-out/GRAPH_REPORT.md` exists and repo-intel is healthy, read it before broad raw-file search.
 - Prefer `agentcli repo-intel query "<question>"` or `agentcli repo-intel serve` for architecture and path questions before wide grep; open targeted raw files only after graph routing.
+- If `agentcli` or `loopsmith` is not available on PATH, repair the public launcher with the bundle-local `agentctl.py doctor --fix` path before continuing; do not replace requested loops with docs-only tracking.
 - Treat the current local branch as the canonical place for normal solo work; do not create or switch branches just to preserve agent changes.
 - Treat Codex-managed worktrees as temporary isolation only; if work should be kept and pushed, continue from the local checkout so local commits and pushes do not require merging a worktree branch back.
 - Create a separate branch only when explicitly requested or when a real PR flow or parallel-agent workflow needs branch isolation.

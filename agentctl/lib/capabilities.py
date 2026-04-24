@@ -62,6 +62,7 @@ CAPABILITY_SPECS: list[dict[str, Any]] = [
         "routing_notes": [
             f"Start with `$loopsmith`, then launch the durable loop with `{PUBLIC_COMMAND} loop <name>`.",
             f"Prefer `{PUBLIC_COMMAND} run <workflow>` when a dedicated deep workflow already exists, such as UI, docs, test, refactor, or CI/CD audits.",
+            f"If `{PUBLIC_COMMAND}` or `loopsmith` is not on PATH, repair the launcher with the bundle-local `agentctl.py doctor --fix` path before continuing; do not replace the loop with docs-only tracking.",
             "Store the task brief on disk and let the outer runner own `.codex-workflows/<name>/state.json`, the checklist, and the progress notes.",
         ],
     },
@@ -1392,6 +1393,9 @@ def _capability_counts(payload: dict[str, Any], *, required_only: bool = False) 
 
 def _doctor_notes(payload: dict[str, Any]) -> list[str]:
     notes: list[str] = []
+    launcher = payload.get("public_launcher", {})
+    if launcher and launcher.get("status") != "ok":
+        notes.append(launcher.get("detail", f"`{PUBLIC_COMMAND}` is not resolving from PATH cleanly."))
     gh = payload.get("tools", {}).get("gh", {})
     if gh.get("installed") and not gh.get("skill_supported"):
         notes.append("`gh skill` is unavailable locally, so publish/preview wrappers stay disabled.")

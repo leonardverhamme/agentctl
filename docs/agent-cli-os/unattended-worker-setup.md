@@ -46,6 +46,18 @@ Then verify:
 agentcli doctor
 ```
 
+If `agentcli` or `loopsmith` is not available on PATH, do not replace the requested run with hand-written progress docs. Run the bundle-local control plane and repair the public launcher first:
+
+```powershell
+python "$env:CODEX_HOME\agentctl\agentctl.py" doctor --fix
+```
+
+If `CODEX_HOME` is not set, use the default bundle path:
+
+```powershell
+python "$HOME\.codex\agentctl\agentctl.py" doctor --fix
+```
+
 ## Safe First Run
 
 ```powershell

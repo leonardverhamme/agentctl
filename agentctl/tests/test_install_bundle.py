@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import os
 import tempfile
 import unittest
 import zipfile
@@ -111,6 +112,108 @@ class InstallBundleTests(unittest.TestCase):
             copied = target_root / "skills" / "ui-skill" / "SKILL.md"
             self.assertTrue(copied.exists())
             self.assertEqual(copied.read_bytes(), b"---\nname: ui-skill\ndescription: test\n---\n")
+
+    def test_preferred_launcher_dir_prefers_existing_path_visible_launcher_dir_on_windows(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            local_app_data = root / "AppData" / "Local"
+            app_data = root / "AppData" / "Roaming"
+            codex_bin = local_app_data / "OpenAI" / "Codex" / "bin"
+            python_scripts = app_data / "Python" / "Scripts"
+            python_scripts.mkdir(parents=True, exist_ok=True)
+            with mock.patch("agentctl.bundle_install.os.name", "nt"), mock.patch.dict(
+                "os.environ",
+                {
+                    "LOCALAPPDATA": str(local_app_data),
+                    "APPDATA": str(app_data),
+                    "PATH": os.pathsep.join([str(codex_bin), str(python_scripts)]),
+                },
+                clear=False,
+            ):
+                selected = bundle_install_module.preferred_launcher_dir()
+
+        self.assertEqual(selected, python_scripts)
+
+    def test_publish_public_launchers_writes_windows_cmd_shims(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            target_root = root / ".codex"
+            (target_root / "agentctl").mkdir(parents=True, exist_ok=True)
+            local_app_data = root / "AppData" / "Local"
+            app_data = root / "AppData" / "Roaming"
+            codex_bin = local_app_data / "OpenAI" / "Codex" / "bin"
+            with mock.patch("agentctl.bundle_install.os.name", "nt"), mock.patch.dict(
+                "os.environ",
+                {
+                    "LOCALAPPDATA": str(local_app_data),
+                    "APPDATA": str(app_data),
+                    "PATH": str(codex_bin),
+                },
+                clear=False,
+            ):
+                summary = bundle_install_module.publish_public_launchers(target_root)
+                self.assertEqual(summary["status"], "ok")
+                agentcli_launcher = Path(summary["commands"]["agentcli"])
+                self.assertTrue(agentcli_launcher.exists())
+                content = agentcli_launcher.read_text(encoding="utf-8")
+                self.assertIn(str(target_root).replace("/", "\\"), content)
+                self.assertIn('%CODEX_HOME%\\agentctl\\agentctl.py', content)
+
+    @mock.patch("agentctl.bundle_install.publish_public_launchers")
+    @mock.patch("agentctl.bundle_install.write_install_metadata")
+    @mock.patch("agentctl.bundle_install.ensure_plugin_enabled")
+    @mock.patch("agentctl.bundle_install.cleanup_legacy_plugin")
+    @mock.patch("agentctl.bundle_install.copy_item")
+    def test_install_bundle_auto_publishes_launchers_for_default_codex_home(
+        self,
+        copy_item_mock: mock.Mock,
+        cleanup_mock: mock.Mock,
+        ensure_plugin_mock: mock.Mock,
+        metadata_mock: mock.Mock,
+        publish_mock: mock.Mock,
+    ) -> None:
+        copy_item_mock.return_value = None
+        cleanup_mock.return_value = []
+        ensure_plugin_mock.return_value = None
+        publish_mock.return_value = {"status": "ok", "launcher_dir": r"C:\shim"}
+        with tempfile.TemporaryDirectory() as temp_dir:
+            target_root = Path(temp_dir) / ".codex"
+            metadata_mock.return_value = target_root / "agentctl" / "state" / "install-metadata.json"
+            with mock.patch("agentctl.bundle_install.default_codex_home", return_value=target_root):
+                summary = bundle_install_module.install_bundle(
+                    source_root=Path(temp_dir) / "source",
+                    target_root=target_root,
+                    skip_post_checks=True,
+                )
+
+        publish_mock.assert_called_once_with(target_root)
+        self.assertEqual(summary["launchers"]["status"], "ok")
+
+    def test_public_launcher_health_ignores_repo_local_wrapper_and_finds_path_shim(self) -> None:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            repo_root = root / "repo"
+            repo_root.mkdir(parents=True, exist_ok=True)
+            (repo_root / "agentcli.cmd").write_text("@echo off\r\n", encoding="utf-8")
+            target_root = root / ".codex"
+            expected_launcher = root / "Scripts" / "agentcli.cmd"
+            expected_launcher.parent.mkdir(parents=True, exist_ok=True)
+            expected_launcher.write_text("@echo off\r\n", encoding="utf-8")
+
+            with mock.patch("agentctl.bundle_install.preferred_launcher_dir", return_value=expected_launcher.parent), mock.patch.dict(
+                "os.environ",
+                {"PATH": str(expected_launcher.parent)},
+                clear=False,
+            ):
+                cwd_before = Path.cwd()
+                try:
+                    os.chdir(repo_root)
+                    health = bundle_install_module.public_launcher_health(target_root)
+                finally:
+                    os.chdir(cwd_before)
+
+        self.assertEqual(health["status"], "ok")
+        self.assertEqual(Path(health["commands"]["agentcli"]["resolved_path"]), expected_launcher.resolve())
 
     @mock.patch("agentctl.bundle_install.install_bundle")
     @mock.patch("agentctl.bundle_install.extract_archive")

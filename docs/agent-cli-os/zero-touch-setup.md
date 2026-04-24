@@ -25,8 +25,11 @@ The one-time maintainer setup for that path is tracked in [pypi-publishing.md](p
 - installs the bundle into `CODEX_HOME`
 - keeps the internal bundle under `agentctl/`
 - enables the `agent-cli-os` plugin in `config.toml`
+- publishes PATH launcher shims for `agentcli`, `loopsmith`, and `agentctl` when targeting the default `CODEX_HOME`
 - writes install metadata to `agentctl/state/install-metadata.json`
 - runs post-install checks against the exact target `CODEX_HOME`
+
+On Windows, launcher publishing prefers an existing user-writable PATH directory such as `%APPDATA%\Python\Scripts`, then falls back to other common user launcher locations.
 
 Post-install checks include:
 

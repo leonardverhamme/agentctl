@@ -36,6 +36,7 @@ agentcli doctor --fix
 That is the main onboarding path.
 
 `agentcli` is the canonical public command. `loopsmith` still works as a compatibility alias for the current migration release.
+Bootstrap and local bundle installs now also publish PATH launchers for `agentcli`, `loopsmith`, and `agentctl` when targeting the default `CODEX_HOME`, so durable loops do not fail just because `~/.codex` itself is not on PATH.
 
 ## What You Get
 
@@ -405,6 +406,7 @@ That loop uses the same runner contract, but stores its queue under `docs/<name>
 The public wrapper is installable as a Python package.
 
 The real bundle is installed into `CODEX_HOME` by `agentcli bootstrap` and upgraded by `agentcli upgrade`.
+When the target is the default `CODEX_HOME`, install and upgrade also publish PATH-visible launcher shims, preferring an existing user-writable PATH directory such as `%APPDATA%\Python\Scripts` on Windows and `~/.local/bin` on POSIX hosts.
 
 Install metadata is written to:
 

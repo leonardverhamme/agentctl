@@ -54,16 +54,16 @@ The raw app-aware inventory is stored at `agentctl/state/inventory.json`.
 ```json
 {
   "bucket_count": 8,
-  "hidden_count": 22,
+  "hidden_count": 21,
   "kind_counts": {
-    "app": 6,
+    "app": 5,
     "plugin": 1,
     "skill": 77,
     "tool": 20
   },
   "max_bucket_size": 25,
   "status": "ok",
-  "total_items": 104
+  "total_items": 103
 }
 ```
 
@@ -75,6 +75,6 @@ The raw app-aware inventory is stored at `agentctl/state/inventory.json`.
 - `skills-project`: `ok`
   - 36 project skills
 - `apps-temp`: `ok`
-  - 100 manifests, 101 mapped connectors
+  - 100 manifests, 100 mapped connectors
 - `apps-active`: `ok`
-  - 6 active connectors, 6 helper connectors ignored, 1 cache files
+  - 5 active connectors, 6 helper connectors ignored, 1 cache files

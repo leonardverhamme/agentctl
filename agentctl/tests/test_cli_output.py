@@ -94,6 +94,7 @@ class CliOutputTests(unittest.TestCase):
     def test_doctor_human_is_compact_and_health_focused(self) -> None:
         payload = {
             "summary": {"status": "ok", "installed_skill_count": 17},
+            "public_launcher": {"status": "missing", "detail": "`agentcli` is not available on PATH."},
             "tools": {
                 "gh": {"installed": True, "skill_supported": False},
             },
@@ -109,6 +110,7 @@ class CliOutputTests(unittest.TestCase):
         output = buffer.getvalue()
         self.assertIn("Healthy baseline capabilities: 1 / 1", output)
         self.assertIn("Needs attention", output)
+        self.assertIn("not available on PATH", output)
         self.assertNotIn("Capability menu", output)
 
     def test_status_human_hides_history_and_surfaces_active_workflows(self) -> None:

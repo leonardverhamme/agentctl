@@ -26,6 +26,7 @@ Use for oversized or novel tasks that need a durable checklist, state file, and 
 
 - Start with `$loopsmith`, then launch the durable loop with `agentcli loop <name>`.
 - Prefer `agentcli run <workflow>` when a dedicated deep workflow already exists, such as UI, docs, test, refactor, or CI/CD audits.
+- If `agentcli` or `loopsmith` is not on PATH, repair the launcher with the bundle-local `agentctl.py doctor --fix` path before continuing; do not replace the loop with docs-only tracking.
 - Store the task brief on disk and let the outer runner own `.codex-workflows/<name>/state.json`, the checklist, and the progress notes.
 
 ## Backing Interfaces
